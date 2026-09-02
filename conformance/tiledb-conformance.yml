@@ -1,0 +1,92 @@
+generated: '2026-08-30'
+method: searched
+source: openapi/tiledb-cloud-v1-openapi.yaml, openapi/tiledb-cloud-v2-openapi.yaml, https://documentation.cloud.tiledb.com/academy/self-hosting/sso/,
+  https://documentation.cloud.tiledb.com/academy/structure/life-sciences/
+standards:
+- id: oauth2
+  conforms: true
+  evidence: securityDefinitions.OAuth2 declares an authorization-code (Swagger 2.0 `accessCode`) flow with authorizationUrl
+    https://oauth2.tiledb.com/oauth2/authorize and tokenUrl .../token, scopes read/write/admin, in both openapi-v1
+    and openapi-v2.
+  caveat: Declared but not wired into the global `security` block — the spec comments it out with the note that it
+    broke the generated Python client. oauth2.tiledb.com does not resolve in public DNS (NXDOMAIN, probed 2026-08-30),
+    so the declared endpoints are not reachable as published.
+- id: oidc
+  conforms: true
+  evidence: TileDB self-hosted deployments support OpenID Connect for SSO, documented with Okta and Microsoft Entra
+    walkthroughs at https://documentation.cloud.tiledb.com/academy/self-hosting/sso/openid-connect/ and .../microsoft-entra/.
+    The v1 contract also carries an SSOProvider enum (github, google, stripe, okta, perdomain, scim).
+  caveat: Applies to the self-hosted control plane, not to the public api.tiledb.com REST surface. No /.well-known/openid-configuration
+    is served on any TileDB host (all probed 404 or SPA shell).
+- id: scim
+  conforms: true
+  evidence: SCIM 2.0 user provisioning, documented at https://documentation.cloud.tiledb.com/academy/self-hosting/sso/okta-scim/
+    with the endpoint base path {api-server}/v1/scim/2.0/ and Create Users / Update User Attributes / Deactivate Users
+    supported. `scim` is also a member of the SSOProvider enum in the published v1 contract.
+  caveat: Self-hosted only. Sync Password is explicitly not supported, and the SCIM routes are not part of the published
+    openapi-v1/v2 contracts.
+- id: pagination
+  conforms: true
+  evidence: page / per_page query parameters plus a PaginationMetadata response object (page, per_page, total_pages,
+    total_items) on the browser, favorites, task-graph-log and asset listing endpoints.
+- id: rfc9457
+  conforms: false
+  evidence: No application/problem+json anywhere in either contract. Errors use a proprietary {code, message, request_id}
+    envelope — see errors/tiledb-problem-types.yml.
+- id: idempotency
+  conforms: false
+  evidence: No idempotency key or header in either contract or the documentation (0 hits for /idempoten/i).
+- id: odata
+  conforms: false
+  evidence: No $metadata surface, no OData query options.
+- id: json:api
+  conforms: false
+  evidence: No application/vnd.api+json media type; responses are plain application/json (and application/capnp).
+- id: fhir
+  conforms: false
+  evidence: TileDB is a life-sciences data platform but exposes no FHIR resources or endpoints. Its clinical adjacency
+    is genomics and imaging, not health-record exchange.
+- id: fapi
+  conforms: false
+  evidence: Not a financial-grade API; no FAPI profile claimed or implemented.
+- id: psd2
+  conforms: false
+  evidence: Not applicable — not a payment services provider.
+domain_standards:
+- id: soma
+  name: SOMA (Stack Of Matrices, Annotated) single-cell API
+  conforms: true
+  evidence: TileDB co-authors and implements SOMA, the single-cell community data API, as tiledbsoma. The specification
+    lives at https://github.com/single-cell-data/SOMA and TileDB documents its conformance at https://documentation.cloud.tiledb.com/academy/structure/life-sciences/single-cell/foundation/specification/.
+  surface: Client library and storage format, not the REST contract.
+  why_it_matters: A single-cell team that already speaks SOMA reads and writes TileDB-stored experiments with no bespoke
+    connector.
+- id: vcf
+  name: VCF / population genomics
+  conforms: true
+  evidence: TileDB-VCF ingests and exports standard VCF/BCF via htslib and publishes a documented CLI (tiledbvcf)
+    and Python/C/C++/Java APIs at https://documentation.cloud.tiledb.com/academy/structure/life-sciences/population-genomics/api-reference/.
+  surface: Ingestion/export format and CLI, not the REST contract.
+- id: ome-ngff
+  name: OME / bio-imaging pyramidal formats
+  conforms: partial
+  evidence: TileDB-BioImaging converts and reads OME-TIFF, OME-Zarr and OpenSlide-supported whole-slide formats (SVS
+    and similar) — documented at https://documentation.cloud.tiledb.com/academy/structure/life-sciences/biomedical-imaging/.
+    TileDB stores the images in its own array format rather than serving an OME-NGFF endpoint.
+  surface: Ingestion/conversion, not the REST contract.
+- id: cf-conventions
+  name: CF metadata conventions (climate and forecast)
+  conforms: true
+  evidence: TileDB-CF-Py provides a CF-conventions-aware interface over TileDB arrays (https://github.com/TileDB-Inc/TileDB-CF-Py,
+    PyPI tiledb-cf).
+  caveat: Last release 2024-04-05 — the least maintained of the first-party domain packages.
+domain_standard_finding: TileDB's standards posture lives in its FORMAT and CLIENT layer, not in its REST contract.
+  The REST API declares nothing domain-specific; every domain standard it honours — SOMA, VCF, OME/OpenSlide, CF conventions,
+  and SCIM 2.0 for provisioning — is implemented in the storage engine, the client libraries or the self-hosted control
+  plane. A buyer evaluating TileDB on the contract alone would miss all of it.
+compliance_certifications:
+  published: false
+  searched: '2026-08-30'
+  note: No trust center, no SOC 2 / ISO 27001 / HIPAA / GDPR certification page was found on tiledb.com, cloud.tiledb.com
+    or documentation.cloud.tiledb.com. https://www.tiledb.com/trust and https://www.tiledb.com/security both return
+    404; trust.tiledb.com does not resolve. No Compliance pointer is wired into apis.yml.

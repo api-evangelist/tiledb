@@ -1,0 +1,23 @@
+generated: '2026-08-30'
+method: generated
+source: openapi/tiledb-cloud-v1-openapi.yaml
+api: TileDB Storage Platform API (v1)
+base_url: https://api.tiledb.com/v1
+note: Agent Skills authored by API Evangelist from the TileDB-published v1 contract. TileDB publishes no skills or
+  AGENTS.md of its own (searched 2026-08-30 across github.com/TileDB-Inc and the 423-page docs sitemap). Every operationId
+  referenced in every skill was verified present in openapi/tiledb-cloud-v1-openapi.yaml before it was written.
+skills:
+- name: tiledb-discover-and-inspect-arrays
+  file: skills/tiledb-discover-and-inspect-arrays.md
+  write_surface: false
+  description: Find reachable arrays and inspect schema, non-empty domain, metadata and activity before reading.
+- name: tiledb-query-and-compute
+  file: skills/tiledb-query-and-compute.md
+  write_surface: true
+  description: Size, then run array queries, serverless SQL and UDFs — with the no-dry-run and no-idempotency caveats
+    made explicit.
+- name: tiledb-share-and-govern-assets
+  file: skills/tiledb-share-and-govern-assets.md
+  write_surface: true
+  description: Register, group, share and un-share assets and mint/revoke scoped REST API tokens, with the reversal
+    path stated per write.

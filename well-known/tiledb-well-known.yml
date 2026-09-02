@@ -1,0 +1,169 @@
+generated: '2026-08-30'
+method: probed
+source: live anonymous GET of each /.well-known/ path on every apis.yml and OpenAPI host, 2026-08-30
+result: none — TileDB serves no /.well-known/ document on any host.
+hosts:
+- host: www.tiledb.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 404
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    file: null
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+- host: tiledb.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 404
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    file: null
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+- host: api.tiledb.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+    file: null
+  - path: /.well-known/openid-configuration
+    status: 404
+    file: null
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    file: null
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    file: null
+  - path: /.well-known/api-catalog
+    status: 404
+    file: null
+  - path: /.well-known/ai-plugin.json
+    status: 404
+    file: null
+  - path: /.well-known/agent-card.json
+    status: 404
+    file: null
+  - path: /.well-known/agent.json
+    status: 404
+    file: null
+- host: cloud.tiledb.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    file: null
+    note: FALSE POSITIVE, not a hit. cloud.tiledb.com is a single-page app whose catch-all answers 200 with the same
+      ~4.2KB HTML shell for every path, /.well-known/* included. No document was served.
+  - path: /.well-known/openid-configuration
+    status: 200
+    file: null
+    note: FALSE POSITIVE, not a hit. cloud.tiledb.com is a single-page app whose catch-all answers 200 with the same
+      ~4.2KB HTML shell for every path, /.well-known/* included. No document was served.
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    file: null
+    note: FALSE POSITIVE, not a hit. cloud.tiledb.com is a single-page app whose catch-all answers 200 with the same
+      ~4.2KB HTML shell for every path, /.well-known/* included. No document was served.
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    file: null
+    note: FALSE POSITIVE, not a hit. cloud.tiledb.com is a single-page app whose catch-all answers 200 with the same
+      ~4.2KB HTML shell for every path, /.well-known/* included. No document was served.
+  - path: /.well-known/api-catalog
+    status: 200
+    file: null
+    note: FALSE POSITIVE, not a hit. cloud.tiledb.com is a single-page app whose catch-all answers 200 with the same
+      ~4.2KB HTML shell for every path, /.well-known/* included. No document was served.
+  - path: /.well-known/ai-plugin.json
+    status: 200
+    file: null
+    note: FALSE POSITIVE, not a hit. cloud.tiledb.com is a single-page app whose catch-all answers 200 with the same
+      ~4.2KB HTML shell for every path, /.well-known/* included. No document was served.
+  - path: /.well-known/agent-card.json
+    status: 200
+    file: null
+    note: FALSE POSITIVE, not a hit. cloud.tiledb.com is a single-page app whose catch-all answers 200 with the same
+      ~4.2KB HTML shell for every path, /.well-known/* included. No document was served.
+  - path: /.well-known/agent.json
+    status: 200
+    file: null
+    note: FALSE POSITIVE, not a hit. cloud.tiledb.com is a single-page app whose catch-all answers 200 with the same
+      ~4.2KB HTML shell for every path, /.well-known/* included. No document was served.
+- host: documentation.cloud.tiledb.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    file: null
+    note: FALSE POSITIVE, not a hit. The docs host answers 200 with a 470-byte JavaScript redirect stub for any unknown
+      path. No document was served.
+  - path: /.well-known/openid-configuration
+    status: 200
+    file: null
+    note: FALSE POSITIVE, not a hit. The docs host answers 200 with a 470-byte JavaScript redirect stub for any unknown
+      path. No document was served.
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    file: null
+    note: FALSE POSITIVE, not a hit. The docs host answers 200 with a 470-byte JavaScript redirect stub for any unknown
+      path. No document was served.
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    file: null
+    note: FALSE POSITIVE, not a hit. The docs host answers 200 with a 470-byte JavaScript redirect stub for any unknown
+      path. No document was served.
+  - path: /.well-known/api-catalog
+    status: 200
+    file: null
+    note: FALSE POSITIVE, not a hit. The docs host answers 200 with a 470-byte JavaScript redirect stub for any unknown
+      path. No document was served.
+  - path: /.well-known/ai-plugin.json
+    status: 200
+    file: null
+    note: FALSE POSITIVE, not a hit. The docs host answers 200 with a 470-byte JavaScript redirect stub for any unknown
+      path. No document was served.
+  - path: /.well-known/agent-card.json
+    status: 200
+    file: null
+    note: FALSE POSITIVE, not a hit. The docs host answers 200 with a 470-byte JavaScript redirect stub for any unknown
+      path. No document was served.
+  - path: /.well-known/agent.json
+    status: 200
+    file: null
+    note: FALSE POSITIVE, not a hit. The docs host answers 200 with a 470-byte JavaScript redirect stub for any unknown
+      path. No document was served.
+note: No WellKnown or SecurityTxt pointer is wired into apis.yml, because every probe either 404d or returned an HTML
+  shell. A 200 that is a single-page-app catch-all is a miss, not a presence.

@@ -1,0 +1,49 @@
+generated: '2026-08-30'
+method: searched
+source: https://www.tiledb.com/pricing
+model: component-based, not tiered
+plan_count: 3
+currency: USD
+billing_period: annual
+note: TileDB does not sell named tiers. The pricing page publishes three unit-priced components that a customer combines
+  into a package, all billed annually in fixed increments. There is no self-serve paid plan — the docs direct users
+  who want to upgrade to contact sales — and no published overage rate.
+plans:
+- name: User Seats
+  price: 10
+  currency: USD
+  period: month
+  unit: seat
+  sold_in: increments of 10 seats
+  annual_price: 1200
+  included: Named platform users and their collaboration rights.
+  overage: null
+- name: vCPUs
+  price: 50
+  currency: USD
+  period: month
+  unit: vCPU
+  sold_in: increments of 50 vCPUs
+  annual_price: 30000
+  included: Compute capacity for queries, UDFs, task graphs and notebooks.
+  overage: null
+- name: Dedicated Success Engineer (DSE)
+  price: 250
+  currency: USD
+  period: hour
+  unit: hour
+  sold_in: increments of 100 hours
+  annual_price: 25000
+  included: A named subject-matter expert working as an extension of the customer team.
+  overage: null
+free_tier:
+  exists: true
+  name: Free tier (promotional)
+  price: 0
+  included: $100 in credits, valid 6 months from the date access is granted.
+  eligibility: Individual users only; organization members do not qualify. Applications are reviewed by TileDB, typically
+    within 24 hours.
+  expiry_behaviour: The account is downgraded after 6 months and unused credits are retracted.
+  source: https://documentation.cloud.tiledb.com/academy/accounts/individual/apply-for-free-tier/
+self_serve_paid: false
+enterprise_contact: https://www.tiledb.com/talk-to-us

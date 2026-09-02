@@ -1,0 +1,116 @@
+generated: '2026-08-30'
+method: searched
+source: https://documentation.cloud.tiledb.com/academy/accounts/individual/profile/api-tokens/ + openapi/tiledb-cloud-v1-openapi.yaml
+  (definitions.TokenScope)
+schemes:
+- name: OAuth2
+  source: openapi/tiledb-cloud-v1-openapi.yaml
+  flows:
+  - flow: authorizationCode
+    authorizationUrl: https://oauth2.tiledb.com/oauth2/authorize
+    tokenUrl: https://oauth2.tiledb.com/oauth2/token
+- name: OAuth2
+  source: openapi/tiledb-cloud-v2-openapi.yaml
+  flows:
+  - flow: authorizationCode
+    authorizationUrl: https://oauth2.tiledb.com/oauth2/authorize
+    tokenUrl: https://oauth2.tiledb.com/oauth2/token
+scopes:
+- scope: admin
+  description: Grants read and write access to administrative information
+  flows:
+  - authorizationCode
+  sources:
+  - openapi/tiledb-cloud-v1-openapi.yaml
+  - openapi/tiledb-cloud-v2-openapi.yaml
+- scope: read
+  description: Grants read access
+  flows:
+  - authorizationCode
+  sources:
+  - openapi/tiledb-cloud-v1-openapi.yaml
+  - openapi/tiledb-cloud-v2-openapi.yaml
+- scope: write
+  description: Grants write access
+  flows:
+  - authorizationCode
+  sources:
+  - openapi/tiledb-cloud-v1-openapi.yaml
+  - openapi/tiledb-cloud-v2-openapi.yaml
+docs: https://documentation.cloud.tiledb.com/academy/accounts/individual/profile/api-tokens/
+note: Two distinct scope surfaces. (1) The OAuth 2.0 authorization-code flow declared in securityDefinitions carries
+  three coarse scopes (read/write/admin); note that the spec comments the OAuth2 requirement out of the global security
+  block because it broke the generated Python client, so in practice callers use the X-TILEDB-REST-API-KEY header
+  or HTTP Basic. (2) REST API tokens minted at POST /v1/token carry the finer TokenScope enum below, which the console
+  exposes as the token 'Scope' field. Tokens default to all permissions ('*') and to a 30-minute expiry when none
+  is given.
+api_token_scopes:
+  mint_operation: createToken (POST /v1/token)
+  list_operation: getTokenScopes (GET /v1/tokens/scopes)
+  revoke_operation: revokeToken (DELETE /v1/tokens/{token})
+  default: '*'
+  default_expiry: 30 minutes when no expires value is supplied
+  source: openapi/tiledb-cloud-v1-openapi.yaml definitions.TokenScope
+  scopes:
+  - scope: '*'
+    description: All permissions. The default when no scope is supplied on a token request.
+  - scope: password_reset
+    description: Limited to the password-reset flow (POST /v1/user/password_reset).
+  - scope: confirm_email
+    description: Limited to the email-confirmation flow (POST /v1/user/confirm_email).
+  - scope: user:read
+    description: Read the authenticated user profile and user-scoped listings.
+  - scope: user:read-write
+    description: Read and modify the authenticated user profile.
+  - scope: user:admin
+    description: Administrative access to user records.
+  - scope: array:read
+    description: Read arrays, array schemas, metadata and array activity.
+  - scope: array:read-write
+    description: Read and write arrays, including register/deregister and metadata writes.
+  - scope: array:admin
+    description: Administrative access to arrays, including delete and sharing.
+  - scope: organization:read
+    description: Read organization profile and membership.
+  - scope: organization:read-write
+    description: Read and modify organization profile and membership.
+  - scope: organization:admin
+    description: Administrative access to an organization, including billing and deletion.
+  - scope: group:read
+    description: Read groups and group contents.
+  - scope: group:read-write
+    description: Read and modify groups and group contents.
+  - scope: group:admin
+    description: Administrative access to groups, including delete and sharing.
+related_permission_enums:
+  note: Not token scopes — the per-asset action enums the sharing/permission endpoints accept.
+  ArrayActions:
+  - read
+  - write
+  - edit
+  - read_array_logs
+  - read_array_info
+  - read_array_schema
+  GroupActions:
+  - read
+  - write
+  - edit
+  UDFActions:
+  - fetch_udf
+  - share_udf
+  TaskGraphActions:
+  - fetch_task_graph
+  - share_task_graph
+  NamespaceActions:
+  - read
+  - write
+  - create
+  - delete
+  - edit
+  - read_array_logs
+  - read_job_logs
+  - read_object_logs
+  - run_job
+  - delete_organization
+  - edit_organization
+  - edit_billing

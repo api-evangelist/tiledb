@@ -1,0 +1,177 @@
+aid: tiledb
+name: TileDB
+description: >-
+  TileDB, Inc. builds a multimodal database around a single universal data model — the multi-dimensional
+  array — that stores tables, genomics (VCF), single-cell (SOMA), biomedical imaging, vector embeddings,
+  point clouds, files and ML models in one cloud-native format on S3, Azure Blob, GCS, Lustre or MinIO.
+  The open-source TileDB Embedded storage engine is paired with TileDB Cloud (and the Carrara product
+  line), a hosted and self-hostable platform for cataloging, sharing, governing and querying those assets,
+  with serverless SQL, user-defined functions, task graphs, Jupyter notebooks and dashboards. The platform
+  is programmable through the TileDB Storage Platform REST API (v1 and v2, whose Swagger 2.0 contracts
+  TileDB publishes openly on GitHub), plus first-party clients for Python, R, Java, Go, C, C++, C#,
+  JavaScript and Rust. The company is focused on life sciences and precision medicine.
+accessModel:
+  pricing: paid
+  onboarding: self-serve
+  trial: false
+  try_now: false
+  public: false
+  label: Paid · Self-serve signup
+  confidence: high
+  source:
+  - plans
+  - authentication
+  - scopes
+  - rate-limits
+  - security
+  generated: '2026-09-02'
+  method: derived
+image: https://images.ctfassets.net/nxe07oerbx6d/PTO0pDBxwkIxfaGzEiHPi/931e190a336eebdedc825cba1723b96b/TileDB-homepage-meta.jpg
+url: https://raw.githubusercontent.com/api-evangelist/tiledb/refs/heads/main/apis.yml
+specificationVersion: '0.20'
+created: '2026-08-30'
+modified: '2026-08-30'
+tags:
+- Company
+- Database
+- Multimodal Data
+- Life Sciences
+- Genomics
+- Single Cell
+- Biomedical Imaging
+- Vector Search
+- Data Management
+- Cloud Storage
+- Analytics
+- Machine-Learning
+tags_raw:
+- Company
+- Database
+- Multimodal Data
+- Life Sciences
+- Genomics
+- Single Cell
+- Biomedical Imaging
+- Vector Search
+- Data Management
+- Cloud Storage
+- Analytics
+- Machine Learning
+apis:
+- name: TileDB Storage Platform API (v1)
+  description: >-
+    The primary TileDB Cloud REST API. 168 operations across arrays, groups, assets, files, notebooks,
+    UDFs, task graphs, SQL, queries, users, organizations, invitations, favorites and tokens. Published
+    by TileDB as a Swagger 2.0 contract with basePath /v1. Authenticates with an X-TILEDB-REST-API-KEY
+    header, HTTP Basic, or OAuth 2.0 authorization code. Bodies negotiate between application/json and
+    application/capnp (Cap'n Proto) for the high-throughput query paths.
+  image: https://images.ctfassets.net/nxe07oerbx6d/PTO0pDBxwkIxfaGzEiHPi/931e190a336eebdedc825cba1723b96b/TileDB-homepage-meta.jpg
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v1
+  tags:
+  - Database
+  - Multimodal Data
+  - Data Management
+  - Analytics
+  - Life Sciences
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-cloud-v1-openapi.yaml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+  - type: Overlay
+    url: overlays/tiledb-cloud-v1-overlay.yaml
+- name: TileDB Storage Platform API (v2)
+  description: >-
+    The v2 routes of the TileDB Cloud REST API — 21 operations concentrated on groups, assets, array
+    metadata, files, notebooks, users and organizations. Published by TileDB as a separate Swagger 2.0
+    contract with basePath /v2, sharing the same authentication schemes as v1.
+  image: https://images.ctfassets.net/nxe07oerbx6d/PTO0pDBxwkIxfaGzEiHPi/931e190a336eebdedc825cba1723b96b/TileDB-homepage-meta.jpg
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v2
+  tags:
+  - Database
+  - Multimodal Data
+  - Data Management
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-cloud-v2-openapi.yaml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+  - type: Overlay
+    url: overlays/tiledb-cloud-v2-overlay.yaml
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com
+- FN: APIs.json
+  email: info@apis.io
+common:
+- type: DomainSecurity
+  url: security/tiledb-domain-security.yml
+- type: OAuthScopes
+  url: scopes/tiledb-scopes.yml
+- type: Authentication
+  url: authentication/tiledb-authentication.yml
+- type: Website
+  url: https://www.tiledb.com/
+- type: DeveloperPortal
+  url: https://documentation.cloud.tiledb.com/academy/home/
+- type: Documentation
+  url: https://documentation.cloud.tiledb.com/academy/home/
+- type: APIReference
+  url: https://documentation.cloud.tiledb.com/academy/api-reference/
+- type: GettingStarted
+  url: https://documentation.cloud.tiledb.com/academy/get-started/
+- type: Support
+  url: https://forum.tiledb.com/
+- type: Blog
+  url: https://www.tiledb.com/blog
+- type: GitHubOrganization
+  url: https://github.com/TileDB-Inc
+- type: Pricing
+  url: https://www.tiledb.com/pricing
+- type: SignUp
+  url: https://cloud.tiledb.com/auth/signup
+- type: TermsOfService
+  url: https://www.tiledb.com/terms-of-use
+- type: PrivacyPolicy
+  url: https://www.tiledb.com/privacy-policy
+- type: Packages
+  url: packages/tiledb-packages.yml
+- type: SDKs
+  url: packages/tiledb-packages.yml
+- type: LLMsTxt
+  url: llms/tiledb-llms.txt
+- type: Conformance
+  url: conformance/tiledb-conformance.yml
+- type: ErrorCatalog
+  url: errors/tiledb-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/tiledb-lifecycle.yml
+- type: Conventions
+  url: conventions/tiledb-conventions.yml
+- type: ChangeLog
+  url: changelog/tiledb-changelog.yml
+- type: CLI
+  url: cli/tiledb-cli.yml
+- type: Components
+  url: components/tiledb-components.yml
+- type: DataModel
+  url: data-model/tiledb-data-model.yml
+- type: Plans
+  url: plans/tiledb-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/tiledb-rate-limits.yml
+- type: AgentSkill
+  url: skills/_index.yml
+x-enrichment:
+  date: '2026-08-30'
+  status: enriched
+  artifacts_added: 27
+  pass: local-v1

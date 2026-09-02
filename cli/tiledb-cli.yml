@@ -1,0 +1,46 @@
+generated: '2026-08-30'
+method: searched
+source: https://documentation.cloud.tiledb.com/academy/structure/life-sciences/population-genomics/api-reference/cli/,
+  https://github.com/TileDB-Inc/TileDB-VCF
+note: TileDB ships no general-purpose CLI for the TileDB Cloud REST API. The one first-party, currently documented
+  CLI is tiledbvcf, the population-genomics tool. The former general array CLI (TileDB-Inc/TileDB-CLI-Python) is archived
+  and its README directs users to hello@tiledb.com.
+clis:
+- name: tiledbvcf
+  official: true
+  status: active
+  scope: TileDB-VCF datasets (population genomics)
+  docs: https://documentation.cloud.tiledb.com/academy/structure/life-sciences/population-genomics/api-reference/cli/
+  source_code: https://github.com/TileDB-Inc/TileDB-VCF
+  install: Distributed with TileDB-VCF; the docs page states no install instructions of its own.
+  commands:
+  - command: create
+    description: Creates an empty TileDB-VCF dataset.
+  - command: store
+    description: Ingest samples into a TileDB-VCF dataset.
+  - command: export
+    description: Exports data from a TileDB-VCF dataset.
+  - command: list
+    description: Lists all sample names present in a TileDB-VCF dataset.
+  - command: stat
+    description: Prints high-level statistics about a TileDB-VCF dataset.
+  - command: delete
+    description: Delete samples from a TileDB-VCF dataset.
+  - command: consolidate
+    description: Consolidate a TileDB-VCF dataset.
+    subcommands:
+    - commits
+    - fragments
+    - fragment_meta
+  - command: vacuum
+    description: Vacuum a TileDB-VCF dataset.
+    subcommands:
+    - commits
+    - fragments
+    - fragment_meta
+- name: tiledb (Python CLI)
+  official: true
+  status: archived
+  scope: TileDB array storage manager
+  source_code: https://github.com/TileDB-Inc/archived-TileDB-CLI-Python
+  note: Archived by TileDB; the repo description reads "[archived - please contact hello@tiledb.com]".

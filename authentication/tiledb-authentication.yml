@@ -1,0 +1,56 @@
+generated: '2026-08-30'
+method: searched
+source: https://documentation.cloud.tiledb.com/academy/accounts/individual/profile/api-tokens/ + openapi/tiledb-cloud-v1-openapi.yaml
+summary:
+  types:
+  - apiKey
+  - http
+  - oauth2
+  api_key_in:
+  - header
+  oauth2_flows:
+  - authorizationCode
+schemes:
+- name: BasicAuth
+  type: http
+  scheme: basic
+  sources:
+  - openapi/tiledb-cloud-v1-openapi.yaml
+  - openapi/tiledb-cloud-v2-openapi.yaml
+- name: ApiKeyAuth
+  type: apiKey
+  in: header
+  parameter: X-TILEDB-REST-API-KEY
+  sources:
+  - openapi/tiledb-cloud-v1-openapi.yaml
+  - openapi/tiledb-cloud-v2-openapi.yaml
+- name: OAuth2
+  type: oauth2
+  flows:
+  - flow: authorizationCode
+    authorizationUrl: https://oauth2.tiledb.com/oauth2/authorize
+    tokenUrl: https://oauth2.tiledb.com/oauth2/token
+    scopes: 3
+  sources:
+  - openapi/tiledb-cloud-v1-openapi.yaml
+  - openapi/tiledb-cloud-v2-openapi.yaml
+docs: https://documentation.cloud.tiledb.com/academy/accounts/individual/profile/api-tokens/
+primary_method: api_key_header
+details:
+  api_key_header: X-TILEDB-REST-API-KEY
+  token_type: REST API token, created in the TileDB Cloud console under Profile > API tokens, or via POST /v1/token.
+  token_expiry: User-selected; defaults to 30 minutes when no expiration is set.
+  token_scoping: Optional scope from the TokenScope enum; defaults to all permissions (*). See scopes/tiledb-scopes.yml.
+  environment_variable: TILEDB_REST_TOKEN — TileDB Cloud notebook servers inject a temporary token here at launch.
+  client_config_key: rest.token — the TileDB context config option used by the client libraries instead of username/password.
+  basic_auth: HTTP Basic (username/password) is accepted by the API but the docs steer callers to REST API tokens.
+  oauth2: An authorization-code flow is declared in securityDefinitions against oauth2.tiledb.com, but it is commented
+    out of the global security requirement in the published spec (a note in the spec says it broke the generated
+    Python client). oauth2.tiledb.com does not resolve in public DNS (NXDOMAIN, probed 2026-08-30).
+  sso: Self-hosted TileDB deployments support OpenID Connect and SCIM 2.0 user provisioning (Okta, Microsoft Entra).
+    See conformance/tiledb-conformance.yml.
+evidence:
+- url: https://api.tiledb.com/v1/user
+  http_status: 401
+  body: '{"code":401,"message":"Unauthorized","request_id":"..."}'
+  note: Anonymous probe 2026-08-30 — confirms the live base host and the JSON error envelope.

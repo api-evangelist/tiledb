@@ -1,0 +1,190 @@
+generated: '2026-08-30'
+method: searched
+source: pypi.org, registry.npmjs.org, search.maven.org, api.nuget.org, proxy.golang.org, crandb.r-pkg.org, crates.io,
+  rubygems.org, github.com/TileDB-Inc
+summary:
+  total: 17
+  official: 17
+  registries:
+  - pypi
+  - npm
+  - maven
+  - nuget
+  - go
+  - cran
+  - r-universe
+  languages:
+  - Python
+  - JavaScript/TypeScript
+  - Java
+  - Scala
+  - C#
+  - Go
+  - R
+  - Rust
+  absent_registries:
+  - crates.io (probed, absent)
+  - rubygems.org (probed, absent)
+currency_finding: 'The Cloud REST API clients decay much faster than the storage-engine bindings. The JavaScript client
+  (@tiledb-inc/tiledb-cloud 1.0.14) last published 2023-09-06 and the generated openapi-java-client 0.0.5 in 2022,
+  while the spec repo last changed 2025-08-04 — so both ship against a contract that has since moved. TileDB is candid
+  about this: its own API-reference page marks the Java, C#, Go, Rust, R and JavaScript clients as "out of date, incomplete,
+  or under active development".'
+packages:
+- name: tiledb
+  registry: pypi
+  url: https://pypi.org/project/tiledb/
+  language: Python
+  official: true
+  version: 0.36.1
+  published: '2026-02-25'
+  note: TileDB-Py — Python interface to the TileDB Embedded storage engine.
+  source_code: https://github.com/TileDB-Inc/TileDB-Py
+- name: tiledb-cloud
+  registry: pypi
+  url: https://pypi.org/project/tiledb-cloud/
+  language: Python
+  official: true
+  version: 0.14.4
+  published: '2025-12-05'
+  note: TileDB-Cloud-Py — the generated client for the TileDB Cloud REST API this profile captures.
+  source_code: https://github.com/TileDB-Inc/TileDB-Cloud-Py
+- name: tiledbsoma
+  registry: pypi
+  url: https://pypi.org/project/tiledbsoma/
+  language: Python
+  official: true
+  version: 2.3.0
+  published: '2026-01-27'
+  note: SOMA single-cell API implementation on TileDB.
+  source_code: https://github.com/single-cell-data/TileDB-SOMA
+- name: tiledb-vector-search
+  registry: pypi
+  url: https://pypi.org/project/tiledb-vector-search/
+  language: Python
+  official: true
+  version: 0.16.0
+  published: '2025-12-11'
+  note: TileDB Vector Search Python client.
+  source_code: https://github.com/TileDB-Inc/TileDB-Vector-Search
+- name: tiledb-bioimg
+  registry: pypi
+  url: https://pypi.org/project/tiledb-bioimg/
+  language: Python
+  official: true
+  version: 0.3.10
+  published: '2025-12-11'
+  note: Biomedical imaging support.
+  source_code: https://github.com/TileDB-Inc/TileDB-BioImaging
+- name: tiledb-ml
+  registry: pypi
+  url: https://pypi.org/project/tiledb-ml/
+  language: Python
+  official: true
+  version: 0.10.1
+  published: '2025-12-04'
+  note: ML data and model I/O (PyTorch, TensorFlow, scikit-learn).
+  source_code: https://github.com/TileDB-Inc/TileDB-ML
+- name: tiledb-cf
+  registry: pypi
+  url: https://pypi.org/project/tiledb-cf/
+  language: Python
+  official: true
+  version: 0.9.1
+  published: '2024-04-05'
+  note: CF metadata conventions for climate/forecast data. Last release predates every other first-party Python package
+    by well over a year — the weakest-maintained of the set.
+  source_code: https://github.com/TileDB-Inc/TileDB-CF-Py
+- name: '@tiledb-inc/tiledb-cloud'
+  registry: npm
+  url: https://www.npmjs.com/package/@tiledb-inc/tiledb-cloud
+  language: JavaScript/TypeScript
+  official: true
+  version: 1.0.14
+  published: '2023-09-06'
+  note: TileDB Cloud JavaScript client, generated from the same OpenAPI contract. Last published 2023-09-06 — roughly
+    two years behind the REST spec it wraps (spec repo last committed 2025-08-04), and the docs API-reference page
+    flags the JavaScript client as out of date or incomplete.
+  source_code: https://github.com/TileDB-Inc/TileDB-Cloud-JS
+- name: io.tiledb:tiledb-java
+  registry: maven
+  url: https://central.sonatype.com/artifact/io.tiledb/tiledb-java
+  language: Java
+  official: true
+  version: 0.29.0
+  published: '2025-05-23'
+  note: Java JNI interface to TileDB Embedded.
+  source_code: https://github.com/TileDB-Inc/TileDB-Java
+- name: io.tiledb:tiledb-cloud-java
+  registry: maven
+  url: https://central.sonatype.com/artifact/io.tiledb/tiledb-cloud-java
+  language: Java
+  official: true
+  version: 0.5.0
+  published: '2025-02-06'
+  note: Java client for the TileDB Cloud REST API.
+  source_code: https://github.com/TileDB-Inc/TileDB-Client-Java
+- name: io.tiledb:tiledb-spark
+  registry: maven
+  url: https://central.sonatype.com/artifact/io.tiledb/tiledb-spark
+  language: Java/Scala
+  official: true
+  version: 1.19.0
+  published: '2024-09-12'
+  note: Spark data source for TileDB arrays.
+  source_code: https://github.com/TileDB-Inc/TileDB-Spark
+- name: io.tiledb:openapi-java-client
+  registry: maven
+  url: https://central.sonatype.com/artifact/io.tiledb/openapi-java-client
+  language: Java
+  official: true
+  version: 0.0.5
+  published: '2022-09-16'
+  note: Generated OpenAPI Java client. Stale — superseded by tiledb-cloud-java.
+- name: TileDB.CSharp
+  registry: nuget
+  url: https://www.nuget.org/packages/TileDB.CSharp/
+  language: C#
+  official: true
+  version: 5.20.0
+  published: '2025-12-23'
+  note: C# API for TileDB Embedded.
+  source_code: https://github.com/TileDB-Inc/TileDB-CSharp
+- name: github.com/TileDB-Inc/TileDB-Go
+  registry: go
+  url: https://pkg.go.dev/github.com/TileDB-Inc/TileDB-Go
+  language: Go
+  official: true
+  version: v0.39.1
+  published: '2026-02-09'
+  note: Go bindings, read from proxy.golang.org.
+  source_code: https://github.com/TileDB-Inc/TileDB-Go
+- name: tiledb
+  registry: cran
+  url: https://cran.r-project.org/package=tiledb
+  language: R
+  official: true
+  version: 0.33.0
+  published: '2025-10-01'
+  note: R interface to TileDB Embedded.
+  source_code: https://github.com/TileDB-Inc/TileDB-R
+- name: tiledbcloud
+  registry: r-universe
+  url: https://tiledb-inc.r-universe.dev/tiledbcloud
+  language: R
+  official: true
+  version: null
+  published: null
+  note: R client for the TileDB Cloud REST API. Distributed through TileDB's own r-universe repository, not CRAN —
+    crandb.r-pkg.org returns no record (probed 2026-08-30), so there is no registry metadata endpoint to read a dated
+    version from.
+  source_code: https://github.com/TileDB-Inc/TileDB-Cloud-R
+- name: tiledb-rs
+  registry: none
+  url: https://github.com/TileDB-Inc/tiledb-rs
+  language: Rust
+  official: true
+  version: null
+  published: null
+  note: Rust bindings, self-described "early wip". Not published to crates.io — crates.io/api/v1/crates/tiledb returns
+    "crate `tiledb` does not exist" (probed 2026-08-30).

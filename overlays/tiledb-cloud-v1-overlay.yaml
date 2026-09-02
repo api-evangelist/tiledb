@@ -1,0 +1,68 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for the TileDB Storage Platform API (v1)
+  version: 1.0.0
+extends: openapi/tiledb-cloud-v1-openapi.yaml
+x-provenance:
+  generated: '2026-08-30'
+  method: generated
+  source: openapi/tiledb-cloud-v1-openapi.yaml
+  note: Non-destructive Overlay 1.0.0 capturing API Evangelist enrichment of the provider-published contract. The
+    original spec in openapi/ is never mutated; the apis.io scorer parses the ORIGINAL, so this improves our derived
+    artifacts rather than the provider's content score.
+actions:
+- target: $.info
+  description: Record the real production host, which the published Swagger 2.0 document omits (no `host` key, only
+    basePath and schemes). Verified by an anonymous probe of https://api.tiledb.com/v1/user returning 401 with the
+    documented Error envelope.
+  update:
+    x-api-evangelist:
+      base_url: https://api.tiledb.com/v1
+      base_url_verified: '2026-08-30'
+      base_url_evidence: https://api.tiledb.com/v1/user -> 401 {"code":401,"message":"Unauthorized","request_id":"..."}
+      contract_source: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+      contract_version: 2.17.51
+      operation_count: 168
+      docs: https://documentation.cloud.tiledb.com/academy/api-reference/
+- target: $.info
+  description: Record the authentication posture actually in force, which differs from the declared securityDefinitions.
+  update:
+    x-authentication:
+      primary: apiKey header X-TILEDB-REST-API-KEY
+      alternatives:
+      - HTTP Basic
+      oauth2_declared_but_inactive: true
+      oauth2_note: The OAuth2 authorization-code flow is declared in securityDefinitions but commented out of the
+        global security block, and its declared host oauth2.tiledb.com does not resolve (NXDOMAIN, probed 2026-08-30).
+      token_scopes: scopes/tiledb-scopes.yml
+      profile: authentication/tiledb-authentication.yml
+- target: $.info
+  description: Record the error envelope and the absence of RFC 9457 problem details.
+  update:
+    x-error-envelope:
+      media_type: application/json
+      shape: '{code, message, request_id}'
+      rfc9457: false
+      catalog: errors/tiledb-problem-types.yml
+      gap: No 401, 403 or 429 is declared on any operation, though the live API returns 401 anonymously.
+- target: $.info
+  description: Record the Cap'n Proto content negotiation, which is the single most consequential thing a client author
+    needs to know and which is only discoverable by reading per-operation produces/consumes overrides.
+  update:
+    x-content-negotiation:
+      default: application/json
+      binary: application/capnp
+      schema: https://github.com/TileDB-Inc/TileDB/blob/main/tiledb/sm/serialization/tiledb-rest.capnp
+      json_safe_operations_note: Where an operation exists in both forms, prefer the *Json operationId (getArrayMetaDataJson,
+        submitQueryJson, getArrayNonEmptyDomainJson).
+      conventions: conventions/tiledb-conventions.yml
+- target: $.info
+  description: Record the runtime-semantics gaps an agent must plan around.
+  update:
+    x-agent-notes:
+      idempotency: none published
+      rate_limits: none published; no 429, no Retry-After, no RateLimit headers
+      dry_run: none; read-only estimators (getEstResultSizes, getArrayMaxBufferSizes) are the closest analogue
+      reversibility: documented but unbounded — see conventions/tiledb-conventions.yml reversibility block
+      deprecation_policy: none published
+      status_page: none published

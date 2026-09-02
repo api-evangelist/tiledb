@@ -1,0 +1,39 @@
+generated: '2026-08-30'
+method: searched
+source: https://github.com/TileDB-Inc/TileDB/releases, https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec/commits/master
+scheme: semver
+rest_api_changelog:
+  published: false
+  note: There is NO dated changelog for the TileDB Cloud REST API itself. The contract repository publishes no GitHub
+    releases and no CHANGELOG file; the only dated record of API change is its commit history. info.version moves
+    silently inside the spec (v1 at 2.17.51, v2 at 1.4.0).
+  latest_contract_change:
+    date: '2025-08-04'
+    summary: 'Merge #492 — add TileDB Cloud REST support for AWS KMS key id on credentials (kms_id renamed to sse_kms_key_id).'
+  source: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec/commits/master
+engine_changelog:
+  published: true
+  url: https://github.com/TileDB-Inc/TileDB/releases
+  note: The open-source TileDB Embedded storage engine DOES publish a dated, per-release changelog as GitHub Releases
+    (and HISTORY.md in the repo). This is the changelog a TileDB user actually tracks, but it covers the storage engine
+    and format, not the Cloud REST API.
+  current_version: 2.30.1
+  entries:
+  - version: 2.30.1
+    date: '2026-02-25'
+    type: patch
+  - version: 2.30.0
+    date: '2025-12-06'
+    type: minor
+  - version: 2.30.0-rc0
+    date: '2025-11-24'
+    type: prerelease
+  - version: 2.29.2
+    date: '2025-11-06'
+    type: patch
+  - version: 2.29.1
+    date: '2025-10-08'
+    type: patch
+finding: 'The gap between the two is the story: the engine ships dated releases every few weeks while the REST contract
+  that agents and integrators depend on has had no release, no changelog and no dated announcement — only commits,
+  the most recent in August 2025.'

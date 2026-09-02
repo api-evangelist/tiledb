@@ -1,0 +1,153 @@
+generated: '2026-08-30'
+method: derived
+source: openapi/tiledb-cloud-v1-openapi.yaml, openapi/tiledb-cloud-v2-openapi.yaml, https://documentation.cloud.tiledb.com/academy/,
+  live probe of https://api.tiledb.com/v1/user
+auth:
+  style: api-key-header
+  header: X-TILEDB-REST-API-KEY
+  alternatives:
+  - HTTP Basic
+  - OAuth 2.0 authorization code (declared but commented out of global security)
+  see: authentication/tiledb-authentication.yml
+versioning:
+  style: uri-path
+  values:
+  - /v1
+  - /v2
+  note: Two separately published Swagger 2.0 contracts sharing one host. v2 is not a replacement for v1 — it is a
+    smaller, newer surface (21 operations, mostly groups and assets) that coexists with the 168-operation v1. info.version
+    is bumped independently per contract (v1 2.17.51, v2 1.4.0) and is not exposed as a header or a discovery endpoint.
+  see: lifecycle/tiledb-lifecycle.yml
+content_negotiation:
+  default: application/json
+  alternate: application/capnp
+  note: 'A genuinely unusual convention: the high-throughput array paths (query submit/finalize, array schema load,
+    fragment info, array metadata, enumerations, est_result_sizes, non_empty_domain) negotiate Cap''n Proto instead
+    of JSON. Some operations exist in BOTH forms as distinct operationIds — e.g. getArrayMetadata (capnp) alongside
+    getArrayMetaDataJson, and updateArrayMetadataCapnp alongside updateArrayMetadata. An agent that speaks only JSON
+    should prefer the *Json operationIds.'
+  schema_source: https://github.com/TileDB-Inc/TileDB/blob/main/tiledb/sm/serialization/tiledb-rest.capnp
+  other_media_types:
+  - application/octet-stream (file export/upload)
+  - multipart/form-data (file and notebook upload)
+  - application/x-ipynb+json (notebook export)
+pagination:
+  style: page-number
+  params:
+  - name: page
+    in: query
+    type: integer
+    description: Page to return; default 1.
+  - name: per_page
+    in: query
+    type: integer
+    description: Items per page.
+  response_fields:
+  - 'pagination_metadata (PaginationMetadata: page, per_page, total_pages, total_items)'
+  note: Applied on the browser/listing endpoints (arrays browser owned/shared/public, groups browser, favorites, task
+    graph logs, assets). Not every list endpoint is paginated.
+request_tracing:
+  field: request_id
+  location: error response body
+  header: null
+  note: Every error carries a request_id in the JSON body. No correlation header (no X-Request-Id / traceparent) was
+    observed on the live 401 response.
+error_envelope:
+  shape: '{code, message, request_id}'
+  media_type: application/json
+  rfc9457: false
+  see: errors/tiledb-problem-types.yml
+idempotency:
+  supported: false
+  header: null
+  scope: null
+  retention: null
+  evidence: 'No idempotency key, header, or discussion appears anywhere in either published contract (grep for /idempoten/i
+    across both files: 0 hits) or in the 423-page docs sitemap.'
+  consequence: A retried POST — createArray, registerArray, submitUDF, submitTaskGraph, createGroup, shareArray —
+    has no provider-supplied deduplication guarantee. Many of these are naturally idempotent by key (register/share
+    by namespace+name), but that is a property of the resource model, not a contract TileDB states.
+rate_limit_signaling:
+  documented: false
+  headers: []
+  status_on_exhaustion: null
+  note: No X-RateLimit-* / RateLimit-* headers, no 429 response, no Retry-After anywhere in either contract or the
+    documentation. See rate-limits/tiledb-rate-limits.yml.
+dry_run_mode:
+  supported: false
+  note: No dry-run/preview/validate-only parameter in either contract. The closest analogues are read-only estimators
+    — getEstResultSizes, getArrayMaxBufferSizes, getArraySampleData and the consolidation-plan endpoints — which let
+    a caller size a query before running it, but they do not rehearse a write.
+reversibility:
+  grade: documented
+  grade_basis: Reversal operations exist and are named in the contract, but TileDB states no time window for any of
+    them. A window is what would raise this to `verified`; inventing one is not an option.
+  write_surface: true
+  surfaces:
+  - action: Submit a task graph execution
+    operationId: submitTaskGraph
+    reversal: stopTaskGraphExecution (POST /taskgraphs/{namespace}/executions/{id}/stop)
+    window: null
+    window_source: null
+    note: A running execution can be stopped, and a failed one re-driven with retryTaskGraphExecution or resubmitTaskGraphExecution.
+      No stated deadline; stopping is only meaningful while the execution runs.
+  - action: Register an array into TileDB Cloud
+    operationId: registerArray
+    reversal: deregisterArray (DELETE /arrays/{namespace}/{array}/deregister)
+    window: null
+    window_source: null
+    note: Deregistering removes the array from TileDB Cloud without deleting the underlying data in object storage
+      — this is the reversible sibling of deleteArray, which the contract describes as deleting the array.
+  - action: Delete an array
+    operationId: deleteArray
+    reversal: null
+    window: null
+    window_source: null
+    note: No restore/undelete operation exists. Not reversible through the API.
+  - action: Share an array or group
+    operationId: shareArray (PATCH /arrays/{namespace}/{array}/share) / shareGroup
+    reversal: No distinct unshare/revoke operation exists. Sharing is expressed as a PATCH carrying an ArraySharing.actions
+      list, so revocation is a rewrite of that list.
+    window: null
+    window_source: null
+    note: The contract does not state what an empty actions list does, so the exact revocation call is undocumented.
+      getArraySharingPolicies / getGroupSharingPolicies let a caller read the current state before and after.
+  - action: Invite a user to share an asset or join an organization
+    operationId: shareArrayByInvite / joinOrganization
+    reversal: cancelShareArrayByInvite, cancelShareGroupByInvite, cancelJoinOrganization, cancelSharePayment
+    window: null
+    window_source: null
+    note: Pending invitations are explicitly cancellable — the cleanest reversal path in the API.
+  - action: Issue a REST API token
+    operationId: requestToken
+    reversal: revokeToken (DELETE /tokens/{token})
+    window: Bounded by the token expiry, which defaults to 30 minutes when none is set.
+    window_source: https://documentation.cloud.tiledb.com/academy/accounts/individual/profile/api-tokens/
+    note: The one reversal in the API with a provider-stated bound, and it is an expiry rather than an undo window.
+  - action: Write to an array
+    operationId: submitQuery / submitQueryJson
+    reversal: Time travel — TileDB arrays are append-only with per-fragment timestamps, so a prior state is readable
+      by opening the array at an earlier timestamp.
+    window: Until the fragments are vacuumed (vacuumArray), which permanently removes them.
+    window_source: https://documentation.cloud.tiledb.com/academy/structure/arrays/foundation/key-concepts/compute/time-traveling/
+    note: This is a storage-format property rather than a REST reversal operation, but it is the mechanism an agent
+      would actually use to undo a bad write. vacuumArray and consolidateArray are the operations that destroy that
+      ability, and neither is reversible.
+  irreversible_operations:
+  - deleteArray
+  - deleteGroup
+  - deleteUser
+  - deleteOrganization
+  - deleteUDFInfo
+  - deleteRegisteredTaskGraph
+  - deleteAWSAccessCredentials
+  - deleteSSODomain
+  - vacuumArray
+  - consolidateArray
+cross_links:
+  errors: errors/tiledb-problem-types.yml
+  lifecycle: lifecycle/tiledb-lifecycle.yml
+  authentication: authentication/tiledb-authentication.yml
+  scopes: scopes/tiledb-scopes.yml
+  rate_limits: rate-limits/tiledb-rate-limits.yml
+  data_model: data-model/tiledb-data-model.yml

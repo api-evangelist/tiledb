@@ -1,0 +1,43 @@
+generated: '2026-08-30'
+method: searched
+source: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec, https://documentation.cloud.tiledb.com/academy/, openapi/tiledb-cloud-v1-openapi.yaml,
+  openapi/tiledb-cloud-v2-openapi.yaml
+versioning:
+  scheme: uri-path
+  current:
+  - v1 (info.version 2.17.51)
+  - v2 (info.version 1.4.0)
+  policy_published: false
+  note: TileDB publishes no versioning policy for the REST API. The spec repo README states only that it is "a living
+    specification, which might reference features which are in beta testing, and are subject to change" and that unstable
+    routes and models "will have a beta label added".
+deprecation:
+  policy_published: false
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  deprecated_operations: []
+  note: 'No deprecation policy page, no Sunset or Deprecation response headers in either contract, and no operation
+    carries `deprecated: true`. No Deprecation pointer is wired into apis.yml.'
+status_page:
+  published: false
+  url: null
+  probes:
+  - url: https://status.tiledb.com/
+    status: <no response> (DNS does not resolve)
+  note: No status page found on any TileDB host or in the 423-page docs sitemap. No StatusPage pointer is wired into
+    apis.yml.
+sla:
+  published: false
+  note: No public SLA document. Terms of Use at https://www.tiledb.com/terms-of-use governs the service; no uptime
+    commitment is published on the pricing page.
+support_lifecycle:
+  self_hosting: TileDB publishes upgrade guidance for self-hosted deployments at https://documentation.cloud.tiledb.com/academy/self-hosting/upgrades/
+  storage_format: The on-disk array format is separately versioned and specified — see https://documentation.cloud.tiledb.com/academy/structure/arrays/foundation/storage-format-spec/
+    — and arrays can be migrated forward with the documented array-upgrade tutorial.
+spec_activity:
+  repo: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+  last_commit: '2025-08-04'
+  releases_published: 0
+  note: The contract repository publishes no GitHub releases and no CHANGELOG; the only dated signal is commit history.
+    Last substantive change was "Add support for AWS KMS key ID with credentials" (2025-07-31).

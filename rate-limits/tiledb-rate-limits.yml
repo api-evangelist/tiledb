@@ -1,0 +1,32 @@
+generated: '2026-08-30'
+method: searched
+source: https://documentation.cloud.tiledb.com/academy/ (423-page sitemap), openapi/tiledb-cloud-v1-openapi.yaml,
+  openapi/tiledb-cloud-v2-openapi.yaml, https://www.tiledb.com/pricing
+limit_count: 0
+rate_limits: []
+headers: []
+status_on_exhaustion: null
+retry_after: false
+note: 'TileDB publishes no rate limits for the TileDB Cloud REST API. Neither contract declares a 429 response, a
+  Retry-After header, or any X-RateLimit-* / RateLimit-* header, and no page in the docs sitemap covers throttling.
+  What the platform meters instead is CONSUMPTION, not request rate: pricing is sold in vCPUs and user seats, and
+  individual accounts run against a credit balance (the free tier grants $100 of credits for six months). The one
+  payment-shaped ceiling the contract exposes is a 402 Payment Required on getNotebookServerStatus (GET /notebooks/server/{namespace}/status),
+  which is a credit/billing signal rather than a rate limit.'
+consumption_limits:
+- dimension: compute
+  unit: vCPU
+  sold_in: increments of 50 vCPUs, billed annually
+  source: https://www.tiledb.com/pricing
+- dimension: users
+  unit: seat
+  sold_in: increments of 10 seats, billed annually
+  source: https://www.tiledb.com/pricing
+- dimension: credits
+  unit: USD
+  free_tier: $100 of credits for 6 months, individual accounts only, one-time promotion
+  source: https://documentation.cloud.tiledb.com/academy/accounts/individual/apply-for-free-tier/
+evidence:
+- url: https://api.tiledb.com/v1/user
+  http_status: 401
+  note: Anonymous probe returned no rate-limit headers of any kind.

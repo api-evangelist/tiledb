@@ -1,0 +1,91 @@
+generated: '2026-08-30'
+method: derived
+status: candidate
+source: openapi/tiledb-cloud-v1-openapi.yaml + openapi/tiledb-cloud-v2-openapi.yaml
+deployment:
+  mode: none
+  endpoint: null
+  install: null
+  package: null
+  auth: unknown
+  verified: searched
+search_record:
+  searched: '2026-08-30'
+  result: No TileDB-published MCP server found. No mcp.tiledb.com host (DNS does not resolve), no MCP repo in the
+    TileDB-Inc GitHub organization across 100 repositories, no MCP package on npm or PyPI under the tiledb / @tiledb-inc
+    names, and no MCP mention in the TileDB Cloud academy documentation (423 pages in the docs sitemap).
+  probes:
+  - url: https://mcp.tiledb.com/
+    status: <no response> (DNS does not resolve)
+  - url: https://cloud.tiledb.com/mcp
+    status: 200
+    note: SPA catch-all HTML shell, not an MCP endpoint.
+note: The tools below are a DERIVED CANDIDATE surface — what an MCP server over the TileDB Cloud REST API would plausibly
+  expose. TileDB ships nothing. No MCPServer pointer is wired into apis.yml, because the pointer would assert an agent
+  surface the provider does not serve.
+candidate_tools:
+- tool: list_arrays
+  rest:
+  - getArraysInNamespace
+  description: List arrays in a namespace.
+- tool: get_array_info
+  rest:
+  - getArray
+  description: Fetch array info for a namespace/array.
+- tool: get_array_schema
+  rest:
+  - loadArraySchema
+  description: Load the schema of an array.
+- tool: get_array_metadata
+  rest:
+  - getArrayMetaDataJson
+  - getAllArrayMetadata
+  description: Read array metadata as JSON.
+- tool: submit_query
+  rest:
+  - submitQueryJson
+  - submitQuery
+  description: Submit a read/write query against an array.
+- tool: run_sql
+  rest:
+  - runSQL
+  description: Run a serverless SQL query in a namespace.
+- tool: submit_udf
+  rest:
+  - submitGenericUDF
+  - submitUDF
+  - submitMultiArrayUDF
+  description: Execute a user-defined function.
+- tool: list_groups
+  rest:
+  - listOwnedGroups
+  - listSharedGroups
+  - listPublicGroups
+  description: List groups by ownership.
+- tool: get_group_contents
+  rest:
+  - getGroupContents
+  description: List the assets inside a group.
+- tool: list_assets
+  rest:
+  - listAssets
+  - listPublicAssets
+  description: List assets in a namespace.
+- tool: list_task_graph_logs
+  rest:
+  - listTaskGraphLogs
+  description: List task graph execution logs.
+- tool: get_task_graph_log
+  rest:
+  - getTaskGraphLog
+  description: Fetch one task graph execution log.
+- tool: submit_task_graph
+  rest:
+  - submitTaskGraph
+  description: Submit a registered task graph for execution.
+- tool: get_user
+  rest:
+  - getUser
+  description: Fetch the authenticated user profile.
+candidate_tools_note: Every rest[] operationId above is verified present in openapi/tiledb-cloud-v1-openapi.yaml.
+  No tool is proposed for an operation that does not exist.

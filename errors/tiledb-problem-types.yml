@@ -1,0 +1,107 @@
+generated: '2026-08-30'
+method: derived
+source: openapi/tiledb-cloud-v1-openapi.yaml, openapi/tiledb-cloud-v2-openapi.yaml; envelope confirmed by an anonymous
+  probe of https://api.tiledb.com/v1/user (401)
+format: vendor-json
+rfc9457: false
+rfc9457_note: TileDB does not use application/problem+json. Errors are returned as application/json using a proprietary
+  three-field envelope. No `type` URI, no `title`, no `instance`, no problem-type registry.
+envelope:
+  media_type: application/json
+  schema: definitions.Error (identical in v1 and v2)
+  fields:
+  - field: code
+    type: integer (int64)
+    description: The error code. Mirrors the HTTP status on the responses observed.
+  - field: message
+    type: string
+    description: Human-readable message.
+  - field: request_id
+    type: string
+    description: Server-assigned request correlation id — the value to quote in a support request.
+  observed_example:
+    url: https://api.tiledb.com/v1/user
+    http_status: 401
+    body: '{"code":401,"message":"Unauthorized","request_id":"bde0f63d-554b-42a4-a8f4-a971dd4d8d6c"}'
+coverage:
+  operations_v1: 168
+  operations_v2: 21
+  declared_response_codes:
+    '200': 106
+    '502': 180
+    default: 188
+    '204': 72
+    '404': 24
+    '400': 1
+    '500': 5
+    '202': 4
+    '201': 12
+    '402': 1
+    '207': 4
+  finding: Error coverage in the contract is thin and uneven. Every operation declares a bare 502 with no schema and
+    a `default` that carries the Error schema, but only 25 of 189 operations declare a 404, one declares a 400, one
+    a 402 and six a 500. There is no declared 401 or 403 anywhere in either spec even though the live API returns
+    401 on an anonymous call, and no 429.
+problem_types:
+- status: 400
+  title: Bad Request
+  detail: The request body or query parameters failed validation.
+  declared_on_operations: 1
+  example_operations:
+  - getAllOrganizations
+- status: 402
+  title: Payment Required
+  detail: Declared on exactly one operation — getNotebookServerStatus (GET /notebooks/server/{namespace}/status).
+    A credit/billing signal, not a rate limit.
+  declared_on_operations: 1
+  example_operations:
+  - getNotebookServerStatus
+- status: 404
+  title: Not Found
+  detail: The named namespace, array, group, task or asset does not exist or is not visible to the caller.
+  declared_on_operations: 24
+  example_operations:
+  - GET /task/{id}/result
+  - acceptInvitation
+  - cancelJoinOrganization
+  - cancelShareArrayByInvite
+  - cancelShareGroupByInvite
+  - cancelSharePayment
+- status: 500
+  title: Internal Server Error
+  detail: An unhandled server-side failure.
+  declared_on_operations: 5
+  example_operations:
+  - getAllOrganizations
+  - joinOrganization
+  - shareArrayByInvite
+  - shareGroupByInvite
+  - sharePayment
+- status: 502
+  title: Bad Gateway
+  detail: Declared on every operation in both specs with no response schema.
+  declared_on_operations: 180
+  example_operations:
+  - GET /arrays/browser/owned
+  - GET /arrays/browser/owned/sidebar
+  - GET /arrays/browser/public
+  - GET /arrays/browser/public/sidebar
+  - GET /arrays/browser/shared
+  - GET /arrays/browser/shared/sidebar
+- status: default
+  title: Error
+  detail: The catch-all error response. Carries the Error schema.
+  declared_on_operations: 188
+  example_operations:
+  - GET /arrays/browser/owned
+  - GET /arrays/browser/owned/sidebar
+  - GET /arrays/browser/public
+  - GET /arrays/browser/public/sidebar
+  - GET /arrays/browser/shared
+  - GET /arrays/browser/shared/sidebar
+undeclared_but_observed:
+- status: 401
+  title: Unauthorized
+  detail: Returned by the live API for an anonymous or invalid credential. Not declared on any operation in either
+    spec.
+  evidence: https://api.tiledb.com/v1/user

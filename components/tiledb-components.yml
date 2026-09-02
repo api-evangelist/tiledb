@@ -1,0 +1,88 @@
+generated: '2026-08-30'
+method: searched
+source: https://github.com/TileDB-Inc/TileDB-Viz, registry.npmjs.org (@tiledb-inc scope), https://documentation.cloud.tiledb.com/academy/analyze/notebooks/widgets/
+note: TileDB publishes client-side visualization components rather than embedded API surfaces (no hosted checkout,
+  no embedded dashboard iframe product). They render TileDB arrays — imagery, point clouds, geometry, biomedical slides
+  — in a browser or a Jupyter notebook. Distinct from the SDKs in packages/tiledb-packages.yml. Every viz package
+  below last published in 2023-2024.
+families:
+- family: TileDB-Viz
+  description: Web components and framework ports for visualizing TileDB arrays.
+  source_code: https://github.com/TileDB-Inc/TileDB-Viz
+  components:
+  - name: '@tiledb-inc/viz-core'
+    type: web-component-library
+    version: 1.0.2
+    published: '2023-12-15'
+    registry: npm
+    url: https://www.npmjs.com/package/@tiledb-inc/viz-core
+  - name: '@tiledb-inc/viz-components'
+    type: web-components
+    version: 1.0.2
+    published: '2023-12-15'
+    registry: npm
+    url: https://www.npmjs.com/package/@tiledb-inc/viz-components
+  - name: '@tiledb-inc/viz-react'
+    type: react-bindings
+    version: 1.0.2
+    published: '2023-12-15'
+    registry: npm
+    url: https://www.npmjs.com/package/@tiledb-inc/viz-react
+  - name: '@tiledb-inc/viz-common'
+    type: shared-library
+    version: 1.0.3-alpha.4
+    published: '2024-05-09'
+    registry: npm
+    url: https://www.npmjs.com/package/@tiledb-inc/viz-common
+- family: Notebook widgets
+  description: Jupyter/JupyterLab widgets shipped for the TileDB Cloud notebook environment.
+  docs: https://documentation.cloud.tiledb.com/academy/analyze/notebooks/widgets/
+  components:
+  - name: '@tiledb-inc/pybabylonjs'
+    type: jupyter-widget
+    version: 1.6.3
+    published: '2025-01-17'
+    registry: npm
+    url: https://www.npmjs.com/package/@tiledb-inc/pybabylonjs
+    source_code: https://github.com/TileDB-Inc/TileDB-PyBabylonJS
+  - name: '@tiledb-inc/tiledb-plot-widget'
+    type: jupyter-widget
+    version: 1.1.0
+    published: '2023-07-28'
+    registry: npm
+    url: https://www.npmjs.com/package/@tiledb-inc/tiledb-plot-widget
+  - name: '@tiledb-inc/tiledb-pydeck-tilelayer'
+    type: deck.gl-layer
+    version: 0.1.4
+    published: '2023-06-01'
+    registry: npm
+    url: https://www.npmjs.com/package/@tiledb-inc/tiledb-pydeck-tilelayer
+  - name: '@tiledb-inc/tiledb_prompt_options'
+    type: jupyterlab-extension
+    version: 1.2.0
+    published: '2025-01-03'
+    registry: npm
+    url: https://www.npmjs.com/package/@tiledb-inc/tiledb_prompt_options
+- family: Biomedical imaging viewers
+  description: Whole-slide image viewers for TileDB bio-imaging groups.
+  components:
+  - name: '@tiledb-inc/bioimage-viewer'
+    type: web-component
+    version: 0.1.7
+    published: '2023-08-11'
+    registry: npm
+    url: https://www.npmjs.com/package/@tiledb-inc/bioimage-viewer
+  - name: '@tiledb-inc/jupyter-bioimage-viewer'
+    type: jupyterlab-extension
+    version: 0.2.1
+    published: '2023-08-11'
+    registry: npm
+    url: https://www.npmjs.com/package/@tiledb-inc/jupyter-bioimage-viewer
+  - name: napari-tiledb-bioimg
+    type: napari-plugin
+    version: 0.0.1
+    published: '2023-05-12'
+    registry: pypi
+    source_code: https://github.com/TileDB-Inc/napari-tiledb-bioimg
+    note: Published once to PyPI in May 2023 and not since.
+    url: https://pypi.org/project/napari-tiledb-bioimg/
