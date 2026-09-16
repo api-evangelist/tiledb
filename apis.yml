@@ -58,60 +58,320 @@ tags_raw:
 - Analytics
 - Machine Learning
 apis:
-- name: TileDB Storage Platform API (v1)
-  description: >-
-    The primary TileDB Cloud REST API. 168 operations across arrays, groups, assets, files, notebooks,
-    UDFs, task graphs, SQL, queries, users, organizations, invitations, favorites and tokens. Published
-    by TileDB as a Swagger 2.0 contract with basePath /v1. Authenticates with an X-TILEDB-REST-API-KEY
-    header, HTTP Basic, or OAuth 2.0 authorization code. Bodies negotiate between application/json and
-    application/capnp (Cap'n Proto) for the high-throughput query paths.
-  image: https://images.ctfassets.net/nxe07oerbx6d/PTO0pDBxwkIxfaGzEiHPi/931e190a336eebdedc825cba1723b96b/TileDB-homepage-meta.jpg
+- aid: tiledb:tiledb-array-api
+  name: TileDB Array API
+  description: The array API from TileDB — 29 operation(s) for array.
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
   tags:
-  - Database
-  - Multimodal Data
-  - Data Management
-  - Analytics
-  - Life Sciences
+  - array
   properties:
   - type: OpenAPI
-    url: openapi/tiledb-cloud-v1-openapi.yaml
+    url: openapi/tiledb-array-api-openapi.yml
   - type: Documentation
     url: https://documentation.cloud.tiledb.com/academy/api-reference/
   - type: APIReference
     url: https://documentation.cloud.tiledb.com/academy/api-reference/
   - type: SourceCode
     url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
-  - type: Overlay
-    url: overlays/tiledb-cloud-v1-overlay.yaml
-- name: TileDB Storage Platform API (v2)
-  description: >-
-    The v2 routes of the TileDB Cloud REST API — 21 operations concentrated on groups, assets, array
-    metadata, files, notebooks, users and organizations. Published by TileDB as a separate Swagger 2.0
-    contract with basePath /v2, sharing the same authentication schemes as v1.
-  image: https://images.ctfassets.net/nxe07oerbx6d/PTO0pDBxwkIxfaGzEiHPi/931e190a336eebdedc825cba1723b96b/TileDB-homepage-meta.jpg
+- aid: tiledb:tiledb-array-tasks-api
+  name: TileDB Array Tasks API
+  description: The array_tasks API from TileDB — 1 operation(s) for array_tasks.
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
-  baseURL: https://api.tiledb.com/v2
+  baseURL: https://api.tiledb.com/v1
   tags:
-  - Database
-  - Multimodal Data
-  - Data Management
+  - array_tasks
   properties:
   - type: OpenAPI
-    url: openapi/tiledb-cloud-v2-openapi.yaml
+    url: openapi/tiledb-array-tasks-api-openapi.yml
   - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
     url: https://documentation.cloud.tiledb.com/academy/api-reference/
   - type: SourceCode
     url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
-  - type: Overlay
-    url: overlays/tiledb-cloud-v2-overlay.yaml
+- aid: tiledb:tiledb-assets-api
+  name: TileDB Assets API
+  description: The assets API from TileDB — 3 operation(s) for assets.
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v1
+  tags:
+  - assets
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-assets-api-openapi.yml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+- aid: tiledb:tiledb-favorites-api
+  name: TileDB Favorites API
+  description: The favorites API from TileDB — 12 operation(s) for favorites.
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v1
+  tags:
+  - favorites
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-favorites-api-openapi.yml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+- aid: tiledb:tiledb-files-api
+  name: TileDB Files API
+  description: The files API from TileDB — 4 operation(s) for files.
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v1
+  tags:
+  - files
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-files-api-openapi.yml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+- aid: tiledb:tiledb-groups-api
+  name: TileDB Groups API
+  description: The groups API from TileDB — 17 operation(s) for groups.
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v1
+  tags:
+  - groups
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-groups-api-openapi.yml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+- aid: tiledb:tiledb-invitation-api
+  name: TileDB Invitation API
+  description: The invitation API from TileDB — 10 operation(s) for invitation.
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v1
+  tags:
+  - invitation
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-invitation-api-openapi.yml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+- aid: tiledb:tiledb-notebook-api
+  name: TileDB Notebook API
+  description: The notebook API from TileDB — 5 operation(s) for notebook.
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v1
+  tags:
+  - notebook
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-notebook-api-openapi.yml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+- aid: tiledb:tiledb-notebooks-api
+  name: TileDB Notebooks API
+  description: The notebooks API from TileDB — 3 operation(s) for notebooks.
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v1
+  tags:
+  - notebooks
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-notebooks-api-openapi.yml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+- aid: tiledb:tiledb-organization-api
+  name: TileDB Organization API
+  description: The organization API from TileDB — 13 operation(s) for organization.
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v1
+  tags:
+  - organization
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-organization-api-openapi.yml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+- aid: tiledb:tiledb-query-api
+  name: TileDB Query API
+  description: The query API from TileDB — 5 operation(s) for query.
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v1
+  tags:
+  - query
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-query-api-openapi.yml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+- aid: tiledb:tiledb-registered-task-graphs-api
+  name: TileDB Registered Task Graphs API
+  description: The registered_task_graphs API from TileDB — 2 operation(s) for registered_task_graphs.
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v1
+  tags:
+  - registered_task_graphs
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-registered-task-graphs-api-openapi.yml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+- aid: tiledb:tiledb-sql-api
+  name: TileDB Sql API
+  description: The sql API from TileDB — 1 operation(s) for sql.
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v1
+  tags:
+  - sql
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-sql-api-openapi.yml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+- aid: tiledb:tiledb-stats-api
+  name: TileDB Stats API
+  description: The stats API from TileDB — 1 operation(s) for stats.
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v1
+  tags:
+  - stats
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-stats-api-openapi.yml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+- aid: tiledb:tiledb-task-graph-logs-api
+  name: TileDB Task Graph Logs API
+  description: The task_graph_logs API from TileDB — 8 operation(s) for task_graph_logs.
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v1
+  tags:
+  - task_graph_logs
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-task-graph-logs-api-openapi.yml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+- aid: tiledb:tiledb-task-graphs-api
+  name: TileDB Task Graphs API
+  description: The task_graphs API from TileDB — 3 operation(s) for task_graphs.
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v1
+  tags:
+  - task_graphs
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-task-graphs-api-openapi.yml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+- aid: tiledb:tiledb-tasks-api
+  name: TileDB Tasks API
+  description: The tasks API from TileDB — 4 operation(s) for tasks.
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v1
+  tags:
+  - tasks
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-tasks-api-openapi.yml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+- aid: tiledb:tiledb-udf-api
+  name: TileDB Udf API
+  description: The udf API from TileDB — 7 operation(s) for udf.
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v1
+  tags:
+  - udf
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-udf-api-openapi.yml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
+- aid: tiledb:tiledb-user-api
+  name: TileDB User API
+  description: The user API from TileDB — 16 operation(s) for user.
+  humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
+  baseURL: https://api.tiledb.com/v1
+  tags:
+  - user
+  properties:
+  - type: OpenAPI
+    url: openapi/tiledb-user-api-openapi.yml
+  - type: Documentation
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: APIReference
+    url: https://documentation.cloud.tiledb.com/academy/api-reference/
+  - type: SourceCode
+    url: https://github.com/TileDB-Inc/TileDB-Cloud-API-Spec
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: Overlay
+  url: overlays/tiledb-cloud-v1-overlay.yaml
+- type: Overlay
+  url: overlays/tiledb-cloud-v2-overlay.yaml
 - type: DomainSecurity
   url: security/tiledb-domain-security.yml
 - type: OAuthScopes
