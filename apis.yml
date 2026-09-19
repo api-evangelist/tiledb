@@ -79,7 +79,8 @@ apis:
   description: The array_tasks API from TileDB — 1 operation(s) for array_tasks.
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
-  tags:
+  tags: []
+  tags_raw:
   - array_tasks
   properties:
   - type: OpenAPI
@@ -96,6 +97,8 @@ apis:
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
   tags:
+  - Assets
+  tags_raw:
   - assets
   properties:
   - type: OpenAPI
@@ -112,6 +115,8 @@ apis:
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
   tags:
+  - Favorites
+  tags_raw:
   - favorites
   properties:
   - type: OpenAPI
@@ -128,6 +133,8 @@ apis:
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
   tags:
+  - File
+  tags_raw:
   - files
   properties:
   - type: OpenAPI
@@ -144,6 +151,8 @@ apis:
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
   tags:
+  - Group
+  tags_raw:
   - groups
   properties:
   - type: OpenAPI
@@ -160,6 +169,8 @@ apis:
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
   tags:
+  - Invitation
+  tags_raw:
   - invitation
   properties:
   - type: OpenAPI
@@ -176,6 +187,8 @@ apis:
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
   tags:
+  - Notebooks
+  tags_raw:
   - notebook
   properties:
   - type: OpenAPI
@@ -192,6 +205,8 @@ apis:
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
   tags:
+  - Notebooks
+  tags_raw:
   - notebooks
   properties:
   - type: OpenAPI
@@ -208,6 +223,8 @@ apis:
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
   tags:
+  - Organization
+  tags_raw:
   - organization
   properties:
   - type: OpenAPI
@@ -224,6 +241,8 @@ apis:
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
   tags:
+  - Query
+  tags_raw:
   - query
   properties:
   - type: OpenAPI
@@ -239,7 +258,8 @@ apis:
   description: The registered_task_graphs API from TileDB — 2 operation(s) for registered_task_graphs.
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
-  tags:
+  tags: []
+  tags_raw:
   - registered_task_graphs
   properties:
   - type: OpenAPI
@@ -256,6 +276,8 @@ apis:
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
   tags:
+  - SQL
+  tags_raw:
   - sql
   properties:
   - type: OpenAPI
@@ -272,6 +294,8 @@ apis:
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
   tags:
+  - Stats
+  tags_raw:
   - stats
   properties:
   - type: OpenAPI
@@ -287,7 +311,8 @@ apis:
   description: The task_graph_logs API from TileDB — 8 operation(s) for task_graph_logs.
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
-  tags:
+  tags: []
+  tags_raw:
   - task_graph_logs
   properties:
   - type: OpenAPI
@@ -303,7 +328,8 @@ apis:
   description: The task_graphs API from TileDB — 3 operation(s) for task_graphs.
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
-  tags:
+  tags: []
+  tags_raw:
   - task_graphs
   properties:
   - type: OpenAPI
@@ -320,6 +346,8 @@ apis:
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
   tags:
+  - Task
+  tags_raw:
   - tasks
   properties:
   - type: OpenAPI
@@ -336,6 +364,8 @@ apis:
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
   tags:
+  - UDF
+  tags_raw:
   - udf
   properties:
   - type: OpenAPI
@@ -352,6 +382,8 @@ apis:
   humanURL: https://documentation.cloud.tiledb.com/academy/api-reference/
   baseURL: https://api.tiledb.com/v1
   tags:
+  - User
+  tags_raw:
   - user
   properties:
   - type: OpenAPI
