@@ -1,0 +1,1011 @@
+openapi: 3.2.0
+info:
+  description: TileDB Storage Platform REST API
+  title: TileDB Storage Platform Udf API
+  version: 2.17.51
+servers:
+- url: /v1
+security:
+- BasicAuth: []
+- ApiKeyAuth: []
+tags:
+- name: UDF
+paths:
+  /arrays/{namespace}/{array}/udf/submit:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace array is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: array
+      in: path
+      description: name/uri of array that is url-encoded
+      required: true
+      schema:
+        type: string
+    - name: X-Payer
+      in: header
+      description: Name of organization or user who should be charged for this request
+      schema:
+        type: string
+    - name: Accept-Encoding
+      in: header
+      description: Encoding to use
+      schema:
+        type: string
+    - name: v2
+      in: query
+      description: flag to indicate if v2 array UDFs should be used, currently in beta testing. Setting any value will enable v2 array UDFs.
+      required: false
+      schema:
+        type: string
+    post:
+      description: send a UDF to run against a specified array/URI registered to a group/project
+      tags:
+      - UDF
+      operationId: submitUDF
+      responses:
+        200:
+          description: UDF completed and the UDF-type specific result is returned
+          headers:
+            X-TILEDB-CLOUD-TASK-ID:
+              description: Task ID for just completed request
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          headers:
+            X-TILEDB-CLOUD-TASK-ID:
+              description: Task ID for just request if task was started
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MultiArrayUDF'
+        description: UDF to run
+        required: true
+      summary: Submit UDF
+      x-summary-source: derived
+  /udfs/generic/{namespace}:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace array is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: Accept-Encoding
+      in: header
+      description: Encoding to use
+      schema:
+        type: string
+    post:
+      description: submit a generic UDF in the given namespace
+      tags:
+      - UDF
+      operationId: submitGenericUDF
+      responses:
+        200:
+          description: UDF completed and the UDF-type specific result is returned
+          headers:
+            X-TILEDB-CLOUD-TASK-ID:
+              description: Task ID for just completed request
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          headers:
+            X-TILEDB-CLOUD-TASK-ID:
+              description: Task ID for just request if task was started
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericUDF'
+        description: UDF to run
+        required: true
+      summary: Submit generic UDF
+      x-summary-source: derived
+  /udfs/arrays/{namespace}:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace array is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: Accept-Encoding
+      in: header
+      description: Encoding to use
+      schema:
+        type: string
+    post:
+      description: submit a multi-array UDF in the given namespace
+      tags:
+      - UDF
+      operationId: submitMultiArrayUDF
+      responses:
+        200:
+          description: UDF completed and the UDF-type specific result is returned
+          headers:
+            X-TILEDB-CLOUD-TASK-ID:
+              description: Task ID for just completed request
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          headers:
+            X-TILEDB-CLOUD-TASK-ID:
+              description: Task ID for just request if task was started
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MultiArrayUDF'
+        description: UDF to run
+        required: true
+      summary: Submit multi array UDF
+      x-summary-source: derived
+  /udf/{namespace}/{name}:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace array is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: name
+      in: path
+      description: name to register UDF under
+      required: true
+      schema:
+        type: string
+    get:
+      description: get a specific UDF in the given namespace
+      tags:
+      - UDF
+      operationId: getUDFInfo
+      responses:
+        200:
+          description: UDFInfo was retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UDFInfo'
+        404:
+          description: UDF not found
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get UDF info
+      x-summary-source: derived
+    post:
+      description: register a UDF in the given namespace
+      tags:
+      - UDF
+      operationId: registerUDFInfo
+      responses:
+        204:
+          description: UDF registered successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UDFInfoUpdate'
+        description: UDF to register
+        required: true
+      summary: Register UDF info
+      x-summary-source: derived
+    patch:
+      description: update an existing registered UDF in the given namespace
+      tags:
+      - UDF
+      operationId: updateUDFInfo
+      responses:
+        204:
+          description: UDF updated successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UDFInfoUpdate'
+        description: UDF to update
+        required: true
+      summary: Update UDF info
+      x-summary-source: derived
+    delete:
+      description: delete a registered UDF -- this will remove all sharing and can not be undone
+      tags:
+      - UDF
+      operationId: deleteUDFInfo
+      responses:
+        204:
+          description: UDF deleted successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Delete UDF info
+      x-summary-source: derived
+  /udf/{namespace}/{name}/share:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace array is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: name
+      in: path
+      description: name of UDFInfo
+      required: true
+      schema:
+        type: string
+    get:
+      description: Get all sharing details of the UDF
+      tags:
+      - UDF
+      operationId: getUDFInfoSharingPolicies
+      responses:
+        200:
+          description: List of all specific sharing policies
+          content:
+            application/json:
+              schema:
+                type: array
+                x-omitempty: true
+                items:
+                  $ref: '#/components/schemas/UDFSharing'
+        404:
+          description: UDF does not exist or user does not have permissions to view array-sharing policies
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get UDF info sharing policies
+      x-summary-source: derived
+    patch:
+      description: Share a UDF with a user
+      tags:
+      - UDF
+      operationId: shareUDFInfo
+      responses:
+        204:
+          description: UDF shared successfully
+        404:
+          description: UDF does not exist or user does not have permissions to share UDF
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UDFSharing'
+        description: Namespace and list of permissions to share with. An empty list of permissions will remove the namespace; if permissions already exist they will be deleted then new ones added. In the event of a failure, the new policies will be rolled back to prevent partial policies, and it's likely the UDF will not be shared with the namespace at all.
+        required: true
+      summary: Share UDF info
+      x-summary-source: derived
+  /udf/{namespace}/{name}/copy:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace array is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: name
+      in: path
+      description: name of UDFInfo
+      required: true
+      schema:
+        type: string
+    post:
+      description: Copy a tiledb udf at the specified location
+      tags:
+      - UDF
+      operationId: HandleCopyUDF
+      parameters:
+      - name: X-TILEDB-CLOUD-ACCESS-CREDENTIALS-NAME
+        in: header
+        description: Optional registered access credentials to use for creation
+        required: false
+        schema:
+          type: string
+      - name: end_timestamp
+        in: query
+        description: Milliseconds since Unix epoch
+        required: false
+        schema:
+          type: integer
+          format: uint64
+      responses:
+        201:
+          description: UDF copied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UDFCopied'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UDFCopy'
+        description: Input/Output information to copy a UDF
+        required: true
+      summary: Handle copy UDF
+      x-summary-source: derived
+  /udf/{namespace}/{array}/end_timestamps:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace array is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: array
+      in: path
+      description: name/uri of array that is url-encoded
+      required: true
+      schema:
+        type: string
+    - name: page
+      in: query
+      description: pagination offset
+      required: false
+      schema:
+        type: integer
+    - name: per_page
+      in: query
+      description: pagination limit
+      required: false
+      schema:
+        type: integer
+    get:
+      description: retrieve a list of timestamps from the array fragment info listing in milliseconds, paginated
+      tags:
+      - UDF
+      responses:
+        200:
+          description: list of timestamps in milliseconds, paginated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayEndTimestampData'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get udf by namespace by array end timestamps
+      x-summary-source: derived
+      operationId: getUdfByNamespaceByArrayEndTimestamps
+      x-operation-id-source: derived
+components:
+  schemas:
+    QueryRanges:
+      description: Subarray bounds to query
+      type: object
+      properties:
+        layout:
+          $ref: '#/components/schemas/Layout'
+        ranges:
+          description: List of ranges,
+          type: array
+          x-omitempty: true
+          items:
+            type: array
+            x-omitempty: true
+            items:
+              type: number
+    UDFInfo:
+      description: User-defined function that can persist in db, used and shared multiple times
+      type: object
+      properties:
+        id:
+          description: Unique ID of UDF
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        name:
+          type: string
+          description: name of UDF
+        language:
+          $ref: '#/components/schemas/UDFLanguage'
+          description: UDF language
+        type:
+          $ref: '#/components/schemas/UDFType'
+          description: UDF type
+        readme:
+          type: string
+          description: Markdown readme of UDFs
+        license_id:
+          type: string
+          x-omitempty: true
+          description: License identifier from SPDX License List or Custom
+        license_text:
+          type: string
+          x-omitempty: true
+          description: License text
+        tags:
+          description: optional tags for UDF
+          x-omitempty: false
+          type: array
+          items:
+            type: string
+            description: tag must be lowercase characters or hypen [a-z-]
+    UDFSubarray:
+      description: Subarray bounds to query for a UDF to operate on
+      type: object
+      properties:
+        layout:
+          $ref: '#/components/schemas/Layout'
+        ranges:
+          description: List of ranges,
+          type: array
+          items:
+            $ref: '#/components/schemas/UDFSubarrayRange'
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
+    ResultFormat:
+      description: Data format of a result
+      type: string
+      enum:
+      - python_pickle
+      - r_serialization
+      - json
+      - arrow
+      - bytes
+      - tiledb_json
+      - native
+    UDFLanguage:
+      description: UDF Type
+      type: string
+      enum:
+      - python
+      - r
+    UDFCopied:
+      description: Copied udf uri and information
+      type: object
+      required:
+      - id
+      properties:
+        output_uri:
+          type: string
+          description: output location of the TileDB udf
+        namespace:
+          type: string
+          description: namespace of the copied udf
+        name:
+          type: string
+          description: name of the copied udf
+        id:
+          description: unique ID of the copied udf
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+          x-omitempty: false
+    UDFSubarrayRange:
+      description: A dimension range to query
+      type: object
+      properties:
+        dimension_id:
+          type: integer
+          description: The dimension index
+          x-omitempty: false
+        range_start:
+          $ref: '#/components/schemas/DimensionCoordinate'
+          description: The range start index
+          x-omitempty: false
+        range_end:
+          $ref: '#/components/schemas/DimensionCoordinate'
+          description: The range end index
+          x-omitempty: false
+    TGUDFArgument:
+      description: 'A single argument to a UDF. This may represent a positional argument or a named argument, depending upon whether `name` is set.
+
+        '
+      type: object
+      properties:
+        name:
+          description: The name of the argument, if present.
+          type:
+          - string
+          - 'null'
+        value:
+          $ref: '#/components/schemas/TGArgValue'
+    Layout:
+      description: Layout of array
+      type: string
+      enum:
+      - row-major
+      - col-major
+      - global-order
+      - unordered
+    UDFType:
+      description: UDF Type
+      type: string
+      enum:
+      - multi_array
+      - single_array
+      - generic
+    UDFArrayDetails:
+      description: Contains array details for multi-array query including uri, ranges buffers
+      type: object
+      properties:
+        parameter_id:
+          description: 'An optional client-generated identifier to distinguish between multiple range/buffer requests from the same array in the same call.
+
+            This may be set for MultiArrayUDFs that use the `argument_json` style of passing arrays.
+
+            '
+          type:
+          - string
+          - 'null'
+          x-omitempty: true
+        uri:
+          description: array to set ranges and buffers on, must be in tiledb:// format
+          type: string
+        ranges:
+          description: ranges to run against, generic format
+          $ref: '#/components/schemas/QueryRanges'
+        buffers:
+          description: List of buffers to fetch (attributes + dimensions)
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+    UDFSharing:
+      description: details for sharing a given UDF
+      type: object
+      properties:
+        actions:
+          description: List of permitted actions
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/UDFActions'
+          example:
+          - fetch
+          - share
+        namespace:
+          description: namespace being granted array access can be a user or organization
+          type: string
+          example: MyOrganization
+        namespace_type:
+          description: details on if the namespace is a organization or user
+          type: string
+          example: organization
+    TGArgValue:
+      description: "An argument provided to a node. This is one of a direct value (i.e., a raw JSON value) or a `TGSentinel`.\nFor example this Python value:\n\n    {\"a\": [1, \"pipe\", range(30), None], \"b\": b\"bytes\"}\n\nis encoded thusly (with included comments):\n\n    {  // A dictionary with string keys is JSON-encodable.\n      \"a\": [  // As is a list.\n        1,\n        \"pipe\",\n        {  // A `range` is replaced with its pickle.\n          \"__tdbudf__\": \"immediate\",\n          \"format\": \"python_pickle\",\n          \"base64_data\": \"gASVIAAAAAAAAACMCGJ1aWx0aW5zlIwFcmFuZ2WUk5RLAEseSwGHlFKULg==\"\n        },\n        null\n      ],\n      \"b\": {  // Raw binary data is encoded into base64.\n        \"__tdbudf__\": \"immediate\"\n        \"format\": \"bytes\",\n        \"base64_data\": \"Ynl0ZXM=\"\n      }\n    }\n"
+    UDFActions:
+      description: actions a user can take on a UDF
+      type: string
+      enum:
+      - fetch_udf
+      - share_udf
+    UDFInfoUpdate:
+      description: User-defined function that can persist in db, used and shared multiple times
+      type: object
+      properties:
+        name:
+          type: string
+          description: name of UDF
+        language:
+          $ref: '#/components/schemas/UDFLanguage'
+          description: UDF language
+        version:
+          type: string
+          description: Type-specific version
+        image_name:
+          type: string
+          description: Docker image name to use for UDF
+          x-omitempty: true
+        type:
+          $ref: '#/components/schemas/UDFType'
+          description: UDF type
+        exec:
+          type: string
+          description: Type-specific executable text
+        exec_raw:
+          type: string
+          x-omitempty: true
+          description: optional raw text to store of serialized function, used for showing in UI
+        readme:
+          type: string
+          description: Markdown readme of UDFs
+        license_id:
+          type: string
+          x-omitempty: true
+          description: License identifier from SPDX License List or Custom
+        license_text:
+          type: string
+          x-omitempty: true
+          description: License text
+        tags:
+          description: optional tags for UDF
+          x-omitempty: false
+          type: array
+          items:
+            type: string
+            description: tag must be lowercase characters or hypen [a-z-]
+    MultiArrayUDF:
+      description: User-defined function
+      type: object
+      properties:
+        udf_info_name:
+          type: string
+          description: name of UDFInfo to run, format is {namespace}/{udf_name}. Can not be used with exec
+          example: TileDB-Inc/quickstart_median
+        language:
+          $ref: '#/components/schemas/UDFLanguage'
+          description: UDF language
+        version:
+          type: string
+          description: Type-specific version
+        image_name:
+          type: string
+          description: Docker image name to use for UDF
+          x-omitempty: true
+        access_credentials_name:
+          description: The name of the access credentials to use. if unset, no credentials will be configured in the environment.
+          type: string
+        resource_class:
+          type: string
+          description: 'The resource class to use for the UDF execution. Resource classes define resource limits for memory and CPUs. If this is empty, then the UDF will execute in the standard resource class of the TileDB Cloud provider.
+
+            '
+          x-omitempty: true
+          example: standard
+        exec:
+          type: string
+          description: Type-specific executable text
+        exec_raw:
+          type: string
+          x-omitempty: true
+          description: optional raw text to store of serialized function, used for showing in UI
+        result_format:
+          $ref: '#/components/schemas/ResultFormat'
+        task_name:
+          description: name of task, optional
+          type: string
+        argument:
+          type: string
+          description: 'Deprecated: Prefer to use `argument_json` instead.
+
+            Argument(s) to pass to UDF function, tuple or list of args/kwargs which can be in native or JSON format
+
+            '
+          x-omitempty: true
+        arguments_json:
+          type:
+          - array
+          - 'null'
+          description: 'A series of key-value pairs to be passed as arguments into the UDF. See `TGUDFNodeData.arguments` for more information.
+
+            If this format is used to pass arguments, arrays will be passed into the UDF as specified by the Node placeholders passed in here, rather than the classic method of putting all array arguments in the first parameter.
+
+            Either this or `argument` should be set.
+
+            '
+          items:
+            $ref: '#/components/schemas/TGUDFArgument'
+        stored_param_uuids:
+          type: array
+          items:
+            type: string
+          description: The UUIDs of stored input parameters (passed in a language-specific format within "argument") to be retrieved from the server-side cache. Serialized in standard hex format with no {}.
+        store_results:
+          description: store results for later retrieval
+          type: boolean
+        dont_download_results:
+          description: Set to true to avoid downloading the results of this UDF. Useful for intermediate nodes in a task graph where you will not be using the results of your function. Defaults to false ("yes download results").
+          type: boolean
+        ranges:
+          description: ranges to run against, generic format. Deprecated please set arrays with UDFArrayDetails
+          $ref: '#/components/schemas/QueryRanges'
+        subarray:
+          $ref: '#/components/schemas/UDFSubarray'
+          description: Subarray ranges to query. This is deprecated. For single-array UDF, please use `ranges` in `MultiArrayUDF`; for multi-array UDF, please use `ranges` in `UDFArrayDetails`.
+        buffers:
+          description: List of buffers to fetch (attributes + dimensions). Deprecated; please set arrays with `UDFArrayDetails`.
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        arrays:
+          description: Array ranges/buffer into to run UDF on
+          type: array
+          x-omitempty: false
+          items:
+            $ref: '#/components/schemas/UDFArrayDetails'
+        timeout:
+          description: 'UDF-type timeout in seconds (default: 900)'
+          type: integer
+        task_graph_uuid:
+          type: string
+          x-omitempty: true
+          description: 'If set, the ID of the log for the task graph that this was part of.
+
+            '
+        client_node_uuid:
+          type: string
+          x-omitempty: true
+          description: 'If set, the client-defined ID of the node within this task''s graph.
+
+            '
+    DimensionCoordinate:
+      description: A single, typed coordinate for a dimension
+      type: object
+      properties:
+        int8:
+          type: integer
+          format: int8
+          x-omitempty: false
+        uint8:
+          type: integer
+          format: uint8
+          x-omitempty: false
+        int16:
+          type: integer
+          format: int16
+          x-omitempty: false
+        uint16:
+          type: integer
+          format: uint16
+          x-omitempty: false
+        int32:
+          type: integer
+          format: int32
+          x-omitempty: false
+        uint32:
+          type: integer
+          format: uint32
+          x-omitempty: false
+        int64:
+          type: integer
+          format: int64
+          x-omitempty: false
+        uint64:
+          type: integer
+          format: uint64
+          x-omitempty: false
+        float32:
+          type: number
+          format: float
+          x-omitempty: false
+        float64:
+          type: number
+          format: double
+          x-omitempty: false
+    GenericUDF:
+      description: User-defined function
+      type: object
+      properties:
+        udf_info_name:
+          type: string
+          description: name of UDFInfo to run, format is {namespace}/{udf_name}. Can not be used with exec
+          example: TileDB-Inc/csv_ingestor
+        language:
+          $ref: '#/components/schemas/UDFLanguage'
+          description: UDF language
+        version:
+          type: string
+          description: Type-specific version
+        image_name:
+          type: string
+          description: Docker image name to use for UDF
+          x-omitempty: true
+        access_credentials_name:
+          description: The name of the access credentials to use. if unset, no credentials will be configured in the environment.
+          type: string
+        resource_class:
+          type: string
+          description: 'The resource class to use for the UDF execution. Resource classes define resource limits for memory and CPUs. If this is empty, then the UDF will execute in the standard resource class of the TileDB Cloud provider.
+
+            '
+          x-omitempty: true
+          example: standard
+        exec:
+          type: string
+          description: Type-specific executable text
+        exec_raw:
+          type: string
+          x-omitempty: true
+          description: optional raw text to store of serialized function, used for showing in UI
+        argument:
+          type: string
+          description: Argument(s) to pass to UDF function, tuple or list of args/kwargs which can be in native or JSON format
+          x-omitempty: true
+        stored_param_uuids:
+          type: array
+          items:
+            type: string
+            example: 229f38c4-ba89-43d6-ab88-bae3bcca7969
+          description: The UUIDs of stored input parameters (passed in a language-specific format within "argument") to be retrieved from the server-side cache. Serialized in standard hex format with no {}.
+        result_format:
+          $ref: '#/components/schemas/ResultFormat'
+          description: type of results (native, i.e cloud pickle or json or arrow)
+          x-omitempty: true
+        task_name:
+          description: name of task, optional
+          type: string
+        store_results:
+          description: store results for later retrieval
+          type: boolean
+        timeout:
+          description: 'UDF-type timeout in seconds (default: 900)'
+          type: integer
+        dont_download_results:
+          description: Set to true to avoid downloading the results of this UDF. Useful for intermediate nodes in a task graph where you will not be using the results of your function. Defaults to false ("yes download results").
+          type: boolean
+        task_graph_uuid:
+          type: string
+          x-omitempty: true
+          description: 'If set, the ID of the log for the task graph that this was part of.
+
+            '
+        client_node_uuid:
+          type: string
+          x-omitempty: true
+          description: 'If set, the client-defined ID of the node within this task''s graph.
+
+            '
+    ArrayEndTimestampData:
+      description: Object including array end_timestamps (list of Unix epoch timestamps in milliseconds) and pagination metadata
+      type: object
+      properties:
+        end_timestamps:
+          description: List of timestamps expressed in milliseconds since Unix epoch
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint64
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+    PaginationMetadata:
+      properties:
+        page:
+          description: pagination offset. Use it to skip the first ((page - 1) * per_page) items
+          type: number
+          format: uint64
+          example: 1
+        per_page:
+          description: pagination limit (page size)
+          type: number
+          format: uint64
+          example: 10
+        total_pages:
+          description: number of total pages with current limit
+          type: number
+          format: uint64
+          example: 14
+        total_items:
+          description: number of total available items
+          type: number
+          format: uint64
+          example: 138
+    UDFCopy:
+      description: information required to copy a udf
+      type: object
+      properties:
+        output_uri:
+          type: string
+          description: output location of the TileDB File
+        namespace:
+          type: string
+          description: namespace to register the copy. If empty use the namespace of the request user
+        name:
+          type: string
+          description: name to set for the copy. If empty use the name as the original udf, if it not already used in the namespace
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-TILEDB-REST-API-KEY
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          scopes:
+            read: Grants read access
+            write: Grants write access
+            admin: Grants read and write access to administrative information
+          authorizationUrl: https://oauth2.tiledb.com/oauth2/authorize
+          tokenUrl: https://oauth2.tiledb.com/oauth2/token

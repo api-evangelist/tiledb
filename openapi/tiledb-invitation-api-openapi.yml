@@ -1,0 +1,773 @@
+openapi: 3.2.0
+info:
+  description: TileDB Storage Platform REST API
+  title: TileDB Storage Platform Invitation API
+  version: 2.17.51
+servers:
+- url: /v1
+security:
+- BasicAuth: []
+- ApiKeyAuth: []
+tags:
+- name: Invitation
+paths:
+  /invitations:
+    parameters:
+    - name: organization
+      in: query
+      description: name or ID of organization to filter
+      required: false
+      schema:
+        type: string
+    - name: array
+      in: query
+      description: name/uri of array that is url-encoded to filter
+      required: false
+      schema:
+        type: string
+    - name: group
+      in: query
+      description: name or ID of group to filter
+      required: false
+      schema:
+        type: string
+    - name: start
+      in: query
+      description: start time for tasks to filter by
+      required: false
+      schema:
+        type: integer
+        format: uint64
+    - name: end
+      in: query
+      description: end time for tasks to filter by
+      required: false
+      schema:
+        type: integer
+        format: uint64
+    - name: page
+      in: query
+      description: pagination offset
+      required: false
+      schema:
+        type: integer
+    - name: per_page
+      in: query
+      description: pagination limit
+      required: false
+      schema:
+        type: integer
+    - name: type
+      in: query
+      description: invitation type, "ARRAY_SHARE", "JOIN_ORGANIZATION"
+      required: false
+      schema:
+        type: string
+    - name: status
+      in: query
+      description: Filter to only return "PENDING", "ACCEPTED"
+      required: false
+      schema:
+        type: string
+    - name: orderby
+      in: query
+      description: sort by which field valid values include timestamp, array_name, organization_name
+      required: false
+      schema:
+        type: string
+    get:
+      tags:
+      - Invitation
+      description: Fetch a list of invitations
+      operationId: fetchInvitations
+      responses:
+        200:
+          description: List of invitations and pagination metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationData'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Fetch invitations
+      x-summary-source: derived
+  /invitations/{invitation}:
+    parameters:
+    - name: invitation
+      in: path
+      description: the ID of invitation about to be accepted
+      required: true
+      schema:
+        type: string
+    post:
+      tags:
+      - Invitation
+      description: Accepts invitation
+      operationId: acceptInvitation
+      responses:
+        204:
+          description: Invitation was accepted successfully
+        404:
+          description: Could not find invitation identifier
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Accept invitation
+      x-summary-source: derived
+  /invitations/{invitation}/{namespace}/{array}/share:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace array is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: invitation
+      in: path
+      description: the ID of invitation about to be cancelled
+      required: true
+      schema:
+        type: string
+    - name: array
+      in: path
+      description: name/uri of array that is url-encoded
+      required: true
+      schema:
+        type: string
+    delete:
+      description: Cancels array sharing invitation
+      tags:
+      - Invitation
+      operationId: cancelShareArrayByInvite
+      responses:
+        204:
+          description: Invitation cancelled successfully
+        404:
+          description: No invitation was found to cancel
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Cancel share array by invite
+      x-summary-source: derived
+  /invitations/group/{invitation}/{namespace}/{group_name}/share:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace group is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: invitation
+      in: path
+      description: the ID of invitation about to be cancelled
+      required: true
+      schema:
+        type: string
+    - name: group_name
+      in: path
+      description: name/uuid of group that is url-encoded
+      required: true
+      schema:
+        type: string
+    delete:
+      description: Cancels group sharing invitation
+      tags:
+      - Invitation
+      operationId: cancelShareGroupByInvite
+      responses:
+        204:
+          description: Invitation cancelled successfully
+        404:
+          description: No invitation was found to cancel
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Cancel share group by invite
+      x-summary-source: derived
+  /invitations/{invitation}/{organization}/join:
+    parameters:
+    - name: invitation
+      in: path
+      description: the ID of invitation about to be cancelled
+      required: true
+      schema:
+        type: string
+    - name: organization
+      in: path
+      description: name or UUID of organization
+      required: true
+      schema:
+        type: string
+    delete:
+      description: Cancels join organization invitation
+      tags:
+      - Invitation
+      operationId: cancelJoinOrganization
+      responses:
+        204:
+          description: Invitation cancelled successfully
+        404:
+          description: No invitation was found to cancel
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Cancel join organization
+      x-summary-source: derived
+  /invitations/{namespace}/{array}/share:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace array is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: array
+      in: path
+      description: name/uri of array that is url-encoded
+      required: true
+      schema:
+        type: string
+    post:
+      tags:
+      - Invitation
+      description: Sends email to multiple recipients with sharing information regarding an array
+      operationId: shareArrayByInvite
+      responses:
+        204:
+          description: Email sent successfully to user for email confirmation link
+        207:
+          description: Only a portion of the invitations succeeded, some failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationFailedRecipients'
+        500:
+          description: Could not reach any recipients
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationFailedRecipients'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationArrayShareEmail'
+        description: list of email recipients
+        required: true
+      summary: Share array by invite
+      x-summary-source: derived
+  /invitations/group/{namespace}/{group}/share:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace group is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: group
+      in: path
+      description: name/uri of group that is url-encoded
+      required: true
+      schema:
+        type: string
+    post:
+      tags:
+      - Invitation
+      description: Sends email to multiple recipients with sharing information regarding a group
+      operationId: shareGroupByInvite
+      responses:
+        204:
+          description: Email sent successfully to user with an email confirmation link
+        207:
+          description: Only a portion of the invitations succeeded, some failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationFailedRecipients'
+        500:
+          description: Could not reach any recipients
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationFailedRecipients'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationGroupShareEmail'
+        description: list of email/namespace recipients
+        required: true
+      summary: Share group by invite
+      x-summary-source: derived
+  /invitations/{organization}/join:
+    parameters:
+    - name: organization
+      in: path
+      description: name or UUID of organization
+      required: true
+      schema:
+        type: string
+    post:
+      tags:
+      - Invitation
+      description: Sends email to multiple recipients with joining information regarding an organization
+      operationId: joinOrganization
+      responses:
+        204:
+          description: Email sent successfully to user for email confirmation link
+        207:
+          description: Only a portion of the invitations succeeded, some failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationFailedRecipients'
+        500:
+          description: Could not reach any recipients
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationFailedRecipients'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationOrganizationJoinEmail'
+        description: list of email recipients
+        required: true
+      summary: Join organization
+      x-summary-source: derived
+  /invitations/share_payment/{namespace}:
+    parameters:
+    - name: namespace
+      in: path
+      description: name or UUID of namespace sharing their payment info
+      required: true
+      schema:
+        type: string
+    post:
+      tags:
+      - Invitation
+      description: 'Sends email to multiple recipients allowing them to use the payment
+
+        instrument provided by the source namespace.'
+      operationId: sharePayment
+      responses:
+        204:
+          description: Email sent successfully to user for email confirmation link
+        207:
+          description: Only a portion of the invitations succeeded, some failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationFailedRecipients'
+        500:
+          description: Could not reach any recipients
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationFailedRecipients'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                namespaces:
+                  type: array
+                  items:
+                    type: string
+        description: 'Recipients of the invitation. These may only be namespaces,
+
+          not email addresses.
+
+          '
+      summary: Share payment
+      x-summary-source: derived
+  /invitations/share_payment/{namespace}/{target}:
+    parameters:
+    - name: namespace
+      in: path
+      description: name or UUID of namespace sharing their payment info
+      required: true
+      schema:
+        type: string
+    - name: target
+      in: path
+      description: name or UUID of recipient namespace
+      required: true
+      schema:
+        type: string
+    delete:
+      tags:
+      - Invitation
+      description: Revokes invitation from the source namespace to the target.
+      operationId: cancelSharePayment
+      responses:
+        204:
+          description: Invitation cancelled successfully
+        404:
+          description: No invitation was found to cancel
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Cancel share payment
+      x-summary-source: derived
+components:
+  schemas:
+    ArrayActions:
+      description: actions a user can take on an array
+      type: string
+      enum:
+      - read
+      - write
+      - edit
+      - read_array_logs
+      - read_array_info
+      - read_array_schema
+    InvitationStatus:
+      description: List of values that InvitationStatus can take
+      type: string
+      enum:
+      - PENDING
+      - ACCEPTED
+    InvitationType:
+      description: List of values that InvitationType can take
+      type: string
+      enum:
+      - ARRAY_SHARE
+      - GROUP_SHARE
+      - JOIN_ORGANIZATION
+      - PAYMENT_SHARE
+    InvitationArrayShareEmail:
+      description: Encapsulates information regarding inviting people using email to share array, same permissions for all invitees
+      type: object
+      required:
+      - actions
+      - invitee_email
+      properties:
+        actions:
+          description: List of permitted actions
+          type: array
+          items:
+            $ref: '#/components/schemas/ArrayActions'
+          example:
+          - read
+          - write
+        invitee_email:
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+    InvitationData:
+      description: Object including invitations and metadata
+      type: object
+      properties:
+        invitations:
+          description: List of invitations
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/Invitation'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+    NamespaceActions:
+      description: actions a user can take on an organization
+      type: string
+      enum:
+      - read
+      - write
+      - create
+      - delete
+      - edit
+      - read_array_logs
+      - read_job_logs
+      - read_object_logs
+      - run_job
+      - delete_organization
+      - edit_organization
+      - edit_billing
+    InvitationGroupShareEmail:
+      description: Encapsulates information regarding inviting people using email to share group, same permissions for all invitees
+      type: object
+      required:
+      - array_actions
+      - group_actions
+      - invitee_email_or_name
+      properties:
+        array_actions:
+          description: List of permitted array actions
+          type: array
+          items:
+            $ref: '#/components/schemas/ArrayActions'
+          example:
+          - read
+          - write
+        group_actions:
+          description: List of permitted group actions
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupActions'
+          example:
+          - read
+          - write
+        invitee_email_or_name:
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+    PaginationMetadata:
+      properties:
+        page:
+          description: pagination offset. Use it to skip the first ((page - 1) * per_page) items
+          type: number
+          format: uint64
+          example: 1
+        per_page:
+          description: pagination limit (page size)
+          type: number
+          format: uint64
+          example: 10
+        total_pages:
+          description: number of total pages with current limit
+          type: number
+          format: uint64
+          example: 14
+        total_items:
+          description: number of total available items
+          type: number
+          format: uint64
+          example: 138
+    InvitationOrganizationJoinEmail:
+      description: Encapsulates information regarding inviting people using email to join organization, same permissions for all invitees
+      type: object
+      required:
+      - invitee_email
+      - organization_role
+      properties:
+        actions:
+          description: List of permitted actions
+          type: array
+          items:
+            $ref: '#/components/schemas/NamespaceActions'
+          example:
+          - read
+          - write
+        organization_role:
+          description: Role of the invited namespace in the joined organization
+          $ref: '#/components/schemas/OrganizationRoles'
+          x-omitempty: false
+        invitee_email:
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
+    OrganizationRoles:
+      description: role user has in organization
+      type: string
+      enum:
+      - owner
+      - admin
+      - read_write_delete
+      - read_write
+      - read_only
+    GroupActions:
+      description: actions a user can take on a group
+      type: string
+      enum:
+      - read
+      - write
+      - edit
+    InvitationFailedRecipients:
+      description: Encapsulates information regarding the failed invitation recipients
+      type: object
+      required:
+      - failed_recipients
+      properties:
+        failed_recipients:
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+    Invitation:
+      description: Invitations to share or collaborate
+      type: object
+      properties:
+        id:
+          description: Unique ID of invitation added to magic link
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        invitation_type:
+          description: Type of invitation
+          $ref: '#/components/schemas/InvitationType'
+          example: array_share
+          x-omitempty: false
+        owner_namespace_uuid:
+          description: Namespace of the owner of the invitation (user or organization)
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        inviter_uuid:
+          description: Unique ID of the user that sent the invitation
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        user_namespace_uuid:
+          description: Unique ID of the user accepted the invitation
+          type: string
+          x-omitempty: false
+          example: 00000000-0000-0000-0000-000000000000
+        organization_user_uuid:
+          description: Unique ID of the organization user accepted the invitation
+          type: string
+          x-omitempty: false
+          example: 00000000-0000-0000-0000-000000000000
+        organization_name:
+          description: Name of the organization, does not persist in database
+          type: string
+          example: organization_name
+        organization_role:
+          description: Role of the invited namespace in the joined organization
+          $ref: '#/components/schemas/OrganizationRoles'
+          x-omitempty: false
+        organization_uuid:
+          description: Unique ID of the organization whose user(s) accepted the invitation
+          type: string
+          x-omitempty: false
+          example: 00000000-0000-0000-0000-000000000000
+        array_uuid:
+          description: Unique ID of the array
+          type: string
+          x-omitempty: false
+          example: 00000000-0000-0000-0000-000000000000
+        group_uuid:
+          description: Unique ID of the group
+          type: string
+          x-omitempty: false
+          example: 00000000-0000-0000-0000-000000000000
+        array_name:
+          description: Name of the array, does not persist in database
+          type: string
+          example: array_name
+        email:
+          description: Email of the individual we send the invitation to
+          type: string
+          example: jane@doe.com
+        actions:
+          description: A comma separated list of ArrayActions or NamespaceActions
+          type: string
+          example: read,write
+        group_actions:
+          description: A comma separated list of GroupActions
+          type: string
+          example: read,write
+        status:
+          description: Status of invitation
+          $ref: '#/components/schemas/InvitationStatus'
+          example: PENDING
+          x-omitempty: false
+        created_at:
+          description: Datetime the invitation was created in UTC
+          type: string
+          format: date-time
+          x-omitempty: false
+        expires_at:
+          description: Datetime the invitation is expected to expire in UTC
+          type: string
+          format: date-time
+          x-omitempty: false
+        accepted_at:
+          description: Datetime the invitation was accepted in UTC
+          type: string
+          format: date-time
+          x-omitempty: false
+        namespace_invited:
+          description: The namespace invited (user or organization, if it exists in the DB)
+          type: string
+          x-omitempty: true
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-TILEDB-REST-API-KEY
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          scopes:
+            read: Grants read access
+            write: Grants write access
+            admin: Grants read and write access to administrative information
+          authorizationUrl: https://oauth2.tiledb.com/oauth2/authorize
+          tokenUrl: https://oauth2.tiledb.com/oauth2/token

@@ -1,0 +1,983 @@
+openapi: 3.2.0
+info:
+  description: TileDB Storage Platform REST API
+  title: TileDB Storage Platform Favorites API
+  version: 2.17.51
+servers:
+- url: /v1
+security:
+- BasicAuth: []
+- ApiKeyAuth: []
+tags:
+- name: Favorites
+paths:
+  /arrays/favorites:
+    get:
+      parameters:
+      - name: page
+        in: query
+        description: pagination offset
+        required: false
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        description: pagination limit
+        required: false
+        schema:
+          type: integer
+      tags:
+      - Favorites
+      description: Fetch a page of array favorites of connected user
+      operationId: listArrayFavorites
+      responses:
+        200:
+          description: Available array favorites are returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayFavoritesData'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: List array favorites
+      x-summary-source: derived
+  /arrays/favorites/uuids:
+    get:
+      tags:
+      - Favorites
+      description: Fetch all favorite array uuids of connected user
+      operationId: listArrayFavoritesUUIDs
+      responses:
+        200:
+          description: Available favorites array uuids are returned
+          content:
+            application/json:
+              schema:
+                type: array
+                x-omitempty: false
+                items:
+                  $ref: '#/components/schemas/ArrayFavorite'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: List array favorites UUIDs
+      x-summary-source: derived
+  /arrays/favorites/{namespace}/{name}:
+    parameters:
+    - name: namespace
+      in: path
+      required: true
+      description: The namespace of the array
+      schema:
+        type: string
+    - name: name
+      in: path
+      required: true
+      description: The name of the array
+      schema:
+        type: string
+    get:
+      tags:
+      - Favorites
+      description: Fetch array favorite of a specific array
+      operationId: getArrayFavorite
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayFavorite'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get array favorite
+      x-summary-source: derived
+    post:
+      tags:
+      - Favorites
+      description: Add a new array favorite
+      operationId: addArrayFavorite
+      responses:
+        204:
+          description: Item added to favorites successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Add array favorite
+      x-summary-source: derived
+    delete:
+      tags:
+      - Favorites
+      description: Delete specific array favorite
+      operationId: deleteArrayFavorite
+      responses:
+        204:
+          description: array favorite item deleted successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Delete array favorite
+      x-summary-source: derived
+  /notebooks/favorites:
+    get:
+      parameters:
+      - name: is_dashboard
+        in: query
+        description: return only dashboards
+        required: false
+        schema:
+          type: boolean
+      - name: page
+        in: query
+        description: pagination offset
+        required: false
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        description: pagination limit
+        required: false
+        schema:
+          type: integer
+      tags:
+      - Favorites
+      description: Fetch a page of notebook favorites of connected user
+      operationId: listNotebookFavorites
+      responses:
+        200:
+          description: Available notebook favorites are returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotebookFavoritesData'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: List notebook favorites
+      x-summary-source: derived
+  /notebooks/favorites/uuids:
+    get:
+      tags:
+      - Favorites
+      description: Fetch all favorite notebook uuids of connected user
+      operationId: listNotebookFavoritesUUIDs
+      responses:
+        200:
+          description: Available favorites notebook uuids are returned
+          content:
+            application/json:
+              schema:
+                type: array
+                x-omitempty: false
+                items:
+                  $ref: '#/components/schemas/NotebookFavorite'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: List notebook favorites UUIDs
+      x-summary-source: derived
+  /notebooks/favorites/{namespace}/{name}:
+    parameters:
+    - name: namespace
+      in: path
+      required: true
+      description: The namespace of the notebook
+      schema:
+        type: string
+    - name: name
+      in: path
+      required: true
+      description: The name of the notebook
+      schema:
+        type: string
+    get:
+      tags:
+      - Favorites
+      description: Fetch notebook favorite of a specific notebook
+      operationId: getNotebookFavorite
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotebookFavorite'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get notebook favorite
+      x-summary-source: derived
+    post:
+      tags:
+      - Favorites
+      description: Add a new notebook favorite
+      operationId: addNotebookFavorite
+      responses:
+        204:
+          description: Item added to favorites successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Add notebook favorite
+      x-summary-source: derived
+    delete:
+      tags:
+      - Favorites
+      description: Delete specific notebook favorite
+      operationId: deleteNotebookFavorite
+      responses:
+        204:
+          description: notebook favorite item deleted successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Delete notebook favorite
+      x-summary-source: derived
+  /ml_models/favorites:
+    get:
+      parameters:
+      - name: page
+        in: query
+        description: pagination offset
+        required: false
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        description: pagination limit
+        required: false
+        schema:
+          type: integer
+      tags:
+      - Favorites
+      description: Fetch a page of ML models favorites of connected user
+      operationId: listMLModelFavorites
+      responses:
+        200:
+          description: Available ML models favorites are returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MLModelFavoritesData'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: List ML model favorites
+      x-summary-source: derived
+  /ml_models/favorites/uuids:
+    get:
+      tags:
+      - Favorites
+      description: Fetch all favorite ML models uuids of connected user
+      operationId: listMLModelFavoritesUUIDs
+      responses:
+        200:
+          description: Available favorites ML model uuids are returned
+          content:
+            application/json:
+              schema:
+                type: array
+                x-omitempty: false
+                items:
+                  $ref: '#/components/schemas/MLModelFavorite'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: List ML model favorites UUIDs
+      x-summary-source: derived
+  /ml_models/favorites/{namespace}/{name}:
+    parameters:
+    - name: namespace
+      in: path
+      required: true
+      description: The namespace of the ML model
+      schema:
+        type: string
+    - name: name
+      in: path
+      required: true
+      description: The name of the ML model
+      schema:
+        type: string
+    get:
+      tags:
+      - Favorites
+      description: Fetch ML model favorite of a specific ML model
+      operationId: getMLModelFavorite
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MLModelFavorite'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get ML model favorite
+      x-summary-source: derived
+    post:
+      tags:
+      - Favorites
+      description: Add a new ML model favorite
+      operationId: addMLModelFavorite
+      responses:
+        204:
+          description: Item added to favorites successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Add ML model favorite
+      x-summary-source: derived
+    delete:
+      tags:
+      - Favorites
+      description: Delete specific ML model favorite
+      operationId: deleteMLModelFavorite
+      responses:
+        204:
+          description: ML model favorite item deleted successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Delete ML model favorite
+      x-summary-source: derived
+  /udfs/favorites:
+    get:
+      parameters:
+      - name: page
+        in: query
+        description: pagination offset
+        required: false
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        description: pagination limit
+        required: false
+        schema:
+          type: integer
+      tags:
+      - Favorites
+      description: Fetch a page of UDF favorites of connected user
+      operationId: listUDFFavorites
+      responses:
+        200:
+          description: Available UDF favorites are returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UDFFavoritesData'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: List UDF favorites
+      x-summary-source: derived
+  /udfs/favorites/uuids:
+    get:
+      tags:
+      - Favorites
+      description: Fetch all favorite UDF uuids of connected user
+      operationId: listUDFFavoritesUUIDs
+      responses:
+        200:
+          description: Available favorites UDF uuids are returned
+          content:
+            application/json:
+              schema:
+                type: array
+                x-omitempty: false
+                items:
+                  $ref: '#/components/schemas/UDFFavorite'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: List UDF favorites UUIDs
+      x-summary-source: derived
+  /udfs/favorites/{namespace}/{name}:
+    parameters:
+    - name: namespace
+      in: path
+      required: true
+      description: The namespace of the UDF
+      schema:
+        type: string
+    - name: name
+      in: path
+      required: true
+      description: The name of the UDF
+      schema:
+        type: string
+    get:
+      tags:
+      - Favorites
+      description: Fetch UDF favorite of a specific UDF
+      operationId: getUDFFavorite
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UDFFavorite'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get UDF favorite
+      x-summary-source: derived
+    post:
+      tags:
+      - Favorites
+      description: Add a new UDF favorite
+      operationId: addUDFFavorite
+      responses:
+        204:
+          description: Item added to favorites successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Add UDF favorite
+      x-summary-source: derived
+    delete:
+      tags:
+      - Favorites
+      description: Delete specific UDF favorite
+      operationId: deleteUDFFavorite
+      responses:
+        204:
+          description: UDF favorite item deleted successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Delete UDF favorite
+      x-summary-source: derived
+components:
+  schemas:
+    MLModelFavorite:
+      description: A user-favorite MLModel item
+      type: object
+      properties:
+        mlmodel_uuid:
+          description: unique UUID of the MLModel
+          type: string
+        namespace:
+          description: the namespace of the MLModel
+          type: string
+        name:
+          description: the name of the MLModel
+          type: string
+    ArrayFavoritesData:
+      description: Object including array favorites and pagination metadata
+      type: object
+      properties:
+        arrays:
+          description: List of array infos
+          type: array
+          x-omitempty: false
+          items:
+            $ref: '#/components/schemas/ArrayInfo'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+    PricingCurrency:
+      description: Currency of pricing
+      type: string
+      enum:
+      - USD
+    Subscription:
+      description: Subscription of a user (customer) to another user's arrays
+      type: object
+      properties:
+        id:
+          description: Unique ID of subscription as defined by Stripe
+          type: string
+          example: subscriptionID
+        owner_namespace_uuid:
+          description: Unique ID of the array (product) owner
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        customer_namespace_uuid:
+          description: Unique ID of the array (product) user (customer)
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        pricing:
+          description: list of pricing used by this subscription
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/Pricing'
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
+    MetadataStringifiedEntry:
+      type: object
+      description: key/value pair representing an asset metadata map entry
+      properties:
+        key:
+          description: The metadata key
+          type: string
+          x-omitempty: false
+        value:
+          description: The metadata value
+          type: string
+          x-omitempty: false
+        type:
+          description: The metadata type
+          type: string
+          x-omitempty: false
+          example: array_metadata
+    Pricing:
+      description: Pricing created by converting an array to product
+      type: object
+      properties:
+        id:
+          description: Unique ID of plan as defined by Stripe
+          type: string
+          example: planID
+        array_uuid:
+          description: Unique ID of registered array
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        pricing_name:
+          description: Name of pricing
+          type: string
+        pricing_type:
+          description: Type of pricing
+          $ref: '#/components/schemas/PricingType'
+        product_name:
+          description: Name of product
+          type: string
+        product_statement_descriptor:
+          description: Extra information about a product which will appear on the credit card statement of the customer
+          type: string
+        product_unit_label:
+          description: A label that represents units of this product in Stripe and receipts and invoices of the customer
+          $ref: '#/components/schemas/PricingUnitLabel'
+        currency:
+          description: Currency of pricing
+          $ref: '#/components/schemas/PricingCurrency'
+        aggregate_usage:
+          description: Specifies a usage aggregation strategy for pricings of usage_type=metered
+          $ref: '#/components/schemas/PricingAggregateUsage'
+        interval:
+          description: The frequency with which a subscription should be billed
+          $ref: '#/components/schemas/PricingInterval'
+        divided_by:
+          description: Group of n product unit labels
+          type: integer
+          format: int64
+          example: 1048576
+        charge:
+          description: Price in cents (decimal) per unitlabel
+          type: number
+          format: double
+        activated:
+          description: If pricing is activated
+          type: boolean
+          example: false
+    MLModelFavoritesData:
+      description: Object including MLModel favorites and pagination metadata
+      type: object
+      properties:
+        mlmodels:
+          description: List of MLModel infos
+          type: array
+          x-omitempty: false
+          items:
+            $ref: '#/components/schemas/ArrayInfo'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+    PricingUnitLabel:
+      description: Unit label
+      type: string
+      enum:
+      - byte
+      - second
+    UDFFavoritesData:
+      description: Object including UDF favorites and pagination metadata
+      type: object
+      properties:
+        udfs:
+          description: List of UDF infos
+          type: array
+          x-omitempty: false
+          items:
+            $ref: '#/components/schemas/ArrayInfo'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+    UDFFavorite:
+      description: A user-favorite UDF item
+      type: object
+      properties:
+        udf_uuid:
+          description: unique UUID of the UDF
+          type: string
+        namespace:
+          description: the namespace of the UDF
+          type: string
+        name:
+          description: the name of the UDF
+          type: string
+    FileType:
+      description: File types represented as TileDB arrays
+      type: string
+      enum:
+      - notebook
+      - user_defined_function
+      - ml_model
+      - file
+      - registered_task_graph
+    ArrayFavorite:
+      description: A user-favorite array item
+      type: object
+      properties:
+        array_uuid:
+          description: unique UUID of the array
+          type: string
+        namespace:
+          description: the namespace of the array
+          type: string
+        name:
+          description: the name of the array
+          type: string
+    PricingInterval:
+      description: Interval for pricing
+      type: string
+      enum:
+      - month
+    NotebookFavorite:
+      description: A user-favorite notebook item
+      type: object
+      properties:
+        notebook_uuid:
+          description: unique UUID of the notebook
+          type: string
+        namespace:
+          description: the namespace of the notebook
+          type: string
+        name:
+          description: the name of the notebook
+          type: string
+    PricingType:
+      description: Pricing types
+      type: string
+      enum:
+      - egress
+      - access
+    ArrayActions:
+      description: actions a user can take on an array
+      type: string
+      enum:
+      - read
+      - write
+      - edit
+      - read_array_logs
+      - read_array_info
+      - read_array_schema
+    NotebookFavoritesData:
+      description: Object including notebook favorites and pagination metadata
+      type: object
+      properties:
+        notebooks:
+          description: List of notebook infos
+          type: array
+          x-omitempty: false
+          items:
+            $ref: '#/components/schemas/ArrayInfo'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+    PricingAggregateUsage:
+      description: Specifies a usage aggregation strategy for pricings of usage_type=metered
+      type: string
+      enum:
+      - sum
+    PaginationMetadata:
+      properties:
+        page:
+          description: pagination offset. Use it to skip the first ((page - 1) * per_page) items
+          type: number
+          format: uint64
+          example: 1
+        per_page:
+          description: pagination limit (page size)
+          type: number
+          format: uint64
+          example: 10
+        total_pages:
+          description: number of total pages with current limit
+          type: number
+          format: uint64
+          example: 14
+        total_items:
+          description: number of total available items
+          type: number
+          format: uint64
+          example: 138
+    ArrayType:
+      description: TileDB array type
+      type: string
+      enum:
+      - dense
+      - sparse
+    ArrayInfo:
+      description: metadata of an array
+      type: object
+      properties:
+        id:
+          description: unique ID of registered array
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        file_type:
+          description: File type stored /wrapped by this array
+          x-omitempty: true
+          $ref: '#/components/schemas/FileType'
+        file_properties:
+          type: object
+          description: map of file properties created for this array
+          x-omitempty: true
+          additionalProperties:
+            type: string
+        uri:
+          description: uri of array
+          type: string
+          example: s3://bucket/array
+        namespace:
+          description: namespace array is in
+          type: string
+          example: user1
+        size:
+          description: size in bytes of array
+          type:
+          - number
+          - 'null'
+          format: uint64
+          example: 1024
+        last_accessed:
+          description: Datetime array was last accessed in UTC
+          type: string
+          format: date-time
+        description:
+          description: description of array
+          type:
+          - string
+          - 'null'
+        name:
+          description: name of array
+          type: string
+          example: myarray1
+        allowed_actions:
+          description: list of actions user is allowed to do on this array
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/ArrayActions'
+        pricing:
+          description: list of pricing created for this array
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/Pricing'
+        subscriptions:
+          description: list of subscriptions created for this array
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/Subscription'
+        logo:
+          description: logo (base64 encoded) for the array. Optional
+          type: string
+        access_credentials_name:
+          description: the name of the access credentials to use. if unset, the default credentials will be used
+          type: string
+        type:
+          description: Array type (dense, key-value, sparse). Calculation of array type runs after array has been registered. So, it is not available immediately.
+          example: sparse
+          $ref: '#/components/schemas/ArrayType'
+        share_count:
+          description: number of unique namespaces this array is shared with
+          type: number
+          format: int32
+        public_share:
+          description: Suggests if the array was shared to public by owner
+          type: boolean
+          x-omitempty: false
+          example: true
+        namespace_subscribed:
+          description: Depends on the namespace asking, denotes the existence of subscription of namespace to this array
+          type: boolean
+          readOnly: true
+          example: false
+        tiledb_uri:
+          description: uri for access through TileDB cloud
+          type: string
+          x-omitempty: false
+        tags:
+          description: optional tags for array
+          x-omitempty: false
+          type: array
+          items:
+            type: string
+            description: tag must be lowercase characters or hypen [a-z-]
+        license_id:
+          type: string
+          x-omitempty: true
+          description: License identifier from SPDX License List or Custom
+        license_text:
+          type: string
+          x-omitempty: true
+          description: License text
+        read_only:
+          description: Suggests if the array is in read_only mode
+          type:
+          - boolean
+          - 'null'
+          example: false
+        is_favorite:
+          description: Indicates whether the array is in user favorites
+          type: boolean
+          x-omitempty: true
+          example: true
+        created_at:
+          description: Datetime array was registered with tiledb
+          type: string
+          format: date-time
+        created_by:
+          description: The user who created the array, if known.
+          type: string
+          x-omitempty: true
+        metadata:
+          description: 'Contains the metadata of the array.
+
+            **Note:** This property is included in the response only if the `with_metadata` query parameter is set to `true`.
+
+            '
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/MetadataStringifiedEntry'
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-TILEDB-REST-API-KEY
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          scopes:
+            read: Grants read access
+            write: Grants write access
+            admin: Grants read and write access to administrative information
+          authorizationUrl: https://oauth2.tiledb.com/oauth2/authorize
+          tokenUrl: https://oauth2.tiledb.com/oauth2/token

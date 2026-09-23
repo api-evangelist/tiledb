@@ -1,0 +1,73 @@
+openapi: 3.2.0
+info:
+  description: TileDB Storage Platform REST API
+  title: TileDB Storage Platform Stats API
+  version: 2.17.51
+servers:
+- url: /v1
+security:
+- BasicAuth: []
+- ApiKeyAuth: []
+tags:
+- name: Stats
+paths:
+  /.stats:
+    get:
+      description: Fetch libtiledb stat
+      tags:
+      - Stats
+      operationId: getTiledbStats
+      responses:
+        200:
+          description: stats
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stats:
+                    description: string of stats from tiledb
+                    type: string
+                    example: '123'
+              example:
+                stats: '123'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get tiledb stats
+      x-summary-source: derived
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-TILEDB-REST-API-KEY
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          scopes:
+            read: Grants read access
+            write: Grants write access
+            admin: Grants read and write access to administrative information
+          authorizationUrl: https://oauth2.tiledb.com/oauth2/authorize
+          tokenUrl: https://oauth2.tiledb.com/oauth2/token

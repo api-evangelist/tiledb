@@ -1,0 +1,1382 @@
+openapi: 3.2.0
+info:
+  title: Tiledb User API
+  version: '1.0'
+  description: 'Operations tagged user across 2 of this provider''s published API definitions: tiledb-cloud-v1-openapi.yaml, tiledb-cloud-v2-openapi.yaml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: /v1
+- url: /v2
+security:
+- BasicAuth: []
+- ApiKeyAuth: []
+tags:
+- name: User
+paths:
+  /user:
+    get:
+      tags:
+      - User
+      description: get a user
+      operationId: getUser
+      responses:
+        200:
+          description: user details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get user
+      x-summary-source: derived
+    post:
+      security: []
+      tags:
+      - User
+      description: create a user
+      operationId: createUser
+      responses:
+        204:
+          description: user created successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: user to create
+        required: true
+      summary: Create user
+      x-summary-source: derived
+    servers:
+    - url: /v1
+  /user/password_reset:
+    post:
+      tags:
+      - User
+      description: reset user password
+      operationId: resetUserPassword
+      responses:
+        204:
+          description: User password updated successfully
+        404:
+          description: User not found
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: Password to update
+              type: object
+              properties:
+                password:
+                  type: string
+                  minLength: 8
+                  description: password
+                  example: password
+        description: password to update for user requesting update
+        required: true
+      summary: Reset user password
+      x-summary-source: derived
+    servers:
+    - url: /v1
+  /user/confirm_email:
+    post:
+      tags:
+      - User
+      description: confirm user email
+      operationId: confirmEmail
+      responses:
+        204:
+          description: User email confirmed successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Confirm email
+      x-summary-source: derived
+    servers:
+    - url: /v1
+  /users/{username}:
+    parameters:
+    - name: username
+      in: path
+      description: username or ID
+      required: true
+      schema:
+        type: string
+    get:
+      tags:
+      - User
+      description: get a user
+      operationId: getUserWithUsername
+      responses:
+        200:
+          description: user details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        404:
+          description: User does not exist
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get user with username
+      x-summary-source: derived
+    delete:
+      tags:
+      - User
+      description: delete a user
+      operationId: deleteUser
+      responses:
+        204:
+          description: user deleted
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Delete user
+      x-summary-source: derived
+    patch:
+      tags:
+      - User
+      description: update a user
+      operationId: updateUser
+      responses:
+        204:
+          description: user updated successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: user details to update
+        required: true
+      summary: Update user
+      x-summary-source: derived
+    servers:
+    - url: /v1
+  /credentials/{namespace}/aws:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace
+      required: true
+      schema:
+        type: string
+    get:
+      tags:
+      - User
+      description: Check if aws keys are set
+      operationId: checkAWSAccessCredentials
+      responses:
+        200:
+          description: AWS keys are set
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AWSAccessCredentials'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Check AWS access credentials
+      x-summary-source: derived
+    post:
+      tags:
+      - User
+      description: Add aws keys
+      operationId: addAWSAccessCredentials
+      responses:
+        204:
+          description: AWS keys added successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AWSAccessCredentials'
+        description: aws access credentials to store for a namespace
+        required: true
+      summary: Add AWS access credentials
+      x-summary-source: derived
+    servers:
+    - url: /v1
+  /credentials/{namespace}/aws/{name}:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace
+      required: true
+      schema:
+        type: string
+    - name: name
+      in: path
+      description: name
+      required: true
+      schema:
+        type: string
+    get:
+      tags:
+      - User
+      description: Check if aws keys are set by name
+      operationId: checkAWSAccessCredentialsByName
+      responses:
+        200:
+          description: AWS keys are set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AWSAccessCredentials'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Check AWS access credentials by name
+      x-summary-source: derived
+    patch:
+      tags:
+      - User
+      description: Update aws keys or associated buckets. This will update the key associations for each array in the namespace
+      operationId: updateAWSAccessCredentials
+      responses:
+        204:
+          description: AWS keys updated successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AWSAccessCredentials'
+        description: aws credentials to update
+        required: true
+      summary: Update AWS access credentials
+      x-summary-source: derived
+    delete:
+      tags:
+      - User
+      description: delete a AWS Access credentials in a namespace. This will likely cause arrays to become unreachable
+      operationId: deleteAWSAccessCredentials
+      responses:
+        204:
+          description: AWS credentials deleted
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Delete AWS access credentials
+      x-summary-source: derived
+    servers:
+    - url: /v1
+  /organizations/{organization}/user:
+    parameters:
+    - name: organization
+      in: path
+      description: organization name
+      required: true
+      schema:
+        type: string
+    post:
+      tags:
+      - User
+      description: add a user to an organization
+      operationId: addUserToOrganization
+      responses:
+        204:
+          description: user added to organization successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationUser'
+        description: user to add
+        required: true
+      summary: Add user to organization
+      x-summary-source: derived
+    servers:
+    - url: /v1
+  /organizations/{organization}/{username}:
+    parameters:
+    - name: organization
+      in: path
+      description: organization name
+      required: true
+      schema:
+        type: string
+    - name: username
+      in: path
+      description: username to manipulate
+      required: true
+      schema:
+        type: string
+    get:
+      tags:
+      - User
+      description: get a user from an organization
+      operationId: getOrganizationUser
+      responses:
+        200:
+          description: user from organization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationUser'
+        404:
+          description: User is not in organization
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get organization user
+      x-summary-source: derived
+    delete:
+      tags:
+      - User
+      description: delete a user from an organization
+      operationId: deleteUserFromOrganization
+      responses:
+        204:
+          description: user delete from organization successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Delete user from organization
+      x-summary-source: derived
+    patch:
+      tags:
+      - User
+      description: update a user in an organization
+      operationId: updateUserInOrganization
+      responses:
+        204:
+          description: user update in organization successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationUser'
+        description: user details to update
+        required: true
+      summary: Update user in organization
+      x-summary-source: derived
+    servers:
+    - url: /v1
+  /session:
+    parameters:
+    - name: remember_me
+      in: query
+      description: flag to create a token with expiration of 30 days, default is false
+      required: false
+      schema:
+        type: string
+    - name: expires
+      in: query
+      description: Expiration date for token, if empty token defaults to 30 minutes
+      required: false
+      schema:
+        type: string
+        format: date-time
+    get:
+      tags:
+      - User
+      description: Get session token for user
+      operationId: getSession
+      responses:
+        200:
+          description: Session token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get session
+      x-summary-source: derived
+    servers:
+    - url: /v1
+  /token:
+    post:
+      tags:
+      - User
+      description: Request an authorization token, optionally taken a TokenRequest object to set parameters on the token
+      operationId: requestToken
+      responses:
+        200:
+          description: token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+        description: token request object
+      summary: Request token
+      x-summary-source: derived
+    servers:
+    - url: /v1
+  /tokens:
+    get:
+      tags:
+      - User
+      description: Fetch a list of user tokens
+      responses:
+        200:
+          description: Array of user created non-session tokens
+          content:
+            application/json:
+              schema:
+                type: array
+                x-omitempty: true
+                items:
+                  $ref: '#/components/schemas/Token'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get tokens
+      x-summary-source: derived
+      operationId: getTokens
+      x-operation-id-source: derived
+    servers:
+    - url: /v1
+  /tokens/session:
+    get:
+      tags:
+      - User
+      description: Fetch a list of user session tokens
+      responses:
+        200:
+          description: Array of user created session tokens
+          content:
+            application/json:
+              schema:
+                type: array
+                x-omitempty: true
+                items:
+                  $ref: '#/components/schemas/Token'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get tokens session
+      x-summary-source: derived
+      operationId: getTokensSession
+      x-operation-id-source: derived
+    servers:
+    - url: /v1
+  /tokens/{token}:
+    parameters:
+    - name: token
+      in: path
+      description: token name or token itself
+      required: true
+      schema:
+        type: string
+    delete:
+      tags:
+      - User
+      description: revoke an authorization token
+      operationId: revokeToken
+      responses:
+        204:
+          description: revokation successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Revoke token
+      x-summary-source: derived
+    servers:
+    - url: /v1
+  /tokens/scopes:
+    get:
+      tags:
+      - User
+      description: retrieves available token scopes for a user
+      operationId: getTokenScopes
+      responses:
+        200:
+          description: available token scopes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TokenScope'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get token scopes
+      x-summary-source: derived
+    servers:
+    - url: /v1
+  /credentials/{namespace}:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace
+      required: true
+      schema:
+        type: string
+    - name: provider
+      in: query
+      description: Show only the credentials from this provider. This should be one of the CloudProvider enum values.
+      schema:
+        type: string
+    - name: type
+      in: query
+      description: Show only the credentials of this type. This should be one of the AccessCredentialType enum values.
+      schema:
+        type: string
+    - name: page
+      in: query
+      description: pagination offset
+      schema:
+        type: integer
+    - name: per_page
+      in: query
+      description: pagination limit
+      schema:
+        type: integer
+    get:
+      tags:
+      - User
+      description: List the credentials available in the namespace
+      operationId: listCredentials
+      responses:
+        200:
+          description: Available credentials are returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessCredentialsData'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: List credentials
+      x-summary-source: derived
+    post:
+      tags:
+      - User
+      description: Create a new credential for the namespace
+      operationId: addCredential
+      responses:
+        204:
+          description: The new credential was successfully added.
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessCredential'
+        description: The new credentials to be created.
+        required: true
+      summary: Add credential
+      x-summary-source: derived
+    servers:
+    - url: /v2
+  /credentials/{namespace}/{name}:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace
+      required: true
+      schema:
+        type: string
+    - name: name
+      in: path
+      description: A URL-safe version of the credential's user-provided name
+      required: true
+      schema:
+        type: string
+    get:
+      tags:
+      - User
+      description: Retrieve an access credential by name
+      operationId: getCredential
+      responses:
+        200:
+          description: Credential exists and can be returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessCredential'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get credential
+      x-summary-source: derived
+    patch:
+      tags:
+      - User
+      description: Update the named access credential. This will also update the information used to access arrays set to use this credential.
+      operationId: updateCredential
+      responses:
+        204:
+          description: The credential was updated successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessCredential'
+        description: Changes to make to this credential
+        required: true
+      summary: Update credential
+      x-summary-source: derived
+    delete:
+      tags:
+      - User
+      description: Delete the named access credential. Any arrays still set to use this credential will use the namespace's default and may become unreachable.
+      operationId: deleteCredential
+      responses:
+        204:
+          description: The credential was deleted successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Delete credential
+      x-summary-source: derived
+    servers:
+    - url: /v2
+components:
+  schemas:
+    AssetLocations:
+      description: 'Custom storage locations on a per–asset type basis. If any is unset, a suffix of the owning (user/organization) `default_s3_path` is used.
+
+        '
+      type: object
+      properties:
+        arrays:
+          $ref: '#/components/schemas/StorageLocation'
+        files:
+          $ref: '#/components/schemas/StorageLocation'
+        groups:
+          $ref: '#/components/schemas/StorageLocation'
+        ml_models:
+          $ref: '#/components/schemas/StorageLocation'
+        notebooks:
+          $ref: '#/components/schemas/StorageLocation'
+        task_graphs:
+          $ref: '#/components/schemas/StorageLocation'
+        udfs:
+          $ref: '#/components/schemas/StorageLocation'
+    TokenScope:
+      description: An api token scope available for creation
+      type: string
+      enum:
+      - password_reset
+      - confirm_email
+      - '*'
+      - user:read
+      - user:read-write
+      - user:admin
+      - array:read
+      - array:read-write
+      - array:admin
+      - organization:read
+      - organization:read-write
+      - organization:admin
+      - group:read
+      - group:read-write
+      - group:admin
+    NamespaceActions:
+      description: actions a user can take on an organization
+      type: string
+      enum:
+      - read
+      - write
+      - create
+      - delete
+      - edit
+      - read_array_logs
+      - read_job_logs
+      - read_object_logs
+      - run_job
+      - delete_organization
+      - edit_organization
+      - edit_billing
+    AWSAccessCredentials:
+      description: Model representing aws keys or service role, service roles are currently ignored, but will be preferred option in the future
+      type: object
+      properties:
+        secret_access_key:
+          type: string
+          description: aws secret access key, never returned in get requests
+        access_key_id:
+          type: string
+          description: aws access key
+        service_role_arn:
+          type: string
+          description: aws service role to use for access
+        name:
+          type: string
+          description: human readable name
+        default:
+          type: boolean
+          description: true if this is the default credential to be used within this namespace
+          x-omitempty: true
+        buckets:
+          description: a whitelist of one or more buckets this key should access
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+            description: A bucket or path of a bucket that is granted access by these credentials
+            example: s3://company-bucket-1/tiledb/
+        created_at:
+          description: Time when UDF dependencies were created (rfc3339)
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          description: Time when UDF dependencies was last updated (rfc3339)
+          type: string
+          format: date-time
+          readOnly: true
+    OrganizationRoles:
+      description: role user has in organization
+      type: string
+      enum:
+      - owner
+      - admin
+      - read_write_delete
+      - read_write
+      - read_only
+    StorageLocation:
+      description: 'The path at which a given asset will be stored, and the credentials used to access that asset.
+
+        '
+      type: object
+      properties:
+        path:
+          description: 'The path to store this asset type. If unset, a suffix of the user''s `default_s3_path` is used. When updating, explicitly set to `""`, the empty string, to clear this path; leaving it `null` (or absent) will leave the path unchanged.
+
+            '
+          type:
+          - string
+          - 'null'
+        credentials_name:
+          description: 'The name of the credentials used to acess this storage path. If unset, the `default_s3_path_credentials_name` is used. When updating, explicitly set to `""`, the empty string, to clear this name; leaving it `null` (or absent) will leave the name unchanged.
+
+            '
+          type:
+          - string
+          - 'null'
+    TokenRequest:
+      description: A request from a user for an api token
+      type: object
+      properties:
+        expires:
+          description: Expiration date for token, if empty token defaults to 30 minutes
+          type: string
+          format: date-time
+          example: 2018-12-31 12:13:14+00:00
+        name:
+          description: Optional name for token, if the name already exists for the user it will be auto incremented (i.e. myToken-1)
+          type: string
+          example: myToken
+        scope:
+          description: Optional scope to limit token, defaults to all permissions, current supported values are password_reset or *
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenScope'
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
+    User:
+      description: User
+      type: object
+      required:
+      - username
+      properties:
+        id:
+          type: string
+          description: unique ID of user
+          example: 00000000-0000-0000-0000-000000000000
+        username:
+          type: string
+          minLength: 1
+          maxLength: 63
+          pattern: ^[\w.\-]+$
+          description: username must be unique
+          example: username
+        password:
+          type: string
+          minLength: 8
+          description: password
+          example: password
+        name:
+          description: the user's full, real name
+          type: string
+          minLength: 1
+          example: Jane Doe
+        email:
+          description: the user's email
+          type: string
+          example: jane.doe@example.com
+        is_valid_email:
+          description: user's email is validated to be correct
+          type: boolean
+          readOnly: true
+          example: false
+        stripe_connect:
+          description: Denotes that the user is able to apply pricing to arrays by means of Stripe Connect
+          type: boolean
+          readOnly: true
+          example: false
+        company:
+          description: the user's company
+          type: string
+          example: TileDB
+        logo:
+          description: the user's logo
+          type:
+          - string
+          - 'null'
+        timezone:
+          type: string
+          example: Europe/Athens
+        organizations:
+          type: array
+          x-omitempty: true
+          description: Array of organizations a user is part of and their roles
+          readOnly: true
+          items:
+            $ref: '#/components/schemas/OrganizationUser'
+        allowed_actions:
+          description: list of actions user is allowed to do on this organization
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/NamespaceActions'
+        enabled_features:
+          description: List of extra/optional/beta features to enable for namespace
+          type: array
+          x-omitempty: true
+          readOnly: true
+          items:
+            type: string
+        unpaid_subscription:
+          description: A notice that the user has an unpaid subscription
+          type: boolean
+          readOnly: true
+          x-omitempty: false
+        default_s3_path:
+          description: 'The default location to store newly-created notebooks and other assets like UDFs. The name `default_s3_path` is a legacy holdover; it may refer to any supported storage location.
+
+            '
+          type: string
+        default_s3_path_credentials_name:
+          description: 'The name of the credentials used to create and access files in the `default_s3_path`, if needed.
+
+            '
+        asset_locations:
+          $ref: '#/components/schemas/AssetLocations'
+        default_namespace_charged:
+          description: Override the default namespace charged for actions when no namespace is specified
+          type: string
+        default_region:
+          description: 'The default region to use for notebooks and other operations. It must be a region supported by TileDB, see https://docs.tiledb.com/cloud/concepts/tiledb-cloud-internals/architecture#orchestration
+
+            '
+          type: string
+    OrganizationUser:
+      description: user in an organization
+      type: object
+      properties:
+        user_id:
+          type: string
+          description: unique ID of user
+          example: 00000000-0000-0000-0000-000000000000
+        organization_id:
+          type: string
+          description: unique ID of organization
+          example: 00000000-0000-0000-0000-000000000000
+        username:
+          description: username for user
+          type: string
+          example: username
+        user_full_name:
+          description: full name of the user; available to organization admins
+          type: string
+          example: Alice Hanna
+        user_email:
+          description: email address of the user; available to organization admins
+          type: string
+          example: alice@example.com
+        organization_name:
+          description: name of organization
+          type: string
+          example: MyOrganization
+        role:
+          $ref: '#/components/schemas/OrganizationRoles'
+        allowed_actions:
+          description: list of actions user is allowed to do on this organization
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/NamespaceActions'
+    Token:
+      description: A api token and its metadata
+      type: object
+      properties:
+        token:
+          description: A api token
+          type: string
+        name:
+          description: Name of token to revoke
+          type: string
+        issued_at:
+          description: datetime the token was created
+          type: string
+          format: date-time
+        expires_at:
+          description: datetime the token when token will expire
+          type: string
+          format: date-time
+        scope:
+          description: Optional scope to limit token, defaults to all permissions, current supported values are password_reset or *
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenScope'
+    AzureCredential:
+      description: Credential information to access Microsoft Azure. Each supported property is the snake_case version of its name in an Azure Storage connection string.
+      type:
+      - object
+      - 'null'
+      x-omitempty: true
+      properties:
+        account_name:
+          description: The name of the Azure account to access
+          type: string
+          x-go-custom-tag: tdbrest:"key_id" validate:"required"
+        account_key:
+          description: The secret key. Never returned in responses.
+          type: string
+          x-go-custom-tag: tdbrest:"secret" validate:"required"
+    GCPServiceAccountKey:
+      description: The key to a Google Cloud Platform service account.
+      type:
+      - object
+      - 'null'
+      x-omitempty: true
+      properties:
+        account_id:
+          description: 'The ID of the service account (i.e., its email address).
+
+
+            This is ignored when uploading key information, and is only provided
+
+            by the server when downloading metadata about an existing key.
+
+            '
+          type: string
+          x-go-custom-tag: tdbrest:"key_id,output_only"
+          example: identity-data-reader@cinco-research.iam.gserviceaccount.com
+        key_id:
+          description: 'The ID of the particular key. This identifies it among other keys
+
+            issued for this service account.
+
+
+            This is ignored when uploading key information, and is only provided
+
+            by the server when downloading metadata about an existing key.
+
+            '
+          type: string
+          x-go-custom-tag: tdbrest:"output_only"
+          example: b85b7bac16fabf44fd9cd6885d4d1b444f07e9ab
+        key_text:
+          description: 'The full file provided by Google Cloud. This is usually in the form of
+
+            a JSON document, but TileDB Cloud treats it as opaque (except to
+
+            attempt to extract the service account ID and the key ID).
+
+            '
+          type: string
+          x-go-custom-tag: tdbrest:"secret"
+          example: <the JSON key file issued by Google Cloud for a service account>
+    AWSCredential:
+      description: Credential information to access Amazon Web Services
+      type:
+      - object
+      - 'null'
+      x-omitempty: true
+      properties:
+        access_key_id:
+          description: The ID of the access key
+          type: string
+          x-go-custom-tag: tdbrest:"key_id" validate:"required"
+        secret_access_key:
+          description: The access key's secret. Never returned in responses.
+          type: string
+          x-go-custom-tag: tdbrest:"secret" validate:"required"
+        endpoint:
+          description: The endpoint used for this credential
+          type:
+          - string
+          - 'null'
+          example: https://example.us-west-2.amazonaws.com
+        sse_kms_key_id:
+          description: The key ID, key ARN, or key alias of the AWS KMS key to use with this credential
+          type:
+          - string
+          - 'null'
+          example: arn:aws:kms:us-east-1:1234:key/mykey
+    GCPInteroperabilityCredential:
+      description: Credential information to access Google Cloud. using well knows key/secret pair to access storage.
+      type:
+      - object
+      - 'null'
+      x-omitempty: true
+      properties:
+        access_key_id:
+          description: The ID of the access key
+          type: string
+          x-go-custom-tag: validate:"required"
+        secret_access_key:
+          description: The access key's secret. Never returned in responses.
+          type: string
+          x-go-custom-tag: tdbrest:"secret" validate:"required"
+    CloudProvider:
+      description: A service where data is stored or computations take place.
+      type: string
+      enum:
+      - AWS
+      - AZURE
+      - GCP
+    PaginationMetadata:
+      properties:
+        page:
+          description: pagination offset. Use it to skip the first ((page - 1) * per_page) items
+          type: number
+          format: uint64
+          example: 1
+        per_page:
+          description: pagination limit (page size)
+          type: number
+          format: uint64
+          example: 10
+        total_pages:
+          description: number of total pages with current limit
+          type: number
+          format: uint64
+          example: 14
+        total_items:
+          description: number of total available items
+          type: number
+          format: uint64
+          example: 138
+    AWSRole:
+      description: Role information to access Amazon Web Services
+      type:
+      - object
+      - 'null'
+      x-omitempty: true
+      properties:
+        role_arn:
+          description: The role arn used to access
+          x-go-name: RoleARN
+          type: string
+          x-go-custom-tag: validate:"required" tdbrest:"key_id,limit_20"
+          example: arn:partition:service:region:account-id:resource-type:resource-id
+        external_id:
+          description: The role external id used to access
+          x-go-custom-tag: validate:"required" tdbrest:"secret"
+          x-go-name: RoleExternalID
+          type: string
+          example: MzU0M2UwMTItMWJhYy00NWUwLThmZDItZTgwYmQ1NjE5Yjhm
+        endpoint:
+          description: The endpoint used for this role
+          type:
+          - string
+          - 'null'
+          example: https://example.us-west-2.amazonaws.com
+        sse_kms_key_id:
+          description: The key ID, key ARN, or key alias of the AWS KMS key to use with this credential
+          type:
+          - string
+          - 'null'
+          example: arn:aws:kms:us-east-1:1234:key/mykey
+    AccessCredentialsData:
+      description: Object including credentials and pagination metadata
+      type: object
+      properties:
+        credentials:
+          description: List of credentials
+          type: array
+          x-omitempty: false
+          items:
+            $ref: '#/components/schemas/AccessCredential'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+    AccessCredential:
+      description: A union type which may contain a credential to access any one cloud provider.
+      type: object
+      properties:
+        uuid:
+          description: The UUID of the credential
+          type: string
+        name:
+          description: A user-specified name for the key
+          type: string
+        provider:
+          description: The service provider that this credential provides access to. This is derived from the one field which is set when creating or updating the credential data.
+          $ref: '#/components/schemas/CloudProvider'
+          readOnly: true
+        provider_default:
+          description: True if this is the namespace's default credential to be used when connecting to the given cloud provider. There can be at most one default for each unique provider.
+          type:
+          - boolean
+          - 'null'
+        created_at:
+          description: Time when the credential was created (rfc3339)
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          description: Time when the credential was last updated (rfc3339)
+          type: string
+          format: date-time
+          readOnly: true
+        allowed_in_tasks:
+          description: Is this credential allowed to be used in tasks
+          type:
+          - boolean
+          - 'null'
+        credential:
+          description: The credential information itself. Exactly one sub-field may be set. The names match those in the CloudProvider enum.
+          type: object
+          x-omitempty: true
+          x-go-custom-tag: tdbrest:"cred_field"
+          properties:
+            aws:
+              $ref: '#/components/schemas/AWSCredential'
+            azure:
+              $ref: '#/components/schemas/AzureCredential'
+            gcp:
+              $ref: '#/components/schemas/GCPInteroperabilityCredential'
+        role:
+          description: The role information itself. Exactly one sub-field may be set. The names match those in the CloudProvider enum.
+          type: object
+          x-omitempty: true
+          x-go-custom-tag: tdbrest:"cred_field"
+          properties:
+            aws:
+              $ref: '#/components/schemas/AWSRole'
+        token:
+          description: The token information itself. Exactly one sub-field may be set. The names match those in the CloudProvider enum.
+          type: object
+          x-omitempty: true
+          x-go-custom-tag: tdbrest:"cred_field"
+          properties:
+            azure:
+              $ref: '#/components/schemas/AzureToken'
+            gcp:
+              $ref: '#/components/schemas/GCPServiceAccountKey'
+    AzureToken:
+      description: Token information to access Azure services
+      type:
+      - object
+      - 'null'
+      x-omitempty: true
+      properties:
+        account_name:
+          description: The account name of the configuration
+          x-go-name: AccountName
+          type: string
+          x-go-custom-tag: validate:"required"
+          example: tiledbpoc
+        sas_token:
+          description: The token to use for this account
+          type: string
+          example: sv=2022-11-02&ss=bfqt&srt=sco&sp=dsafdssdfafasdfsda&se=2024-03-28T03:02:08Z&st=2024-03-27T19:02:08Z&spr=https&sig=444444555555555555555555555555555555555%3D
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-TILEDB-REST-API-KEY
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          scopes:
+            read: Grants read access
+            write: Grants write access
+            admin: Grants read and write access to administrative information
+          authorizationUrl: https://oauth2.tiledb.com/oauth2/authorize
+          tokenUrl: https://oauth2.tiledb.com/oauth2/token
+x-refined-from:
+- tiledb-cloud-v1-openapi.yaml
+- tiledb-cloud-v2-openapi.yaml

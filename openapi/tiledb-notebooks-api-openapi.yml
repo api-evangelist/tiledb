@@ -1,0 +1,258 @@
+openapi: 3.2.0
+info:
+  title: Tiledb Notebooks API
+  version: '1.0'
+  description: 'Operations tagged notebooks across 2 of this provider''s published API definitions: tiledb-cloud-v1-openapi.yaml, tiledb-cloud-v2-openapi.yaml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: /v1
+- url: /v2
+security:
+- BasicAuth: []
+- ApiKeyAuth: []
+tags:
+- name: Notebooks
+paths:
+  /notebooks/{namespace}/{array}/end_timestamps:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace array is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: array
+      in: path
+      description: name/uri of array that is url-encoded
+      required: true
+      schema:
+        type: string
+    - name: page
+      in: query
+      description: pagination offset
+      required: false
+      schema:
+        type: integer
+    - name: per_page
+      in: query
+      description: pagination limit
+      required: false
+      schema:
+        type: integer
+    get:
+      description: retrieve a list of timestamps from the array fragment info listing in milliseconds, paginated
+      tags:
+      - Notebooks
+      responses:
+        200:
+          description: list of timestamps in milliseconds, paginated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayEndTimestampData'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get notebooks by namespace by array end timestamps
+      x-summary-source: derived
+      operationId: getNotebooksByNamespaceByArrayEndTimestamps
+      x-operation-id-source: derived
+    servers:
+    - url: /v1
+  /notebooks/{namespace}/{array}/prune:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace array is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: array
+      in: path
+      description: name/uri of array that is url-encoded
+      required: true
+      schema:
+        type: string
+    - name: keep_versions
+      in: query
+      description: The number of most recents fragment to preserve
+      required: false
+      schema:
+        type: integer
+        format: uint64
+    post:
+      description: prune fragments of the notebook
+      tags:
+      - Notebooks
+      responses:
+        204:
+          description: notebook pruned
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Create notebooks by namespace by array prune
+      x-summary-source: derived
+      operationId: postNotebooksByNamespaceByArrayPrune
+      x-operation-id-source: derived
+    servers:
+    - url: /v1
+  /notebooks/{namespace}/{array}/upload:
+    parameters:
+    - name: namespace
+      in: path
+      required: true
+      description: The namespace of the notebook
+      schema:
+        type: string
+    - name: array
+      in: path
+      description: name/uri of array that is url-encoded
+      required: true
+      schema:
+        type: string
+    - name: X-TILEDB-CLOUD-ACCESS-CREDENTIALS-NAME
+      in: header
+      description: Optional registered access credentials to use for creation
+      required: false
+      schema:
+        type: string
+    - name: name
+      in: query
+      description: name of the TileDB array to create, if missing {array} is used
+      required: false
+      schema:
+        type: string
+    - name: filesize
+      in: query
+      description: size of the notebook to upload in bytes
+      required: true
+      schema:
+        type: integer
+        format: uint64
+    post:
+      description: Upload a notebook at the specified location and wrap it in TileDB Array
+      tags:
+      - Notebooks
+      operationId: HandleUploadNotebook
+      responses:
+        201:
+          description: Notebook uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotebookUploaded'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+              description: Notebook contents
+        description: notebook to upload
+        required: true
+      summary: Handle upload notebook
+      x-summary-source: derived
+    servers:
+    - url: /v2
+components:
+  schemas:
+    ArrayEndTimestampData:
+      description: Object including array end_timestamps (list of Unix epoch timestamps in milliseconds) and pagination metadata
+      type: object
+      properties:
+        end_timestamps:
+          description: List of timestamps expressed in milliseconds since Unix epoch
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint64
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
+    PaginationMetadata:
+      properties:
+        page:
+          description: pagination offset. Use it to skip the first ((page - 1) * per_page) items
+          type: number
+          format: uint64
+          example: 1
+        per_page:
+          description: pagination limit (page size)
+          type: number
+          format: uint64
+          example: 10
+        total_pages:
+          description: number of total pages with current limit
+          type: number
+          format: uint64
+          example: 14
+        total_items:
+          description: number of total available items
+          type: number
+          format: uint64
+          example: 138
+    NotebookUploaded:
+      description: Uploaded notebook name and information
+      type: object
+      required:
+      - id
+      properties:
+        output_uri:
+          type: string
+          description: output location of the TileDB Notebook
+        name:
+          type: string
+          description: name of the notebook uploaded
+        id:
+          description: unique ID of the uploaded notebook
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+          x-omitempty: false
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-TILEDB-REST-API-KEY
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          scopes:
+            read: Grants read access
+            write: Grants write access
+            admin: Grants read and write access to administrative information
+          authorizationUrl: https://oauth2.tiledb.com/oauth2/authorize
+          tokenUrl: https://oauth2.tiledb.com/oauth2/token
+x-refined-from:
+- tiledb-cloud-v1-openapi.yaml
+- tiledb-cloud-v2-openapi.yaml

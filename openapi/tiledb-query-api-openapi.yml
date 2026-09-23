@@ -1,0 +1,1755 @@
+openapi: 3.2.0
+info:
+  title: Tiledb Query API
+  version: '1.0'
+  description: 'Operations tagged query across 2 of this provider''s published API definitions: tiledb-cloud-v1-openapi.yaml, tiledb-cloud-v2-openapi.yaml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: /v1
+- url: /v2
+security:
+- BasicAuth: []
+- ApiKeyAuth: []
+tags:
+- name: Query
+paths:
+  /arrays/{namespace}/{array}/query/submit:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace array is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: array
+      in: path
+      description: name/uri of array that is url-encoded
+      required: true
+      schema:
+        type: string
+    - name: type
+      in: query
+      description: type of query
+      required: true
+      schema:
+        type: string
+    - name: Content-Type
+      in: header
+      description: Content Type of input and return mime
+      required: true
+      schema:
+        type: string
+        default: application/json
+    - name: X-Payer
+      in: header
+      description: Name of organization or user who should be charged for this request
+      schema:
+        type: string
+    - name: open_at
+      description: open_at for array in unix epoch
+      in: query
+      schema:
+        type: integer
+        format: uint64
+    post:
+      description: send a query to run against a specified array/URI registered to a group/project
+      tags:
+      - Query
+      operationId: submitQuery
+      responses:
+        200:
+          description: query completed and results are returned in query object
+          headers:
+            X-TILEDB-CLOUD-TASK-ID:
+              description: Task ID for just completed query
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+            application/capnp:
+              schema:
+                $ref: '#/components/schemas/Query'
+        204:
+          description: query completed successfully with no return
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/capnp:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Query'
+          application/capnp:
+            schema:
+              $ref: '#/components/schemas/Query'
+        description: query to run
+        required: true
+      summary: Submit query
+      x-summary-source: derived
+    servers:
+    - url: /v1
+  /arrays/{namespace}/{array}/query/submit_query_json:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace array is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: array
+      in: path
+      description: name/uri of array that is url-encoded
+      required: true
+      schema:
+        type: string
+    - name: Content-Type
+      in: header
+      description: Content Type of input and return mime
+      required: true
+      schema:
+        type: string
+        default: application/json
+    - name: X-Payer
+      in: header
+      description: Name of organization or user who should be charged for this request
+      schema:
+        type: string
+    post:
+      description: send a query to run against a specified array/URI registered to a group/project, returns JSON results
+      tags:
+      - Query
+      operationId: submitQueryJson
+      responses:
+        200:
+          description: query completed and results are returned in JSON format
+          headers:
+            X-TILEDB-CLOUD-TASK-ID:
+              description: Task ID for just completed query
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                data: '{"a1":[0,1,2,3,0,1,2,3]}'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryJson'
+        description: query to run
+        required: true
+      summary: Submit query json
+      x-summary-source: derived
+    servers:
+    - url: /v1
+  /arrays/{namespace}/{array}/query/get_file:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace array is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: array
+      in: path
+      description: name/uri of array that is url-encoded
+      required: true
+      schema:
+        type: string
+    - name: Content-Type
+      in: header
+      description: Content Type of input and return mime
+      required: true
+      schema:
+        type: string
+        default: application/json
+    - name: X-Payer
+      in: header
+      description: Name of organization or user who should be charged for this request
+      schema:
+        type: string
+    get:
+      description: send a query to run against a specified array/URI registered to a group/project, returns file bytes
+      tags:
+      - Query
+      operationId: getFile
+      responses:
+        200:
+          description: query completed and result bytes are returned
+          headers:
+            X-TILEDB-CLOUD-TASK-ID:
+              description: Task ID for just completed query
+              schema:
+                type: string
+          content:
+            application/x-ipynb+json:
+              schema:
+                type: string
+                format: binary
+              example:
+                data: abcd
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/x-ipynb+json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get file
+      x-summary-source: derived
+    servers:
+    - url: /v1
+  /arrays/{namespace}/{array}/query/finalize:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace array is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: array
+      in: path
+      description: name/uri of array that is url-encoded
+      required: true
+      schema:
+        type: string
+    - name: type
+      in: query
+      description: type of query
+      required: true
+      schema:
+        type: string
+    - name: Content-Type
+      in: header
+      description: Content Type of input and return mime
+      required: true
+      schema:
+        type: string
+        default: application/json
+    - name: X-Payer
+      in: header
+      description: Name of organization or user who should be charged for this request
+      schema:
+        type: string
+    - name: open_at
+      description: open_at for array in unix epoch
+      in: query
+      schema:
+        type: integer
+        format: uint64
+    post:
+      description: send a query to run against a specified array/URI registered to a group/project
+      tags:
+      - Query
+      operationId: finalizeQuery
+      responses:
+        200:
+          description: query completed and results are returned in query object
+          headers:
+            X-TILEDB-CLOUD-TASK-ID:
+              description: Task ID for just completed query
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+            application/capnp:
+              schema:
+                $ref: '#/components/schemas/Query'
+        204:
+          description: query completed successfully with no return
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/capnp:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Query'
+          application/capnp:
+            schema:
+              $ref: '#/components/schemas/Query'
+        description: query to run
+        required: true
+      summary: Finalize query
+      x-summary-source: derived
+    servers:
+    - url: /v1
+  /arrays/{namespace}/{array}/query/est_result_sizes:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace array is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: array
+      in: path
+      description: name/uri of array that is url-encoded
+      required: true
+      schema:
+        type: string
+    - name: type
+      in: query
+      description: type of query
+      required: true
+      schema:
+        type: string
+    - name: Content-Type
+      in: header
+      description: Content Type of input and return mime
+      required: true
+      schema:
+        type: string
+        default: application/json
+    - name: X-Payer
+      in: header
+      description: Name of organization or user who should be charged for this request
+      schema:
+        type: string
+    - name: open_at
+      description: open_at for array in unix epoch
+      in: query
+      schema:
+        type: integer
+        format: uint64
+    post:
+      description: send a query to run against a specified array/URI registered to a group/project
+      tags:
+      - Query
+      operationId: getEstResultSizes
+      responses:
+        200:
+          description: query est result size computed and results are returned in query object
+          headers:
+            X-TILEDB-CLOUD-TASK-ID:
+              description: Task ID for just computed query result size
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+            application/capnp:
+              schema:
+                $ref: '#/components/schemas/Query'
+        204:
+          description: query completed successfully with no return
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+            application/capnp:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Query'
+          application/capnp:
+            schema:
+              $ref: '#/components/schemas/Query'
+        description: query to run
+        required: true
+      summary: Get est result sizes
+      x-summary-source: derived
+    servers:
+    - url: /v1
+components:
+  schemas:
+    QueryJson:
+      description: Query returning results as JSON
+      type: object
+      properties:
+        query_ranges:
+          description: ranges to run against, generic format
+          $ref: '#/components/schemas/QueryRanges'
+        fields:
+          description: List of fields to return data from, empty means return data for all fields
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+            x-omitempty: true
+    Datatype:
+      description: TileDB data type
+      type: string
+      enum:
+      - INT32
+      - INT64
+      - FLOAT32
+      - FLOAT64
+      - CHAR
+      - INT8
+      - UINT8
+      - INT16
+      - UINT16
+      - UINT32
+      - UINT64
+      - STRING_ASCII
+      - STRING_UTF8
+      - STRING_UTF16
+      - STRING_UTF32
+      - STRING_UCS2
+      - STRING_UCS4
+      - ANY
+      - DATETIME_YEAR
+      - DATETIME_MONTH
+      - DATETIME_WEEK
+      - DATETIME_DAY
+      - DATETIME_HR
+      - DATETIME_MIN
+      - DATETIME_SEC
+      - DATETIME_MS
+      - DATETIME_US
+      - DATETIME_NS
+      - DATETIME_PS
+      - DATETIME_FS
+      - DATETIME_AS
+      - TIME_HR
+      - TIME_MIN
+      - TIME_SEC
+      - TIME_MS
+      - TIME_US
+      - TIME_NS
+      - TIME_PS
+      - TIME_FS
+      - TIME_AS
+      - BLOB
+      - BOOL
+    AttributeBufferSize:
+      type: object
+      description: object representing buffer size of an attribute
+      required:
+      - attribute
+      - offsetBytes
+      - dataBytes
+      properties:
+        attribute:
+          description: name of attribute
+          type: string
+        offsetBytes:
+          description: buffer size (in bytes) of offset buffer
+          type: integer
+          format: uint64
+        dataBytes:
+          description: buffer size (in bytes) of data buffer
+          type: integer
+          format: uint64
+    Querytype:
+      description: Type of query
+      type: string
+      enum:
+      - READ
+      - WRITE
+      - DELETE
+    Layout:
+      description: Layout of array
+      type: string
+      enum:
+      - row-major
+      - col-major
+      - global-order
+      - unordered
+    SubarrayPartitioner:
+      description: The subarray partitioner
+      type: object
+      properties:
+        subarray:
+          $ref: '#/components/schemas/Subarray'
+        budget:
+          description: Result size budget (in bytes) for all attributes.
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/AttributeBufferSize'
+        current:
+          description: The current partition info
+          type: object
+          properties:
+            subarray:
+              $ref: '#/components/schemas/Subarray'
+            start:
+              description: PartitionInfo start
+              type: integer
+              format: uint64
+            end:
+              description: PartitionInfo end
+              type: integer
+              format: uint64
+            splitMultiRange:
+              description: PartitionInfo splitMultiRange
+              type: boolean
+        state:
+          description: The state information for the remaining partitions to be produced
+          type: object
+          properties:
+            start:
+              description: State start
+              type: integer
+              format: uint64
+            end:
+              description: State end
+              type: integer
+              format: uint64
+            singleRange:
+              description: State singleRange
+              type: array
+              x-omitempty: true
+              items:
+                $ref: '#/components/schemas/Subarray'
+            multiRange:
+              description: State multiRange
+              type: array
+              x-omitempty: true
+              items:
+                $ref: '#/components/schemas/Subarray'
+        memoryBudget:
+          description: The memory budget for the fixed-sized attributes and the offsets of the var-sized attributes
+          type: integer
+          format: uint64
+        memoryBudgetVar:
+          description: The memory budget for the var-sized attributes
+          type: integer
+          format: uint64
+    AttributeBufferHeader:
+      description: Represents an attribute buffer header information
+      type: object
+      required:
+      - name
+      - fixedLenBufferSizeInBytes
+      - varLenBufferSizeInBytes
+      properties:
+        name:
+          description: Attribute name
+          type: string
+          example: attribute1
+        fixedLenBufferSizeInBytes:
+          description: Number of bytes in the fixed-length attribute data buffer (offsets for var-len attributes)
+          type: integer
+          format: uint64
+        varLenBufferSizeInBytes:
+          description: Number of bytes in the var-length attribute data buffer
+          type: integer
+          format: uint64
+    Querystatus:
+      description: Status of query
+      type: string
+      enum:
+      - FAILED
+      - COMPLETED
+      - INPROGRESS
+      - INCOMPLETE
+      - UNINITIALIZED
+    SubarrayRanges:
+      description: A set of 1D ranges for a subarray
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/Datatype'
+        hasDefaultRange:
+          description: True if the range is the default range
+          type: boolean
+        buffer:
+          description: The bytes of the ranges
+          type: array
+          items:
+            type: integer
+            format: uint8
+    Array:
+      description: Represents an open array
+      type: object
+      required:
+      - timestamp
+      - queryType
+      - uri
+      properties:
+        timestamp:
+          description: timestamp (epoch milliseconds) array is opened at
+          type: number
+          format: uint64
+          example: 1540471791873
+        queryType:
+          description: Array opened for query type
+          $ref: '#/components/schemas/Querytype'
+        uri:
+          description: Array uri
+          type: string
+    Query:
+      type: object
+      required:
+      - type
+      - attributeBufferHeaders
+      - layout
+      - status
+      - array
+      - totalFixedLengthBufferBytes
+      - totalVarLenBufferBytes
+      properties:
+        type:
+          $ref: '#/components/schemas/Querytype'
+        layout:
+          $ref: '#/components/schemas/Layout'
+        status:
+          $ref: '#/components/schemas/Querystatus'
+        attributeBufferHeaders:
+          description: List of attribute buffer headers
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/AttributeBufferHeader'
+        writer:
+          description: writer contains data needed for continuation of global write order queries
+          $ref: '#/components/schemas/Writer'
+        reader:
+          description: reader contains data needed for continuation of reads
+          $ref: '#/components/schemas/QueryReader'
+        array:
+          description: Represents an open array
+          $ref: '#/components/schemas/Array'
+        totalFixedLengthBufferBytes:
+          description: Total number of bytes in fixed size attribute buffers.
+          type: integer
+          format: uint64
+        totalVarLenBufferBytes:
+          description: Total number of bytes in variable size attribute buffers.
+          type: integer
+          format: uint64
+      x-go-type:
+        import:
+          package: github.com/TileDB-Inc/TileDB-Go
+          alias: tiledb
+        type: Query
+    QueryRanges:
+      description: Subarray bounds to query
+      type: object
+      properties:
+        layout:
+          $ref: '#/components/schemas/Layout'
+        ranges:
+          description: List of ranges,
+          type: array
+          x-omitempty: true
+          items:
+            type: array
+            x-omitempty: true
+            items:
+              type: number
+    Subarray:
+      description: A Subarray
+      type: object
+      properties:
+        layout:
+          $ref: '#/components/schemas/Layout'
+        ranges:
+          description: List of 1D ranges, one per dimension
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/SubarrayRanges'
+    ReadState:
+      description: state for reads
+      type: object
+      properties:
+        initialized:
+          description: True if the reader has been initialized.
+          type: boolean
+        overflowed:
+          description: True if the query produced results that could not fit in some buffer.
+          type: boolean
+        unsplittable:
+          description: True if the current subarray partition is unsplittable.
+          type: boolean
+        subarrayPartitioner:
+          $ref: '#/components/schemas/SubarrayPartitioner'
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
+    QueryReader:
+      description: Read struct (can't be called reader due to class name conflict)
+      type: object
+      properties:
+        layout:
+          $ref: '#/components/schemas/Layout'
+        subarray:
+          $ref: '#/components/schemas/Subarray'
+        readState:
+          description: To handle incomplete read queries.
+          $ref: '#/components/schemas/ReadState'
+        varOffsetsMode:
+          description: The offsets format (bytes or elements) to be used.
+          type: string
+        varOffsetsAddExtraElement:
+          description: True if an extra element will be added to the end of the offsets buffer.
+          type: boolean
+        varOffsetsBitsize:
+          description: The offsets bitsize (32 or 64) to be used.
+          type: integer
+          format: uint32
+    Writer:
+      type: object
+      properties:
+        checkCoordDups:
+          type: boolean
+        checkCoordOOB:
+          type: boolean
+        dedupCoords:
+          type: boolean
+        subarray:
+          $ref: '#/components/schemas/DomainArray'
+    DomainArray:
+      description: Domain object for an array of each type
+      type: object
+      properties:
+        int8:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: int8
+        uint8:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint8
+        int16:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: int16
+        uint16:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint16
+        int32:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: int32
+        uint32:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint32
+        int64:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: int64
+        uint64:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint64
+        float32:
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: float
+        float64:
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: double
+    GenericTileOffsets:
+      type: object
+      description: Array directory (for reads)
+      properties:
+        rtree:
+          description: RTree serialized as a blob
+          type: number
+          format: uint64
+        tileOffsets:
+          description: tile offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileVarOffsets:
+          description: variable tile offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileVarSizes:
+          description: sizes of the uncompressed variable tiles offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileValidityOffsets:
+          description: tile validity offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileMinOffsets:
+          description: min tile offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileMaxOffsets:
+          description: max tile offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileSumOffsets:
+          description: tile sum offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileNullCountOffsets:
+          description: null count offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        fragmentMinMaxSumNullCountOffset:
+          description: fragment min/max/sum/nullcount offsets
+          type: number
+          format: uint64
+        processedConditionsOffsets:
+          description: processed conditions offsets
+          type: number
+          format: uint64
+    Querytype_2:
+      description: Type of query
+      type: string
+      enum:
+      - READ
+      - WRITE
+    SubarrayRanges_2:
+      description: A set of 1D ranges for a subarray
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/Datatype'
+        hasDefaultRange:
+          description: True if the range is the default range
+          type: boolean
+        buffer:
+          description: The bytes of the ranges
+          type: array
+          items:
+            type: integer
+            format: uint8
+        bufferSizes:
+          description: The list of sizes per range
+          type: array
+          items:
+            type: integer
+            format: uint64
+        bufferStartSizes:
+          description: The list of start sizes per range
+          type: array
+          items:
+            type: integer
+            format: uint64
+    Array_2:
+      description: Represents an open array
+      type: object
+      required:
+      - queryType
+      - uri
+      properties:
+        queryType:
+          description: Array opened for query type
+          $ref: '#/components/schemas/Querytype_2'
+        uri:
+          description: Array uri
+          type: string
+        endTimestamp:
+          description: Ending timestamp (epoch milliseconds) array is opened at
+          type: number
+          format: uint64
+          example: 1540471791873
+        startTimestamp:
+          description: Starting timestamp (epoch milliseconds) array is opened at
+          type: number
+          format: uint64
+          example: 1540471791873
+        arraySchemaLatest:
+          description: Latest array schema
+          $ref: '#/components/schemas/ArraySchema'
+        arraySchemasAll:
+          description: Array's schemas
+          $ref: '#/components/schemas/ArraySchemaMap'
+        arrayMetadata:
+          description: Array's metadata
+          $ref: '#/components/schemas/ArrayMetadata'
+        nonEmptyDomain:
+          description: Array's non empty domain
+          $ref: '#/components/schemas/NonEmptyDomainList'
+        arrayDirectory:
+          description: Array directory (for reads)
+          $ref: '#/components/schemas/ArrayDirectory'
+        fragmentMetadataAll:
+          description: metadata for all fragments (for reads)
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/FragmentMetadata'
+        openedAtEndTimestamp:
+          description: The ending timestamp that the array was last opened at
+          type: number
+          format: uint64
+    Attribute:
+      description: Attribute of array
+      type: object
+      required:
+      - name
+      - type
+      - filterPipeline
+      - cellValNum
+      properties:
+        name:
+          description: Attribute name
+          type: string
+          example: attribute1
+        type:
+          $ref: '#/components/schemas/Datatype'
+        filterPipeline:
+          $ref: '#/components/schemas/FilterPipeline'
+        cellValNum:
+          description: Attribute number of values per cell
+          type: integer
+          example: 1
+        nullable:
+          description: Is attribute nullable
+          type: boolean
+          example: true
+        fillValueValidity:
+          description: Default validity fill value for nullable attributes
+          type: boolean
+          example: true
+        fillValue:
+          description: The default fill value
+          type: array
+          items:
+            type: integer
+            format: uint8
+    DeleteAndUpdateTileLocation:
+      type: object
+      description: the location of delete tiles
+      properties:
+        uri:
+          description: the uri
+          type: string
+        conditionMarker:
+          type: string
+        offset:
+          type: number
+          format: uint64
+    Writer_2:
+      type: object
+      properties:
+        checkCoordDups:
+          type: boolean
+        checkCoordOOB:
+          type: boolean
+        dedupCoords:
+          type: boolean
+        subarrayRanges:
+          $ref: '#/components/schemas/Subarray'
+        subarray:
+          $ref: '#/components/schemas/DomainArray'
+    FloatScaleConfig:
+      description: FloatScaleConfig
+      type: object
+      properties:
+        scale:
+          type: integer
+          format: double
+        offset:
+          type: integer
+          format: double
+        byteWidth:
+          type: integer
+          format: uint64
+    ArrayMetadataEntry:
+      type: object
+      description: key/value pair representing an array metadata map entry
+      properties:
+        key:
+          type: string
+        type:
+          type: string
+        valueNum:
+          type: integer
+          format: uint32
+        value:
+          type: array
+          items:
+            type: integer
+            format: uint8
+        del:
+          type: boolean
+    Filter:
+      description: Filter
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          description: Filter type
+          $ref: '#/components/schemas/FilterType'
+        floatScaleConfig:
+          description: Filter type
+          $ref: '#/components/schemas/FloatScaleConfig'
+        data:
+          description: Filter data
+          type: object
+          properties:
+            text:
+              type: string
+            bytes:
+              type: array
+              items:
+                type: integer
+                format: uint8
+            int8:
+              type: integer
+              format: int8
+            uint8:
+              type: integer
+              format: uint8
+            int16:
+              type: integer
+              format: int16
+            uint16:
+              type: integer
+              format: uint16
+            int32:
+              type: integer
+              format: int32
+            uint32:
+              type: integer
+              format: uint32
+            int64:
+              type: integer
+              format: int64
+            uint64:
+              type: integer
+              format: uint64
+            float32:
+              type: integer
+              format: float
+            float64:
+              type: integer
+              format: double
+    NonEmptyDomainList:
+      type: object
+      description: object containing non empty domains
+      properties:
+        nonEmptyDomains:
+          description: Array's non empty domain
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/NonEmptyDomain'
+    ArrayDirectory:
+      type: object
+      description: Array directory (for reads)
+      properties:
+        unfilteredFragmentUris:
+          description: fragment URIs
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        consolidatedCommitUris:
+          description: consolidated commit URI set
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        arraySchemaUris:
+          description: URIs of all the array schema files
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        latestArraySchemaUri:
+          description: latest array schema URI.
+          type: string
+        arrayMetaUrisToVacuum:
+          description: the array metadata files to vacuum
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        arrayMetaVacUrisToVacuum:
+          description: the array metadata vac files to vacuum
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        commitUrisToConsolidate:
+          description: the commit files to consolidate
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        commitUrisToVacuum:
+          description: the commit files to vacuum
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        consolidatedCommitUrisToVacuum:
+          description: the consolidated commit files to vacuum
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        fragmentMetaUris:
+          description: the URIs of the consolidated fragment metadata files
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        timestampStart:
+          description: Only the files created after timestamp_start are listed
+          type: number
+          format: uint64
+        timestampEnd:
+          description: Only the files created before timestamp_end are listed
+          type: number
+          format: uint64
+        arrayMetaUris:
+          description: the timestamped filtered array metadata URIs, after removing the ones that need to be vacuumed and those that do not fall within
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/TimestampedURI'
+        deleteAndUpdateTileLocation:
+          description: the location of delete tiles
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/DeleteAndUpdateTileLocation'
+    QueryReader_2:
+      description: Read struct (can't be called reader due to class name conflict)
+      type: object
+      properties:
+        layout:
+          $ref: '#/components/schemas/Layout'
+        subarray:
+          $ref: '#/components/schemas/Subarray'
+        readState:
+          description: To handle incomplete read queries.
+          $ref: '#/components/schemas/ReadState'
+    TimestampedURI:
+      type: object
+      description: the timestamped filtered array metadata URIs, after removing the ones that need to be vacuumed and those that do not fall within
+      properties:
+        uri:
+          description: the uri
+          type: string
+        timestampStart:
+          description: start of timestamp
+          type: number
+          format: uint64
+        timestampEnd:
+          description: end of timestamp
+          type: number
+          format: uint64
+    ArraySchemaEntry:
+      type: object
+      description: key/value pair representing an array schema map entry
+      properties:
+        key:
+          type: string
+        value:
+          $ref: '#/components/schemas/ArraySchema'
+    AttributeBufferHeader_2:
+      description: Represents an attribute buffer header information
+      type: object
+      required:
+      - name
+      - fixedLenBufferSizeInBytes
+      - varLenBufferSizeInBytes
+      properties:
+        name:
+          description: Attribute name
+          type: string
+          example: attribute1
+        fixedLenBufferSizeInBytes:
+          description: Number of bytes in the fixed-length attribute data buffer (offsets for var-len attributes)
+          type: integer
+          format: uint64
+        varLenBufferSizeInBytes:
+          description: Number of bytes in the var-length attribute data buffer
+          type: integer
+          format: uint64
+        validityLenBufferSizeInBytes:
+          description: Number of bytes for validity in case attribute is nullable
+          type: integer
+          format: uint64
+        originalFixedLenBufferSizeInBytes:
+          description: Original user set number of bytes in the fixed-length attribute data buffer
+          type: integer
+          format: uint64
+        originalVarLenBufferSizeInBytes:
+          description: Original user set number of bytes in the var-length attribute data buffer
+          type: integer
+          format: uint64
+        originalValidityLenBufferSizeInBytes:
+          description: Original user set number of bytes in the validity data buffer
+          type: integer
+          format: uint64
+    FilterPipeline:
+      description: One or more filters to apply
+      type: object
+      properties:
+        filters:
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/Filter'
+    FilterType:
+      description: TileDB filter types
+      type: string
+      enum:
+      - FILTER_NONE
+      - FILTER_GZIP
+      - FILTER_ZSTD
+      - FILTER_LZ4
+      - FILTER_RLE
+      - FILTER_BZIP2
+      - FILTER_DOUBLE_DELTA
+      - FILTER_BIT_WIDTH_REDUCTION
+      - FILTER_BITSHUFFLE
+      - FILTER_BYTESHUFFLE
+      - FILTER_POSITIVE_DELTA
+      - FILTER_SCALE_FLOAT
+      - FILTER_WEBP
+      - FILTER_CHECKSUM_MD5
+      - FILTER_CHECKSUM_SHA256
+      - FILTER_DICTIONARY
+    FragmentMetadata:
+      type: object
+      description: Metadata of a fragment
+      properties:
+        fileSizes:
+          description: The size of each attribute file
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        fileVarSizes:
+          description: The size of each var attribute file
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        fileValiditySizes:
+          description: The size of each validity attribute file
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        fragmentUri:
+          description: The uri of the fragment this metadata belongs to
+          type: string
+        hasTimestamps:
+          description: True if the fragment has timestamps
+          type: boolean
+        hasDeleteMeta:
+          description: True if the fragment has delete metadata
+          type: boolean
+        sparseTileNum:
+          description: The number of sparse tiles
+          type: number
+          format: uint64
+        tileIndexBase:
+          description: Used to track the tile index base between global order writes
+          type: number
+          format: uint64
+        tileOffsets:
+          description: Tile offsets in their attribute files
+          type: array
+          x-omitempty: true
+          items:
+            type: array
+            items:
+              type: number
+              format: uint64
+        tileVarOffsets:
+          description: Variable tile offsets in their attribute files
+          type: array
+          x-omitempty: true
+          items:
+            type: array
+            items:
+              type: number
+              format: uint64
+        tileVarSizes:
+          description: The sizes of the uncompressed variable tiles
+          type: array
+          x-omitempty: true
+          items:
+            type: array
+            items:
+              type: number
+              format: uint64
+        tileValidityOffsets:
+          description: Validity tile offests in their attribute files
+          type: array
+          x-omitempty: true
+          items:
+            type: array
+            items:
+              type: number
+              format: uint64
+        tileMinBuffer:
+          description: tile min buffers
+          type: array
+          x-omitempty: true
+          items:
+            type: array
+            items:
+              type: number
+              format: uint8
+        tileMinVarBuffer:
+          description: tile min buffers for var length data
+          type: array
+          x-omitempty: true
+          items:
+            type: array
+            items:
+              type: number
+              format: uint8
+        tileMaxBuffer:
+          description: tile max buffers
+          type: array
+          x-omitempty: true
+          items:
+            type: array
+            items:
+              type: number
+              format: uint8
+        tileMaxVarBuffer:
+          description: tile max buffers for var length data
+          type: array
+          x-omitempty: true
+          items:
+            type: array
+            items:
+              type: number
+              format: uint8
+        tileSums:
+          description: tile sum values
+          type: array
+          x-omitempty: true
+          items:
+            type: array
+            items:
+              type: number
+              format: uint8
+        tileNullCounts:
+          description: tile null count values
+          type: array
+          x-omitempty: true
+          items:
+            type: array
+            items:
+              type: number
+              format: uint64
+        fragmentMins:
+          description: fragment min values
+          type: array
+          x-omitempty: true
+          items:
+            type: array
+            items:
+              type: number
+              format: uint8
+        fragmentMaxs:
+          description: fragment max values
+          type: array
+          x-omitempty: true
+          items:
+            type: array
+            items:
+              type: number
+              format: uint8
+        fragmentSums:
+          description: fragment sum values
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        fragmentNullCounts:
+          description: fragment null count values
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        version:
+          description: the format version of this metadata
+          type: integer
+          format: uint32
+        timestampRange:
+          description: A pair of timestamps for fragment
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        lastTileCellNum:
+          description: The number of cells in the last tile
+          type: integer
+          format: uint64
+        nonEmptyDomain:
+          description: The non empty domain of the fragment
+          $ref: '#/components/schemas/NonEmptyDomainList'
+        rtree:
+          description: The RTree for the MBRs serialized as a blob
+          type: string
+          format: binary
+        hasConsolidatedFooter:
+          description: if the fragment metadata footer appears in a consolidated file
+          type: boolean
+        gtOffsets:
+          description: The start offsets of the generic tiles stored in the metadata file
+          $ref: '#/components/schemas/GenericTileOffsets'
+    NonEmptyDomain:
+      type: object
+      description: object representing a non-empty domain
+      required:
+      - nonEmptyDomain
+      - isEmpty
+      properties:
+        nonEmptyDomain:
+          description: Non Empty Domain of array
+          $ref: '#/components/schemas/DomainArray'
+        isEmpty:
+          description: Is non-empty domain really empty?
+          type: boolean
+          example: false
+        sizes:
+          description: Number of elements in DomainArray for var length
+          type: array
+          items:
+            type: integer
+            format: uint64
+    ArraySchemaMap:
+      type: object
+      description: array's schemas
+      properties:
+        entries:
+          description: List of array schemas entries
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/ArraySchemaEntry'
+    ArraySchema:
+      description: ArraySchema during creation or retrieval
+      type: object
+      required:
+      - version
+      - arrayType
+      - tileOrder
+      - cellOrder
+      - capacity
+      - coordsFilterPipeline
+      - offsetFilterPipeline
+      - domain
+      - attributes
+      properties:
+        uri:
+          description: URI of schema
+          type: string
+          example: s3://<bucket>/test_array
+        name:
+          description: name of schema
+          type: string
+        version:
+          description: file format version
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+          example:
+          - 1
+          - 3
+          - 0
+        arrayType:
+          $ref: '#/components/schemas/ArrayType'
+          description: Type of array
+          example: sparse
+        tileOrder:
+          description: Tile order setting of array
+          $ref: '#/components/schemas/Layout'
+          example: row-major
+        cellOrder:
+          description: Order of cells
+          $ref: '#/components/schemas/Layout'
+          example: row-major
+        capacity:
+          description: Capacity of array
+          type: integer
+          format: uint64
+          example: 100000
+        coordsFilterPipeline:
+          description: Filter pipeline used for coordinates (enum)
+          $ref: '#/components/schemas/FilterPipeline'
+        offsetFilterPipeline:
+          description: Filter pipeline use for variable offsets (enum)
+          $ref: '#/components/schemas/FilterPipeline'
+        validityFilterPipeline:
+          description: Type of compression for validity buffers (enum)
+          $ref: '#/components/schemas/FilterPipeline'
+        domain:
+          description: Domain of array
+          $ref: '#/components/schemas/Domain'
+        attributes:
+          description: Attributes of array
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/Attribute'
+        allowsDuplicates:
+          description: True if the array allows coordinate duplicates. Applicable only to sparse arrays.
+          type: boolean
+        timestampRange:
+          description: The list of sizes per range
+          type: array
+          items:
+            type: integer
+            format: uint64
+    Query_2:
+      type: object
+      required:
+      - type
+      - attributeBufferHeaders
+      - layout
+      - status
+      - array
+      - totalFixedLengthBufferBytes
+      - totalVarLenBufferBytes
+      properties:
+        type:
+          $ref: '#/components/schemas/Querytype_2'
+        layout:
+          $ref: '#/components/schemas/Layout'
+        status:
+          $ref: '#/components/schemas/Querystatus'
+        attributeBufferHeaders:
+          description: List of attribute buffer headers
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/AttributeBufferHeader_2'
+        writer:
+          description: writer contains data needed for continuation of global write order queries
+          $ref: '#/components/schemas/Writer_2'
+        reader:
+          description: reader contains data needed for continuation of reads
+          $ref: '#/components/schemas/QueryReader_2'
+        array:
+          description: Represents an open array
+          $ref: '#/components/schemas/Array_2'
+        totalFixedLengthBufferBytes:
+          description: Total number of bytes in fixed size attribute buffers.
+          type: integer
+          format: uint64
+        totalVarLenBufferBytes:
+          description: Total number of bytes in variable size attribute buffers.
+          type: integer
+          format: uint64
+        totalValidityBufferBytes:
+          description: Total number of bytes in validity buffers
+          type: integer
+          format: uint64
+      x-go-type:
+        import:
+          package: github.com/TileDB-Inc/TileDB-Go
+          alias: tiledb
+        type: Query
+    ArrayMetadata:
+      type: object
+      description: user's TileDB array metadata
+      properties:
+        entries:
+          description: List of metadata entries
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/ArrayMetadataEntry'
+    ArrayType:
+      description: TileDB array type
+      type: string
+      enum:
+      - dense
+      - sparse
+    Domain:
+      description: Domain of array
+      type: object
+      required:
+      - type
+      - tileOrder
+      - cellOrder
+      - dimensions
+      properties:
+        type:
+          $ref: '#/components/schemas/Datatype'
+          description: Domain Type
+        tileOrder:
+          $ref: '#/components/schemas/Layout'
+          description: Tile Order
+        cellOrder:
+          $ref: '#/components/schemas/Layout'
+          description: Cell Order
+        dimensions:
+          type: array
+          description: Array of dimensions
+          items:
+            $ref: '#/components/schemas/Dimension'
+    Dimension:
+      description: Dimension of array
+      type: object
+      required:
+      - type
+      - domain
+      - nullTileExtent
+      properties:
+        name:
+          description: Dimension name
+          type: string
+          example: row
+        type:
+          $ref: '#/components/schemas/Datatype'
+        domain:
+          description: extent of domain
+          $ref: '#/components/schemas/DomainArray'
+        nullTileExtent:
+          description: Is tile extent null
+          type: boolean
+          example: true
+        tileExtent:
+          description: Extent of tile
+          type: object
+          properties:
+            int8:
+              type: integer
+              format: int8
+            uint8:
+              type: integer
+              format: uint8
+            int16:
+              type: integer
+              format: int16
+            uint16:
+              type: integer
+              format: uint16
+            int32:
+              type: integer
+              format: int32
+            uint32:
+              type: integer
+              format: uint32
+            int64:
+              type: integer
+              format: int64
+            uint64:
+              type: integer
+              format: uint64
+            float32:
+              type: integer
+              format: float
+            float64:
+              type: integer
+              format: double
+        filterPipeline:
+          x-omit-empty: true
+          $ref: '#/components/schemas/FilterPipeline'
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-TILEDB-REST-API-KEY
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          scopes:
+            read: Grants read access
+            write: Grants write access
+            admin: Grants read and write access to administrative information
+          authorizationUrl: https://oauth2.tiledb.com/oauth2/authorize
+          tokenUrl: https://oauth2.tiledb.com/oauth2/token
+x-refined-from:
+- tiledb-cloud-v1-openapi.yaml
+- tiledb-cloud-v2-openapi.yaml

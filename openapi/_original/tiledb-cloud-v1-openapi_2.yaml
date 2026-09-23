@@ -1,3 +1,5 @@
+# x-archived-from: tiledb-cloud-v1-openapi.yaml
+# x-archived-on: 2026-09-16
 swagger: "2.0"
 info:
   description: TileDB Storage Platform REST API

@@ -1,0 +1,614 @@
+openapi: 3.2.0
+info:
+  description: TileDB Storage Platform REST API
+  title: TileDB Storage Platform Registered Task Graphs API
+  version: 2.17.51
+servers:
+- url: /v1
+security:
+- BasicAuth: []
+- ApiKeyAuth: []
+tags:
+- name: registered_task_graphs
+paths:
+  /taskgraphs/{namespace}/registered/{name}:
+    parameters:
+    - name: namespace
+      in: path
+      description: The namespace that owns this registered UDF.
+      required: true
+      schema:
+        type: string
+    - name: name
+      in: path
+      description: The name of the registered task graph.
+      required: true
+      schema:
+        type: string
+    get:
+      description: Fetch the contents of this registered task graph.
+      operationId: getRegisteredTaskGraph
+      tags:
+      - registered_task_graphs
+      responses:
+        200:
+          description: The contents of the registered task graph.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisteredTaskGraph'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get registered task graph
+      x-summary-source: derived
+    post:
+      description: Register a task graph in the given namespace, with the given name.
+      operationId: registerRegisteredTaskGraph
+      tags:
+      - registered_task_graphs
+      responses:
+        204:
+          description: Task graph registered successfully.
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisteredTaskGraph'
+        description: Task graph to register.
+      summary: Register registered task graph
+      x-summary-source: derived
+    patch:
+      description: Update the contents of an existing registered task graph.
+      operationId: updateRegisteredTaskGraph
+      tags:
+      - registered_task_graphs
+      responses:
+        204:
+          description: Task graph updated successfully.
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisteredTaskGraph'
+        description: The new contents of the task graph.
+      summary: Update registered task graph
+      x-summary-source: derived
+    delete:
+      description: Delete the given registered task graph.
+      operationId: deleteRegisteredTaskGraph
+      tags:
+      - registered_task_graphs
+      responses:
+        204:
+          description: Task graph successfully deleted.
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Delete registered task graph
+      x-summary-source: derived
+  /taskgraphs/{namespace}/registered/{name}/share:
+    parameters:
+    - name: namespace
+      in: path
+      description: The namespace that owns the registered task graph.
+      required: true
+      schema:
+        type: string
+    - name: name
+      in: path
+      description: The name of the task graph.
+      required: true
+      schema:
+        type: string
+    get:
+      description: Get sharing policies for the task graph.
+      tags:
+      - registered_task_graphs
+      operationId: getRegisteredTaskGraphSharingPolicies
+      responses:
+        200:
+          description: List of all specific sharing policies
+          content:
+            application/json:
+              schema:
+                type: array
+                x-omitempty: true
+                items:
+                  $ref: '#/components/schemas/TaskGraphSharing'
+        404:
+          description: 'The task graph does not exist (or the user does not have permission to view policies)
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get registered task graph sharing policies
+      x-summary-source: derived
+    patch:
+      description: Share a task graph.
+      tags:
+      - registered_task_graphs
+      operationId: shareRegisteredTaskGraph
+      responses:
+        204:
+          description: UDF shared successfully
+        404:
+          description: UDF does not exist or user does not have permissions to share UDF
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskGraphSharing'
+        description: 'Namespace and list of permissions to share with. An empty list of permissions will remove the namespace; if permissions already exist they will be deleted then new ones added. In the event of a failure, the new policies will be rolled back to prevent partial policies, and it''s likely the UDF will not be shared with the namespace at all.
+
+          '
+        required: true
+      summary: Share registered task graph
+      x-summary-source: derived
+components:
+  schemas:
+    QueryRanges:
+      description: Subarray bounds to query
+      type: object
+      properties:
+        layout:
+          $ref: '#/components/schemas/Layout'
+        ranges:
+          description: List of ranges,
+          type: array
+          x-omitempty: true
+          items:
+            type: array
+            x-omitempty: true
+            items:
+              type: number
+    Backoff:
+      description: Backoff is a backoff strategy to use within retryStrategy
+      type: object
+      properties:
+        duration:
+          description: Duration is the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
+          type: string
+        factor:
+          description: Factor is a factor to multiply the base duration after each failed retry
+          type: integer
+          format: uint32
+        maxDuration:
+          description: MaxDuration is the maximum amount of time allowed for the backoff strategy
+          type: string
+    TaskGraphActions:
+      description: actions a user can take on a UDF
+      type: string
+      enum:
+      - fetch_task_graph
+      - share_task_graph
+    RetryPolicy:
+      description: RetryPolicy is a policy of node statuses that will be retried
+      type: string
+      enum:
+      - Always
+      - OnFailure
+      - OnError
+      - OnTransientError
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
+    ResultFormat:
+      description: Data format of a result
+      type: string
+      enum:
+      - python_pickle
+      - r_serialization
+      - json
+      - arrow
+      - bytes
+      - tiledb_json
+      - native
+    TaskGraphSharing:
+      description: details for sharing a given registered task graph
+      type: object
+      properties:
+        actions:
+          description: List of permitted actions
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/TaskGraphActions'
+          example:
+          - fetch_task_graph
+          - share_task_graph
+        namespace:
+          description: namespace being granted array access can be a user or organization
+          type: string
+          example: MyOrganization
+        namespace_type:
+          description: details on if the namespace is a organization or user
+          type: string
+          example: organization
+    UDFLanguage:
+      description: UDF Type
+      type: string
+      enum:
+      - python
+      - r
+    TGUDFArgument:
+      description: 'A single argument to a UDF. This may represent a positional argument or a named argument, depending upon whether `name` is set.
+
+        '
+      type: object
+      properties:
+        name:
+          description: The name of the argument, if present.
+          type:
+          - string
+          - 'null'
+        value:
+          $ref: '#/components/schemas/TGArgValue'
+    Layout:
+      description: Layout of array
+      type: string
+      enum:
+      - row-major
+      - col-major
+      - global-order
+      - unordered
+    RegisteredTaskGraph:
+      description: 'The structure and metadata of a task graph that can be stored on TileDB Cloud and executed by users who have access to it.
+
+        '
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: A server-assigned unique ID for the UDF, in UUID format.
+        namespace:
+          type: string
+          description: The namespace that owns this task graph log.
+        name:
+          type: string
+          maxLength: 255
+          description: 'The name of this graph, to appear in URLs. Must be unique per-namespace.
+
+            '
+        readme:
+          type: string
+          description: Documentation for the task graph, in Markdown format.
+        license_id:
+          type:
+          - string
+          - 'null'
+          description: SPDX license identifier.
+        license_text:
+          type:
+          - string
+          - 'null'
+          description: Full text of the license.
+        tags:
+          type: array
+          description: Optional tags to classify the graph.
+          items:
+            type: string
+            description: Unaccented, lowercase, hyphenated Latin characters.
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskGraphNode'
+          description: 'The structure of the graph, in the form of the nodes that make it up. As with `TaskGraphLog`, nodes must topologically sorted, so that any node appears after all the nodes it depends on.
+
+            '
+    UDFArrayDetails:
+      description: Contains array details for multi-array query including uri, ranges buffers
+      type: object
+      properties:
+        parameter_id:
+          description: 'An optional client-generated identifier to distinguish between multiple range/buffer requests from the same array in the same call.
+
+            This may be set for MultiArrayUDFs that use the `argument_json` style of passing arrays.
+
+            '
+          type:
+          - string
+          - 'null'
+          x-omitempty: true
+        uri:
+          description: array to set ranges and buffers on, must be in tiledb:// format
+          type: string
+        ranges:
+          description: ranges to run against, generic format
+          $ref: '#/components/schemas/QueryRanges'
+        buffers:
+          description: List of buffers to fetch (attributes + dimensions)
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+    TaskGraphNode:
+      description: 'Information about a single node within a registered task graph. A single node represents one piece of data or a computational step; either as an input value, a data source, or a computation that acts upon earlier nodes. The structure parallels the existing `TaskGraphNodeMetadata`.
+
+        '
+      type: object
+      properties:
+        client_node_id:
+          type: string
+          description: The client-generated UUID of the given graph node.
+        name:
+          type:
+          - string
+          - 'null'
+          maxLength: 255
+          description: 'A client-specified name for the node. If provided, this must be unique.
+
+            '
+        depends_on:
+          type: array
+          items:
+            type: string
+          description: 'The client_node_uuid of each node that this node depends upon. Used to define the structure of the graph.
+
+            '
+        array_node:
+          $ref: '#/components/schemas/UDFArrayDetails'
+        input_node:
+          $ref: '#/components/schemas/TGInputNodeData'
+        sql_node:
+          $ref: '#/components/schemas/TGSQLNodeData'
+        udf_node:
+          $ref: '#/components/schemas/TGUDFNodeData'
+        retry_strategy:
+          $ref: '#/components/schemas/RetryStrategy'
+        expand_node_output:
+          type:
+          - string
+          - 'null'
+          description: 'Used to create dynamic tasks based on the output of another node. The other node''s output must be a JSON list of values. The expansion process creates one task per item in the output list. The item is also passed as an argument to each task. The value is the client_node_uuid of the node that we want to expand.
+
+            '
+        deadline:
+          type:
+          - integer
+          - 'null'
+          format: int64
+          x-omitempty: true
+          description: 'Duration in seconds relative to the node start time which the node is allowed to run before it gets terminated.
+
+            '
+    TGUDFEnvironment:
+      description: Metadata about the environment where we want to execute a UDF.
+      type: object
+      properties:
+        language:
+          $ref: '#/components/schemas/UDFLanguage'
+        language_version:
+          description: 'The language version used to execute this UDF. Neither this nor `language` needs to be set for registered UDFs, since the language and version are stored server-side with the UDF itself.
+
+            '
+          type: string
+        image_name:
+          description: 'The name of the image to use for the execution environment.
+
+            '
+          type: string
+        access_credentials_name:
+          description: 'The name of the access credentials to use. if unset, no credentials will be configured in the environment.
+
+            '
+          type: string
+        namespace:
+          description: 'If set, the non-default namespace to execute this UDF under (and to query any Array Nodes that are used as inputs to this UDF).
+
+            '
+          type:
+          - string
+          - 'null'
+        resource_class:
+          description: 'The resource class to use for the UDF execution. Resource classes define resource limits for memory and CPUs. If this is empty, then the UDF will execute in the standard resource class of the TileDB Cloud provider.
+
+            '
+          type: string
+          x-omitempty: true
+        resources:
+          type: object
+          description: 'The resources requested for this particular node. If resources are not specified resource_class is used, if it is not set the standard resource // defaults are used
+
+            '
+          properties:
+            cpu:
+              type: string
+              example: 500m
+            memory:
+              type: string
+              example: 8Gi
+            gpu:
+              type: integer
+              example: 1
+          x-omitempty: true
+        run_client_side:
+          description: 'A hint that, if possible, this function should be executed on the client side rather than on the server. Registered UDFs and functions which take arrays as inputs can never be executed client-side. If the client’s environment is incompatible, or the client does not support client-side execution, the function will be executed on the server.
+
+            '
+          type: boolean
+          x-omitempty: true
+        timeout:
+          description: 'The maximum length of time this UDF is allowed to execute for before it is killed and fails. If not present (or zero), the function is allowed to run indefinitely (subject to the server’s global limits).
+
+            '
+          type:
+          - number
+          - 'null'
+    TGArgValue:
+      description: "An argument provided to a node. This is one of a direct value (i.e., a raw JSON value) or a `TGSentinel`.\nFor example this Python value:\n\n    {\"a\": [1, \"pipe\", range(30), None], \"b\": b\"bytes\"}\n\nis encoded thusly (with included comments):\n\n    {  // A dictionary with string keys is JSON-encodable.\n      \"a\": [  // As is a list.\n        1,\n        \"pipe\",\n        {  // A `range` is replaced with its pickle.\n          \"__tdbudf__\": \"immediate\",\n          \"format\": \"python_pickle\",\n          \"base64_data\": \"gASVIAAAAAAAAACMCGJ1aWx0aW5zlIwFcmFuZ2WUk5RLAEseSwGHlFKULg==\"\n        },\n        null\n      ],\n      \"b\": {  // Raw binary data is encoded into base64.\n        \"__tdbudf__\": \"immediate\"\n        \"format\": \"bytes\",\n        \"base64_data\": \"Ynl0ZXM=\"\n      }\n    }\n"
+    TGSQLNodeData:
+      description: 'A node specifying an SQL query to execute in TileDB Cloud.
+
+        '
+      type:
+      - object
+      - 'null'
+      properties:
+        init_commands:
+          description: The commands to execute before running the query itself.
+          type: array
+          items:
+            type: string
+        query:
+          description: 'The text of the SQL query to execute. Parameters are substituted in for `?`s, just as in a regular MariaDB query.
+
+            '
+          type: string
+        parameters:
+          description: 'The parameters to substitute in for arguments in the `query`. Fixed-length. Arguments must be in JSON format.
+
+            '
+          type: array
+          items:
+            $ref: '#/components/schemas/TGArgValue'
+        result_format:
+          $ref: '#/components/schemas/ResultFormat'
+        namespace:
+          description: 'If set, the non-default namespace to execute this SQL query under.
+
+            '
+          type:
+          - string
+          - 'null'
+    TGUDFNodeData:
+      description: A node specifying the execution of a user-defined function.
+      type:
+      - object
+      - 'null'
+      properties:
+        registered_udf_name:
+          description: 'If set, the name of the registered UDF to execute, in the format `namespace/name`. Either this or `executable_code` should be set, but not both.
+
+            '
+          type:
+          - string
+          - 'null'
+        executable_code:
+          description: 'If set, the base64 serialization of the code for this step, encoded in a language-specific format (e.g. Pickle for Python, serialization for R).
+
+            '
+          type:
+          - string
+          - 'null'
+        source_text:
+          description: 'Optionally, the source text for the code passed in `executable_code`. *For reference only; only the code in `executable_code` is actually executed.* This will be included in activity logs and may be useful for debugging.
+
+            '
+          type: string
+        environment:
+          $ref: '#/components/schemas/TGUDFEnvironment'
+        arguments:
+          description: "The arguments to a UDF function. This encompasses both named and positional arguments. The format is designed to provide compatibility across languages like Python which have a fairly traditional split between positional arguments and named arguments, and languages like R which has a rather unique way of specifying arguments.\nFor Python (and most other languages), all positional arguments will come before all named arguments (if any are present):\n\n    // fn(arg1, arg2, arg3)\n    [\n      {value: arg1},\n      {value: arg2},\n      {value: arg3},\n    ]\n    // fn(arg1, arg2, n=kw1, a=kw2)\n    [\n      {value: arg1},\n      {value: arg2},\n      {name: \"n\", value: kw1},\n      {name: \"a\", value: kw2},\n    ]\n    // fn(kw=k1, only=k2)\n    [\n      {name: \"kw\", value: k1},\n      {name: \"only\", value: k2},\n    ]\n\nHowever, in R, named and positional arguments may be intermixed freely:\n\n    // fn(arg, n=kw1, arg2)\n    [\n      {value: arg},\n      {name: \"n\", value: kw1},\n      {value: arg2},\n    ]\n"
+          type: array
+          items:
+            $ref: '#/components/schemas/TGUDFArgument'
+        result_format:
+          $ref: '#/components/schemas/ResultFormat'
+    TGInputNodeData:
+      description: 'Specifies that a node is an “input value”, allowing for parameterized task graphs. An input node may not depend upon any other nodes.
+
+        '
+      type:
+      - object
+      - 'null'
+      properties:
+        default_value:
+          $ref: '#/components/schemas/TGArgValue'
+        datatype:
+          description: 'An annotation of what datatype this node is supposed to be. Conventionally, this is a Python-format type annotation, but it’s purely for documentation purposes and not validated.
+
+            '
+          type:
+          - string
+          - 'null'
+    RetryStrategy:
+      description: RetryStrategy provides controls on how to retry a taskgraph node
+      type: object
+      properties:
+        backoff:
+          description: Backoff is a backoff strategy
+          $ref: '#/components/schemas/Backoff'
+        expression:
+          description: Expression is a condition expression for when a node will be retried. If it evaluates to false, the node will not be retried and the retry strategy will be ignored
+          type: string
+        limit:
+          description: Limit is the maximum number of retry attempts when retrying a container. It does not include the original container; the maximum number of total attempts will be `limit + 1`.
+          type: integer
+          format: uint32
+        retryPolicy:
+          description: RetryPolicy is a policy of NodePhase statuses that will be retried
+          $ref: '#/components/schemas/RetryPolicy'
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-TILEDB-REST-API-KEY
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          scopes:
+            read: Grants read access
+            write: Grants write access
+            admin: Grants read and write access to administrative information
+          authorizationUrl: https://oauth2.tiledb.com/oauth2/authorize
+          tokenUrl: https://oauth2.tiledb.com/oauth2/token

@@ -1,0 +1,164 @@
+openapi: 3.2.0
+info:
+  description: TileDB Storage Platform REST API
+  title: TileDB Storage Platform Sql API
+  version: 2.17.51
+servers:
+- url: /v1
+security:
+- BasicAuth: []
+- ApiKeyAuth: []
+tags:
+- name: sql
+paths:
+  /sql/{namespace}:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace to run task under is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: Accept-Encoding
+      in: header
+      description: Encoding to use
+      schema:
+        type: string
+    post:
+      tags:
+      - sql
+      description: Run a sql query
+      operationId: runSQL
+      responses:
+        200:
+          description: JSON results in array of objects form, if the query returns results
+          headers:
+            X-TILEDB-CLOUD-TASK-ID:
+              description: Task ID for just completed query
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+        204:
+          description: SQL executed successfully
+          headers:
+            X-TILEDB-CLOUD-TASK-ID:
+              description: Task ID for just completed query
+              schema:
+                type: string
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SQLParameters'
+        description: sql being submitted
+        required: true
+      summary: Run SQL
+      x-summary-source: derived
+components:
+  schemas:
+    SQLParameters:
+      description: Parameters for running sql query
+      type: object
+      properties:
+        name:
+          description: name of task, optional
+          type: string
+        query:
+          description: query to run
+          type: string
+        output_uri:
+          type: string
+          description: Output array uri
+          example: s3://my_bucket/my_output_array
+        store_results:
+          description: store results for later retrieval
+          type: boolean
+        dont_download_results:
+          description: Set to true to avoid downloading the results of this UDF. Useful for intermediate nodes in a task graph where you will not be using the results of your function. Defaults to false ("yes download results").
+          type: boolean
+        resource_class:
+          type: string
+          description: 'The resource class to use for the SQL execution. Resource classes define resource limits for memory and CPUs. If this is empty, then the SQL will execute in the standard resource class of the TileDB Cloud provider.
+
+            '
+          x-omitempty: true
+          example: standard
+        result_format:
+          $ref: '#/components/schemas/ResultFormat'
+          description: type of results (native, i.e cloud pickle or json or arrow)
+          x-omitempty: tru
+        init_commands:
+          description: Queries or commands to run before main query
+          type: array
+          items:
+            type: string
+            description: sql query or command to run before main sql query
+        parameters:
+          description: SQL query parameters
+          type: array
+          items: {}
+        task_graph_uuid:
+          type: string
+          x-omitempty: true
+          description: 'If set, the ID of the log for the task graph that this was part of.
+
+            '
+        client_node_uuid:
+          type: string
+          x-omitempty: true
+          description: 'If set, the client-defined ID of the node within this task''s graph.
+
+            '
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
+    ResultFormat:
+      description: Data format of a result
+      type: string
+      enum:
+      - python_pickle
+      - r_serialization
+      - json
+      - arrow
+      - bytes
+      - tiledb_json
+      - native
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-TILEDB-REST-API-KEY
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          scopes:
+            read: Grants read access
+            write: Grants write access
+            admin: Grants read and write access to administrative information
+          authorizationUrl: https://oauth2.tiledb.com/oauth2/authorize
+          tokenUrl: https://oauth2.tiledb.com/oauth2/token

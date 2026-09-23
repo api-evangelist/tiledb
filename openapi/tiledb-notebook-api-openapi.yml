@@ -1,0 +1,442 @@
+openapi: 3.2.0
+info:
+  description: TileDB Storage Platform REST API
+  title: TileDB Storage Platform Notebook API
+  version: 2.17.51
+servers:
+- url: /v1
+security:
+- BasicAuth: []
+- ApiKeyAuth: []
+tags:
+- name: Notebook
+paths:
+  /notebooks/server/{namespace}/status:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace notebook is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    get:
+      description: Get status of the notebook server
+      tags:
+      - Notebook
+      operationId: getNotebookServerStatus
+      responses:
+        200:
+          description: status of running notebook
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotebookStatus'
+        402:
+          description: Payment required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Notebook is not running
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Get notebook server status
+      x-summary-source: derived
+  /notebooks/server/{namespace}:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace notebook is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    delete:
+      description: Shutdown a notebook server
+      tags:
+      - Notebook
+      operationId: shutdownNotebookServer
+      responses:
+        204:
+          description: Notebook shutdown successfully
+        404:
+          description: Notebook is not running
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Shutdown notebook server
+      x-summary-source: derived
+  /notebooks/{namespace}/{array}/rename:
+    parameters:
+    - name: namespace
+      in: path
+      description: namespace array is in (an organization name or user's username)
+      required: true
+      schema:
+        type: string
+    - name: array
+      in: path
+      description: name/uri of notebook (array) that is url-encoded
+      required: true
+      schema:
+        type: string
+    patch:
+      description: update name on a notebok, moving related S3 object to new location
+      tags:
+      - Notebook
+      operationId: updateNotebookName
+      responses:
+        204:
+          description: notebook name updated successfully
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArrayInfoUpdate'
+        description: notebook (array) metadata to update
+        required: true
+      summary: Update notebook name
+      x-summary-source: derived
+  /notebooks/{namespace}/{array}/copy:
+    parameters:
+    - name: namespace
+      in: path
+      required: true
+      description: The namespace of the notebook
+      schema:
+        type: string
+    - name: array
+      in: path
+      required: true
+      description: The name of the notebook
+      schema:
+        type: string
+    - name: X-TILEDB-CLOUD-ACCESS-CREDENTIALS-NAME
+      in: header
+      description: Optional registered access credentials to use for creation
+      required: false
+      schema:
+        type: string
+    - name: end_timestamp
+      in: query
+      description: Milliseconds since Unix epoch, copy will use open_at functionality to copy notebook created at the specific timestamp
+      required: false
+      schema:
+        type: integer
+        format: uint64
+    post:
+      description: Copy a tiledb notebook at the specified location
+      tags:
+      - Notebook
+      operationId: HandleCopyNotebook
+      responses:
+        201:
+          description: Notebook copied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotebookCopied'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotebookCopy'
+        description: Input/Output information to create a new TileDB file
+        required: true
+      summary: Handle copy notebook
+      x-summary-source: derived
+  /notebooks/{namespace}/upload:
+    parameters:
+    - name: namespace
+      in: path
+      required: true
+      description: The namespace of the notebook
+      schema:
+        type: string
+    - name: X-TILEDB-CLOUD-ACCESS-CREDENTIALS-NAME
+      in: header
+      description: Optional registered access credentials to use for creation
+      required: false
+      schema:
+        type: string
+    post:
+      description: Upload a notebook at the specified location
+      tags:
+      - Notebook
+      operationId: HandleUploadNotebook
+      responses:
+        201:
+          description: File uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileUploaded'
+        502:
+          description: Bad Gateway
+        default:
+          description: error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                input_file:
+                  type: string
+                  description: the notebook to upload
+                  format: binary
+                output_uri:
+                  type: string
+                  description: output location of the TileDB File
+                name:
+                  type: string
+                  description: name to set for registered file
+              required:
+              - input_file
+      summary: Handle upload notebook
+      x-summary-source: derived
+components:
+  schemas:
+    NotebookCopied:
+      description: Copied notebook uri and information
+      type: object
+      required:
+      - id
+      properties:
+        output_uri:
+          type: string
+          description: output location of the TileDB Notebook
+        name:
+          type: string
+          description: name of the notebook created
+        namespace:
+          type: string
+          description: namespace copied to
+        id:
+          description: unique ID of the copied notebook
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+          x-omitempty: false
+    NotebookCopy:
+      description: Output information required to copy a notebook
+      type: object
+      properties:
+        output_uri:
+          type: string
+          description: output location of the TileDB File
+        name:
+          type: string
+          description: name to set for registered notebook
+        namespace:
+          type: string
+          description: namespace to copy to
+    NotebookStatus:
+      description: Status details of a notebook server
+      type: object
+      properties:
+        namespace:
+          description: namespace of notebook
+          type: string
+        uptime:
+          description: duration notebook has been running in seconds
+          type: integer
+          format: uint64
+          example: 120
+        cpu_usage:
+          description: current cpu usage in millicpu
+          type: integer
+          format: uint64
+          example: 4000
+        gpu_usage:
+          description: gpu usage in milligpu
+          type: integer
+          format: uint64
+          example: 4000
+        memory_usage:
+          description: memory usage in bytes
+          type: integer
+          format: uint64
+          example: 1073741824
+        gpu_limit:
+          description: gpu limit in milligpu
+          type: integer
+          format: uint64
+          example: 1073741824
+        memory_limit:
+          description: memory allocated to notebook server in bytes
+          type: integer
+          format: uint64
+          example: 1073741824
+        storage_usage:
+          description: storage usage in bytes
+          type: integer
+          format: uint64
+          example: 1073741824
+        storage_limit:
+          description: storage allocated to notebook server in bytes
+          type: integer
+          format: uint64
+          example: 1073741824
+        cpu_count:
+          description: millicpu allocated to notebook server
+          type: integer
+          format: uint64
+          example: 4000
+        cost:
+          description: cost in USD for the current notebook session
+          x-omitempty: true
+          type:
+          - number
+          - 'null'
+          format: double
+          example: 0.27
+        pod_status:
+          description: Status of the pod
+          $ref: '#/components/schemas/PodStatus'
+          example: RUNNING
+          x-omitempty: true
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
+    ArrayInfoUpdate:
+      description: metadata of an array
+      type: object
+      properties:
+        description:
+          description: description of array
+          type:
+          - string
+          - 'null'
+        name:
+          description: description of array
+          type: string
+          example: myarray1
+        uri:
+          description: uri of array
+          type: string
+          example: s3://bucket/array
+        file_type:
+          description: File type stored /wrapped by this array
+          x-omitempty: true
+          $ref: '#/components/schemas/FileType'
+        file_properties:
+          type: object
+          description: map of file properties created for this array
+          x-omitempty: true
+          additionalProperties:
+            type: string
+        access_credentials_name:
+          description: the name of the access credentials to use. if unset, the default credentials will be used
+          type: string
+        logo:
+          description: logo (base64 encoded) for the array. Optional
+          type: string
+        tags:
+          description: optional tags for array
+          x-omitempty: false
+          type: array
+          items:
+            type: string
+            description: tag must be lowercase characters or hypen [a-z-]
+        license_id:
+          type: string
+          x-omitempty: true
+          description: License identifier from SPDX License List or Custom
+        license_text:
+          type: string
+          x-omitempty: true
+          description: License text
+        read_only:
+          description: Suggests if the array is in read_only mode
+          type: boolean
+          x-omitempty: true
+          example: true
+    FileType:
+      description: File types represented as TileDB arrays
+      type: string
+      enum:
+      - notebook
+      - user_defined_function
+      - ml_model
+      - file
+      - registered_task_graph
+    FileUploaded:
+      description: Uploaded file name and information
+      type: object
+      required:
+      - id
+      properties:
+        output_uri:
+          type: string
+          description: output location of the TileDB File
+        file_name:
+          type: string
+          description: name of the file uploaded
+        id:
+          description: unique ID of the uploaded file
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+          x-omitempty: false
+    PodStatus:
+      description: List of all available pod statuses
+      type: string
+      enum:
+      - TERMINATING
+      - RUNNING
+      - LAUNCHING
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-TILEDB-REST-API-KEY
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          scopes:
+            read: Grants read access
+            write: Grants write access
+            admin: Grants read and write access to administrative information
+          authorizationUrl: https://oauth2.tiledb.com/oauth2/authorize
+          tokenUrl: https://oauth2.tiledb.com/oauth2/token
