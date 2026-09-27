@@ -173,29 +173,6 @@ paths:
     - url: /v2
 components:
   schemas:
-    ArrayEndTimestampData:
-      description: Object including array end_timestamps (list of Unix epoch timestamps in milliseconds) and pagination metadata
-      type: object
-      properties:
-        end_timestamps:
-          description: List of timestamps expressed in milliseconds since Unix epoch
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: uint64
-        pagination_metadata:
-          $ref: '#/components/schemas/PaginationMetadata'
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int64
-        message:
-          type: string
-        request_id:
-          type: string
     PaginationMetadata:
       properties:
         page:
@@ -218,6 +195,29 @@ components:
           type: number
           format: uint64
           example: 138
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
+    ArrayEndTimestampData:
+      description: Object including array end_timestamps (list of Unix epoch timestamps in milliseconds) and pagination metadata
+      type: object
+      properties:
+        end_timestamps:
+          description: List of timestamps expressed in milliseconds since Unix epoch
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint64
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
     NotebookUploaded:
       description: Uploaded notebook name and information
       type: object

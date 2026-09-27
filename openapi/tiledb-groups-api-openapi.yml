@@ -1001,7 +1001,7 @@ paths:
         type: string
     post:
       description: Creates an empty group
-      operationId: createGroup
+      operationId: postGroupsByGroupNamespace
       tags:
       - Groups
       responses:
@@ -1026,9 +1026,11 @@ paths:
               $ref: '#/components/schemas/GroupCreationRequest'
       summary: Create group
       x-summary-source: derived
+      x-operation-id-source: normalized
+      x-operation-id-original: createGroup
     put:
       description: Registers an already existing group
-      operationId: registerGroup
+      operationId: putGroupsByGroupNamespace
       tags:
       - Groups
       responses:
@@ -1049,6 +1051,8 @@ paths:
               $ref: '#/components/schemas/GroupRegistrationRequest'
       summary: Register group
       x-summary-source: derived
+      x-operation-id-source: normalized
+      x-operation-id-original: registerGroup
     servers:
     - url: /v2
   /groups/{group_namespace}/{group_name}/delete:
@@ -1073,7 +1077,7 @@ paths:
         type: string
     delete:
       description: Deregisters and physically deletes a group
-      operationId: deleteGroup
+      operationId: deleteGroupsByGroupNamespaceByGroupNameDelete
       tags:
       - Groups
       responses:
@@ -1089,6 +1093,8 @@ paths:
                 $ref: '#/components/schemas/Error'
       summary: Delete group
       x-summary-source: derived
+      x-operation-id-source: normalized
+      x-operation-id-original: deleteGroup
     servers:
     - url: /v2
   /groups/{group_namespace}/{group_name}/activity:
@@ -1133,7 +1139,7 @@ paths:
         type: integer
     get:
       description: Retrieves activity logs for all assets contained in a group (arrays and other groups) including the parent group itself.
-      operationId: getGroupActivity
+      operationId: getGroupsByGroupNamespaceByGroupNameActivity
       tags:
       - Groups
       responses:
@@ -1153,12 +1159,31 @@ paths:
                 $ref: '#/components/schemas/Error'
       summary: Get group activity
       x-summary-source: derived
+      x-operation-id-source: normalized
+      x-operation-id-original: getGroupActivity
     servers:
     - url: /v2
 components:
   schemas:
-    GroupSharing:
-      description: sharing state of a group with a namespace
+    MetadataStringifiedEntry:
+      type: object
+      description: key/value pair representing an asset metadata map entry
+      properties:
+        key:
+          description: The metadata key
+          type: string
+          x-omitempty: false
+        value:
+          description: The metadata value
+          type: string
+          x-omitempty: false
+        type:
+          description: The metadata type
+          type: string
+          x-omitempty: false
+          example: array_metadata
+    GroupSharingRequest:
+      description: a request to share a group and all the contents with a namespace
       type: object
       properties:
         group_actions:
@@ -1183,29 +1208,177 @@ components:
           description: namespace being granted group access can be a user or organization
           type: string
           example: MyOrganization
-        namespace_type:
-          description: details on if the namespace is a organization or user
-          type: string
-          example: organization
-    GroupEntry:
-      description: Object describing a single member of a group, which can be an array or a group
+    Error:
       type: object
       properties:
-        member_id:
+        code:
+          type: integer
+          format: int64
+        message:
           type: string
-          readOnly: true
-          description: The unique member id for the entry
-        group:
-          description: the metadata of the entry if it is a group, null if it is an array
-          $ref: '#/components/schemas/GroupInfo'
-        array:
-          description: the metadata of the entry if it is an array, null if it is a group
-          $ref: '#/components/schemas/ArrayInfo'
+        request_id:
+          type: string
+    GroupBrowserFilterData:
+      description: Object with data to fill browser filter
+      type: object
+      properties:
+        namespaces:
+          description: list of all unique namespaces to display
+          type: array
+          x-omitempty: false
+          items:
+            type: string
+        group_types:
+          description: list of all available group types to display
+          type: array
+          x-omitempty: false
+          items:
+            $ref: '#/components/schemas/GroupType'
+    GroupUpdate:
+      description: Updates for a group. New values for the attributes.
+      type: object
+      properties:
+        description:
+          description: A human readable description of the content of the group
+          type:
+          - string
+          - 'null'
+        name:
+          description: The name of the group. If must be unique within the group.
+          type: string
+        logo:
+          description: logo (base64 encoded) for the group. Optional
+          type: string
+        access_credentials_name:
+          description: the name of the access credentials to use. if unset, the default credentials will be used
+          type: string
+        tags:
+          description: optional tags for groups
+          x-omitempty: false
+          type: array
+          items:
+            type: string
+            description: tag must be lowercase characters or hypen [a-z-]
+        license_id:
+          type: string
+          x-omitempty: true
+          description: License identifier from SPDX License List or Custom
+        license_text:
+          type: string
+          x-omitempty: true
+          description: License text
+    GroupContentsFilterData:
+      description: Object with data to fill contents filter
+      type: object
+      properties:
+        namespaces:
+          description: list of all unique namespaces to display
+          type: array
+          x-omitempty: false
+          items:
+            type: string
+    GroupChanges:
+      description: A request to change the members of a group. Contains assets to add or remove.
+      type: object
+      properties:
+        add:
+          description: the assets, arrays or groups, to add to the group.
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupMember'
+        remove:
+          description: the assets, arrays or groups, to remove from the group.
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupMember'
+    GroupCreate:
+      description: Initial attributes for the creation of a group.
+      type: object
+      properties:
+        description:
+          description: A human readable description of the contents of the group.
+          type: string
+        name:
+          description: The name of the group. If must be unique within the group.
+          type: string
+        parent:
+          description: The unique name or id of the parent of the group. If empty, then the new group will be a top level group.
+          type: string
+        uri:
+          description: uri of group.
+          type: string
+          x-omitempty: false
+        logo:
+          description: logo (base64 encoded) for the group. Optional
+          type: string
+        access_credentials_name:
+          description: the name of the access credentials to use. if unset, the default credentials will be used.
+          type: string
+        tags:
+          description: optional tags for groups.
+          x-omitempty: false
+          type: array
+          items:
+            type: string
+            description: tag must be lowercase characters or hypen [a-z-].
+        license_id:
+          type: string
+          x-omitempty: true
+          description: License identifier from SPDX License List or Custom.
+        license_text:
+          type: string
+          x-omitempty: true
+          description: License text
+    GroupActions:
+      description: actions a user can take on a group
+      type: string
+      enum:
+      - read
+      - write
+      - edit
     PricingCurrency:
       description: Currency of pricing
       type: string
       enum:
       - USD
+    GroupRegister:
+      description: Initial attributes for the registration of a an existing group.
+      type: object
+      properties:
+        description:
+          description: A human readable description of the contents of the group.
+          type: string
+        name:
+          description: The name of the group. If must be unique within the group.
+          type: string
+        parent:
+          description: The unique name or id of the parent of the group. If empty, then the new group will be a top level group.
+          type: string
+        uri:
+          description: uri of group.
+          type: string
+          x-omitempty: false
+        logo:
+          description: logo (base64 encoded) for the group. Optional
+          type: string
+        access_credentials_name:
+          description: the name of the access credentials to use. if unset, the default credentials will be used.
+          type: string
+        tags:
+          description: optional tags for groups.
+          x-omitempty: false
+          type: array
+          items:
+            type: string
+            description: tag must be lowercase characters or hypen [a-z-].
+        license_id:
+          type: string
+          x-omitempty: true
+          description: License identifier from SPDX License List or Custom.
+        license_text:
+          type: string
+          x-omitempty: true
+          description: License text
     Subscription:
       description: Subscription of a user (customer) to another user's arrays
       type: object
@@ -1228,45 +1401,25 @@ components:
           x-omitempty: true
           items:
             $ref: '#/components/schemas/Pricing'
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int64
-        message:
-          type: string
-        request_id:
-          type: string
-    GroupContents:
-      description: Object including a page of members of a group and pagination metadata
-      type: object
-      properties:
-        entries:
-          description: Groups members
-          type: array
-          x-omitempty: false
-          items:
-            $ref: '#/components/schemas/GroupEntry'
-        pagination_metadata:
-          $ref: '#/components/schemas/PaginationMetadata'
-    MetadataStringifiedEntry:
-      type: object
-      description: key/value pair representing an asset metadata map entry
-      properties:
-        key:
-          description: The metadata key
-          type: string
-          x-omitempty: false
-        value:
-          description: The metadata value
-          type: string
-          x-omitempty: false
-        type:
-          description: The metadata type
-          type: string
-          x-omitempty: false
-          example: array_metadata
+    AssetType:
+      description: Asset types represented as TileDB arrays
+      type: string
+      enum:
+      - array
+      - notebook
+      - dashboard
+      - user_defined_function
+      - ml_model
+      - file
+      - registered_task_graph
+      - group
+      - vcf
+      - soma
+      - pointcloud
+      - bioimg
+      - geometry
+      - raster
+      - vector_search
     Pricing:
       description: Pricing created by converting an array to product
       type: object
@@ -1316,148 +1469,28 @@ components:
           description: If pricing is activated
           type: boolean
           example: false
-    GroupContentActivityResponse:
-      description: Object containing activity logs of group content along with the pagination metadata
-      type: object
+    PaginationMetadata:
       properties:
-        activity:
-          description: Activity of a group's content
-          type: array
-          x-omitempty: false
-          items:
-            $ref: '#/components/schemas/GroupContentActivity'
-        pagination_metadata:
-          x-omitempty: false
-          $ref: '#/components/schemas/PaginationMetadata'
-    GroupChanges:
-      description: A request to change the members of a group. Contains assets to add or remove.
-      type: object
-      properties:
-        add:
-          description: the assets, arrays or groups, to add to the group.
-          type: array
-          items:
-            $ref: '#/components/schemas/GroupMember'
-        remove:
-          description: the assets, arrays or groups, to remove from the group.
-          type: array
-          items:
-            $ref: '#/components/schemas/GroupMember'
-    PricingUnitLabel:
-      description: Unit label
-      type: string
-      enum:
-      - byte
-      - second
-    GroupType:
-      description: Group type is a hint for the groups contents and TileDB Cloud may use a specialized viewer for each type
-      type: string
-      enum:
-      - generic
-      - vcf
-      - soma
-      - bioimg
-      - pointcloud
-      - raster
-      - geometry
-      - vector_search
-    GroupActions:
-      description: actions a user can take on a group
-      type: string
-      enum:
-      - read
-      - write
-      - edit
-    GroupBrowserData:
-      description: Object including group info and pagination metadata
-      type: object
-      properties:
-        groups:
-          description: Groups Info
-          type: array
-          x-omitempty: false
-          items:
-            $ref: '#/components/schemas/GroupInfo'
-        pagination_metadata:
-          $ref: '#/components/schemas/PaginationMetadata'
-    FileType:
-      description: File types represented as TileDB arrays
-      type: string
-      enum:
-      - notebook
-      - user_defined_function
-      - ml_model
-      - file
-      - registered_task_graph
-    GroupSharingRequest:
-      description: a request to share a group and all the contents with a namespace
-      type: object
-      properties:
-        group_actions:
-          description: List of permitted actions for the group and all subgroups
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/GroupActions'
-          example:
-          - read
-          - write
-        array_actions:
-          description: List of permitted actions for all the subarrays of the group
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/ArrayActions'
-          example:
-          - read
-          - write
-        namespace:
-          description: namespace being granted group access can be a user or organization
-          type: string
-          example: MyOrganization
-    GroupContentsFilterData:
-      description: Object with data to fill contents filter
-      type: object
-      properties:
-        namespaces:
-          description: list of all unique namespaces to display
-          type: array
-          x-omitempty: false
-          items:
-            type: string
-    GroupUpdate:
-      description: Updates for a group. New values for the attributes.
-      type: object
-      properties:
-        description:
-          description: A human readable description of the content of the group
-          type:
-          - string
-          - 'null'
-        name:
-          description: The name of the group. If must be unique within the group.
-          type: string
-        logo:
-          description: logo (base64 encoded) for the group. Optional
-          type: string
-        access_credentials_name:
-          description: the name of the access credentials to use. if unset, the default credentials will be used
-          type: string
-        tags:
-          description: optional tags for groups
-          x-omitempty: false
-          type: array
-          items:
-            type: string
-            description: tag must be lowercase characters or hypen [a-z-]
-        license_id:
-          type: string
-          x-omitempty: true
-          description: License identifier from SPDX License List or Custom
-        license_text:
-          type: string
-          x-omitempty: true
-          description: License text
+        page:
+          description: pagination offset. Use it to skip the first ((page - 1) * per_page) items
+          type: number
+          format: uint64
+          example: 1
+        per_page:
+          description: pagination limit (page size)
+          type: number
+          format: uint64
+          example: 10
+        total_pages:
+          description: number of total pages with current limit
+          type: number
+          format: uint64
+          example: 14
+        total_items:
+          description: number of total available items
+          type: number
+          format: uint64
+          example: 138
     ArrayActivityLog:
       description: Actvity of an Array
       type: object
@@ -1501,249 +1534,24 @@ components:
           x-omitempty: true
           type: string
           example: '{"timers": {"Context.StorageManager.read_load_array_schema_from_uri.sum": 0.0255293, "...": "..."}, "counters": {"Context.StorageManager.read_unfiltered_byte_num": 191, "...": "..."}}'
-    PricingInterval:
-      description: Interval for pricing
-      type: string
-      enum:
-      - month
-    GroupBrowserFilterData:
-      description: Object with data to fill browser filter
+    GroupBrowserData:
+      description: Object including group info and pagination metadata
       type: object
       properties:
-        namespaces:
-          description: list of all unique namespaces to display
+        groups:
+          description: Groups Info
           type: array
           x-omitempty: false
           items:
-            type: string
-        group_types:
-          description: list of all available group types to display
-          type: array
-          x-omitempty: false
-          items:
-            $ref: '#/components/schemas/GroupType'
-    PricingType:
-      description: Pricing types
-      type: string
-      enum:
-      - egress
-      - access
-    ArrayActions:
-      description: actions a user can take on an array
-      type: string
-      enum:
-      - read
-      - write
-      - edit
-      - read_array_logs
-      - read_array_info
-      - read_array_schema
-    PricingAggregateUsage:
-      description: Specifies a usage aggregation strategy for pricings of usage_type=metered
-      type: string
-      enum:
-      - sum
-    GroupMemberType:
-      description: File types that can be included in groups
-      type: string
-      enum:
-      - group
-      - array
-    GroupInfo:
-      description: metadata of a group
-      type: object
-      properties:
-        id:
-          description: unique ID of registered group
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        namespace:
-          description: namespace group is in
-          type: string
-          example: user1
-        name:
-          description: name of group
-          type: string
-          example: myarray1
-        description:
-          description: description of group
-          type:
-          - string
-          - 'null'
-        uri:
-          description: uri of group
-          type: string
-          example: s3://bucket/asset
-        tiledb_uri:
-          description: uri for access through TileDB cloud
-          type: string
-          x-omitempty: false
-        asset_count:
-          description: A count of direct array members
-          type: number
-          format: int32
-          example: 12
-          x-omitempty: false
-        group_count:
-          description: A count of direct group members
-          type: number
-          format: int32
-          example: 4
-          x-omitempty: false
-        size:
-          description: A count of direct members. This is the sum of asset_count and group_count
-          type: number
-          format: int32
-          example: 16
-          x-omitempty: false
-        last_accessed:
-          description: Datetime groups was last accessed in UTC
-          type: string
-          format: date-time
-        allowed_actions:
-          description: list of actions user is allowed to do on this group
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/GroupActions'
-        group_type:
-          description: the type of the group
-          $ref: '#/components/schemas/GroupType'
-          x-omitempty: true
-        logo:
-          description: logo (base64 encoded) for the gruop. Optional
-          type: string
-        access_credentials_name:
-          description: the name of the access credentials to use. if unset, the default credentials will be used
-          type: string
-        share_count:
-          description: number of unique namespaces this group is shared with
-          type: number
-          format: int32
-        public_share:
-          description: Suggests if the group was shared to public by owner
-          type: boolean
-          x-omitempty: false
-          example: true
-        tags:
-          description: optional tags for group
-          x-omitempty: false
-          type: array
-          items:
-            type: string
-            description: tag must be lowercase characters or hypen [a-z-]
-        license_id:
-          type: string
-          x-omitempty: true
-          description: License identifier from SPDX License List or Custom
-        license_text:
-          type: string
-          x-omitempty: true
-          description: License text
-        created_at:
-          description: Datetime the group was registered with tiledb
-          type: string
-          format: date-time
-        created_by:
-          description: The username of the group's creator, if known.
-          type: string
-          x-omitempty: true
-        metadata:
-          description: 'Contains metadata of the group.
-
-            **Note:** This property is included in the response only if the `with_metadata` query parameter is set to `true`.
-
-            '
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/MetadataStringifiedEntry'
-    GroupRegister:
-      description: Initial attributes for the registration of a an existing group.
-      type: object
-      properties:
-        description:
-          description: A human readable description of the contents of the group.
-          type: string
-        name:
-          description: The name of the group. If must be unique within the group.
-          type: string
-        parent:
-          description: The unique name or id of the parent of the group. If empty, then the new group will be a top level group.
-          type: string
-        uri:
-          description: uri of group.
-          type: string
-          x-omitempty: false
-        logo:
-          description: logo (base64 encoded) for the group. Optional
-          type: string
-        access_credentials_name:
-          description: the name of the access credentials to use. if unset, the default credentials will be used.
-          type: string
-        tags:
-          description: optional tags for groups.
-          x-omitempty: false
-          type: array
-          items:
-            type: string
-            description: tag must be lowercase characters or hypen [a-z-].
-        license_id:
-          type: string
-          x-omitempty: true
-          description: License identifier from SPDX License List or Custom.
-        license_text:
-          type: string
-          x-omitempty: true
-          description: License text
-    PaginationMetadata:
-      properties:
-        page:
-          description: pagination offset. Use it to skip the first ((page - 1) * per_page) items
-          type: number
-          format: uint64
-          example: 1
-        per_page:
-          description: pagination limit (page size)
-          type: number
-          format: uint64
-          example: 10
-        total_pages:
-          description: number of total pages with current limit
-          type: number
-          format: uint64
-          example: 14
-        total_items:
-          description: number of total available items
-          type: number
-          format: uint64
-          example: 138
+            $ref: '#/components/schemas/GroupInfo'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
     ArrayType:
       description: TileDB array type
       type: string
       enum:
       - dense
       - sparse
-    ActivityEventType:
-      description: Type of activity logged
-      type: string
-      enum:
-      - read_schema
-      - max_buffer_sizes
-      - non_empty_domain
-      - query_read
-      - query_write
-      - query_delete
-      - create
-      - delete
-      - register
-      - deregister
-      - udf
-      - array_metadata_get
-      - array_metadata_update
-      - estimated_result_sizes
-      - read_fragment_info
-      - read_enumerations
     ArrayInfo:
       description: metadata of an array
       type: object
@@ -1880,63 +1688,240 @@ components:
           x-omitempty: true
           items:
             $ref: '#/components/schemas/MetadataStringifiedEntry'
-    GroupCreate:
-      description: Initial attributes for the creation of a group.
+    GroupContentActivityResponse:
+      description: Object containing activity logs of group content along with the pagination metadata
       type: object
       properties:
-        description:
-          description: A human readable description of the contents of the group.
+        activity:
+          description: Activity of a group's content
+          type: array
+          x-omitempty: false
+          items:
+            $ref: '#/components/schemas/GroupContentActivity'
+        pagination_metadata:
+          x-omitempty: false
+          $ref: '#/components/schemas/PaginationMetadata'
+    ArrayActions:
+      description: actions a user can take on an array
+      type: string
+      enum:
+      - read
+      - write
+      - edit
+      - read_array_logs
+      - read_array_info
+      - read_array_schema
+    PricingAggregateUsage:
+      description: Specifies a usage aggregation strategy for pricings of usage_type=metered
+      type: string
+      enum:
+      - sum
+    GroupSharing:
+      description: sharing state of a group with a namespace
+      type: object
+      properties:
+        group_actions:
+          description: List of permitted actions for the group and all subgroups
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/GroupActions'
+          example:
+          - read
+          - write
+        array_actions:
+          description: List of permitted actions for all the subarrays of the group
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/ArrayActions'
+          example:
+          - read
+          - write
+        namespace:
+          description: namespace being granted group access can be a user or organization
+          type: string
+          example: MyOrganization
+        namespace_type:
+          description: details on if the namespace is a organization or user
+          type: string
+          example: organization
+    GroupMember:
+      description: A groups member, array or another groups, to add or remove from an existing group.
+      type: object
+      properties:
+        namespace:
+          description: The namespace of the asset.
           type: string
         name:
-          description: The name of the group. If must be unique within the group.
+          description: The name or id of the asset.
           type: string
-        parent:
-          description: The unique name or id of the parent of the group. If empty, then the new group will be a top level group.
+        member_type:
+          $ref: '#/components/schemas/GroupMemberType'
+    GroupInfo:
+      description: metadata of a group
+      type: object
+      properties:
+        id:
+          description: unique ID of registered group
           type: string
+          example: 00000000-0000-0000-0000-000000000000
+        namespace:
+          description: namespace group is in
+          type: string
+          example: user1
+        name:
+          description: name of group
+          type: string
+          example: myarray1
+        description:
+          description: description of group
+          type:
+          - string
+          - 'null'
         uri:
-          description: uri of group.
+          description: uri of group
+          type: string
+          example: s3://bucket/asset
+        tiledb_uri:
+          description: uri for access through TileDB cloud
           type: string
           x-omitempty: false
+        asset_count:
+          description: A count of direct array members
+          type: number
+          format: int32
+          example: 12
+          x-omitempty: false
+        group_count:
+          description: A count of direct group members
+          type: number
+          format: int32
+          example: 4
+          x-omitempty: false
+        size:
+          description: A count of direct members. This is the sum of asset_count and group_count
+          type: number
+          format: int32
+          example: 16
+          x-omitempty: false
+        last_accessed:
+          description: Datetime groups was last accessed in UTC
+          type: string
+          format: date-time
+        allowed_actions:
+          description: list of actions user is allowed to do on this group
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/GroupActions'
+        group_type:
+          description: the type of the group
+          $ref: '#/components/schemas/GroupType'
+          x-omitempty: true
         logo:
-          description: logo (base64 encoded) for the group. Optional
+          description: logo (base64 encoded) for the gruop. Optional
           type: string
         access_credentials_name:
-          description: the name of the access credentials to use. if unset, the default credentials will be used.
+          description: the name of the access credentials to use. if unset, the default credentials will be used
           type: string
+        share_count:
+          description: number of unique namespaces this group is shared with
+          type: number
+          format: int32
+        public_share:
+          description: Suggests if the group was shared to public by owner
+          type: boolean
+          x-omitempty: false
+          example: true
         tags:
-          description: optional tags for groups.
+          description: optional tags for group
           x-omitempty: false
           type: array
           items:
             type: string
-            description: tag must be lowercase characters or hypen [a-z-].
+            description: tag must be lowercase characters or hypen [a-z-]
         license_id:
           type: string
           x-omitempty: true
-          description: License identifier from SPDX License List or Custom.
+          description: License identifier from SPDX License List or Custom
         license_text:
           type: string
           x-omitempty: true
           description: License text
-    AssetType:
-      description: Asset types represented as TileDB arrays
+        created_at:
+          description: Datetime the group was registered with tiledb
+          type: string
+          format: date-time
+        created_by:
+          description: The username of the group's creator, if known.
+          type: string
+          x-omitempty: true
+        metadata:
+          description: 'Contains metadata of the group.
+
+            **Note:** This property is included in the response only if the `with_metadata` query parameter is set to `true`.
+
+            '
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/MetadataStringifiedEntry'
+    GroupContents:
+      description: Object including a page of members of a group and pagination metadata
+      type: object
+      properties:
+        entries:
+          description: Groups members
+          type: array
+          x-omitempty: false
+          items:
+            $ref: '#/components/schemas/GroupEntry'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+    GroupMemberType:
+      description: File types that can be included in groups
       type: string
       enum:
-      - array
-      - notebook
-      - dashboard
-      - user_defined_function
-      - ml_model
-      - file
-      - registered_task_graph
       - group
+      - array
+    GroupEntry:
+      description: Object describing a single member of a group, which can be an array or a group
+      type: object
+      properties:
+        member_id:
+          type: string
+          readOnly: true
+          description: The unique member id for the entry
+        group:
+          description: the metadata of the entry if it is a group, null if it is an array
+          $ref: '#/components/schemas/GroupInfo'
+        array:
+          description: the metadata of the entry if it is an array, null if it is a group
+          $ref: '#/components/schemas/ArrayInfo'
+    PricingUnitLabel:
+      description: Unit label
+      type: string
+      enum:
+      - byte
+      - second
+    GroupType:
+      description: Group type is a hint for the groups contents and TileDB Cloud may use a specialized viewer for each type
+      type: string
+      enum:
+      - generic
       - vcf
       - soma
-      - pointcloud
       - bioimg
-      - geometry
+      - pointcloud
       - raster
+      - geometry
       - vector_search
+    PricingInterval:
+      description: Interval for pricing
+      type: string
+      enum:
+      - month
     GroupContentActivity:
       description: Object containing activity of an asset of a group
       type: object
@@ -1960,116 +1945,66 @@ components:
         activity_log:
           description: Object containing the activity log
           $ref: '#/components/schemas/ArrayActivityLog'
-    GroupMember:
-      description: A groups member, array or another groups, to add or remove from an existing group.
-      type: object
-      properties:
-        namespace:
-          description: The namespace of the asset.
-          type: string
-        name:
-          description: The name or id of the asset.
-          type: string
-        member_type:
-          $ref: '#/components/schemas/GroupMemberType'
-    MetadataEntry:
-      type: object
-      description: key/value pair representing a group metadata map entry
-      properties:
-        key:
-          type: string
-        type:
-          type: string
-        valueNum:
-          type: integer
-          format: uint32
-        value:
-          x-go-type:
-            type: json.RawMessage
-            hints:
-              noValidation: true
-        del:
-          type: boolean
-    GroupContentsRetrievalRequest:
-      description: Request the contents of a group
+    ActivityEventType:
+      description: Type of activity logged
+      type: string
+      enum:
+      - read_schema
+      - max_buffer_sizes
+      - non_empty_domain
+      - query_read
+      - query_write
+      - query_delete
+      - create
+      - delete
+      - register
+      - deregister
+      - udf
+      - array_metadata_get
+      - array_metadata_update
+      - estimated_result_sizes
+      - read_fragment_info
+      - read_enumerations
+    FileType:
+      description: File types represented as TileDB arrays
+      type: string
+      enum:
+      - notebook
+      - user_defined_function
+      - ml_model
+      - file
+      - registered_task_graph
+    PricingType:
+      description: Pricing types
+      type: string
+      enum:
+      - egress
+      - access
+    GroupContentsChangesRequest:
+      description: Updates the contents group
       type: object
       properties:
         config:
           description: config to use to retrieve the contents
           $ref: '#/components/schemas/TileDBConfig'
-    AssetActivityLog:
-      type: object
-      properties:
-        id:
-          type: string
-          description: The ID of the activity
-        event_at:
-          description: time event took place (RFC3339)
-          type: string
-          format: date-time
-        action:
-          type: string
-          description: type of the event
-        username:
-          description: User who performed action
-          type: string
-        array_task_id:
-          description: uuid of associated array task
-          type: string
-        asset:
-          description: The asset details
+        group_changes:
           type: object
           properties:
-            id:
-              description: The asset ID
-              type: string
-            name:
-              description: The asset name
-              type: string
-            namespace:
-              description: The namespace that the asset belongs to
-              type: string
-            asset_type:
-              description: The type of the asset
-              $ref: '#/components/schemas/AssetType'
-      required:
-      - id
-      - event_at
-      - action
-      - username
-      - asset
-    TileDBConfig:
-      description: TileDB config used for interaction with the embedded library
-      type: object
-      properties:
-        entries:
-          type: array
-          items:
-            type: object
-            properties:
-              key:
+            members_to_remove:
+              description: optional series of members to remove
+              x-omitempty: false
+              type: array
+              items:
                 type: string
-              value:
-                type: string
-    Metadata:
-      type: object
-      description: user's TileDB metadata
-      properties:
-        entries:
-          description: List of metadata entries
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/MetadataEntry'
-    GroupMetadataRetrievalRequest:
-      description: Retrieves the metadata of a group
-      type: object
-      properties:
-        config:
-          type: object
-          description: config to use to retrieve the contents
-          $ref: '#/components/schemas/TileDBConfig'
-    GroupCreationRequest:
+                description: uris of members to remove
+            members_to_add:
+              description: optional series of members to add
+              x-omitempty: false
+              type: array
+              items:
+                description: group members to add
+                $ref: '#/components/schemas/GroupMember_2'
+    GroupRegistrationRequest:
       type: object
       description: information for creating a new group with the passed configuration
       required:
@@ -2086,6 +2021,9 @@ components:
               type: string
             name:
               description: The name of the group. If must be unique within the group.
+              type: string
+            parent:
+              description: The unique name or id of the parent of the group. If empty, then the new group will be a top level group.
               type: string
             uri:
               description: uri of group.
@@ -2109,6 +2047,13 @@ components:
               type: string
               x-omitempty: true
               description: License text
+            region:
+              type: string
+              x-omitempty: true
+              description: region of the group
+            access_credentials_name:
+              description: the name of the access credentials to use. if unset, the default credentials will be used.
+              type: string
     GroupMetadataUpdateRequest:
       description: Updates the metadata of a group
       type: object
@@ -2120,6 +2065,29 @@ components:
           $ref: '#/components/schemas/TileDBConfig'
         metadata:
           $ref: '#/components/schemas/Metadata'
+    TileDBConfig:
+      description: TileDB config used for interaction with the embedded library
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+    Metadata:
+      type: object
+      description: user's TileDB metadata
+      properties:
+        entries:
+          description: List of metadata entries
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/MetadataEntry'
     GroupCreationResponse:
       description: Information of the created group
       type: object
@@ -2179,30 +2147,6 @@ components:
           x-omitempty: true
           type: string
           example: '{"timers": {"Context.StorageManager.read_load_array_schema_from_uri.sum": 0.0255293, "...": "..."}, "counters": {"Context.StorageManager.read_unfiltered_byte_num": 191, "...": "..."}}'
-    GroupContentsChangesRequest:
-      description: Updates the contents group
-      type: object
-      properties:
-        config:
-          description: config to use to retrieve the contents
-          $ref: '#/components/schemas/TileDBConfig'
-        group_changes:
-          type: object
-          properties:
-            members_to_remove:
-              description: optional series of members to remove
-              x-omitempty: false
-              type: array
-              items:
-                type: string
-                description: uris of members to remove
-            members_to_add:
-              description: optional series of members to add
-              x-omitempty: false
-              type: array
-              items:
-                description: group members to add
-                $ref: '#/components/schemas/GroupMember_2'
     GroupContentsRetrievalResponse:
       description: Object including a page of members of a group and pagination metadata
       type: object
@@ -2217,26 +2161,99 @@ components:
           description: Group metadata
           x-omitempty: true
           $ref: '#/components/schemas/Metadata'
+    MetadataEntry:
+      type: object
+      description: key/value pair representing a group metadata map entry
+      properties:
+        key:
+          type: string
+        type:
+          type: string
+        valueNum:
+          type: integer
+          format: uint32
+        value:
+          x-go-type:
+            type: json.RawMessage
+            hints:
+              noValidation: true
+        del:
+          type: boolean
+    AssetActivityLog:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the activity
+        event_at:
+          description: time event took place (RFC3339)
+          type: string
+          format: date-time
+        action:
+          type: string
+          description: type of the event
+        username:
+          description: User who performed action
+          type: string
+        array_task_id:
+          description: uuid of associated array task
+          type: string
+        asset:
+          description: The asset details
+          type: object
+          properties:
+            id:
+              description: The asset ID
+              type: string
+            name:
+              description: The asset name
+              type: string
+            namespace:
+              description: The namespace that the asset belongs to
+              type: string
+            asset_type:
+              description: The type of the asset
+              $ref: '#/components/schemas/AssetType'
+      required:
+      - id
+      - event_at
+      - action
+      - username
+      - asset
+    GroupMember_2:
+      description: A groups member, array or another groups, to add or remove from an existing group.
+      type: object
+      properties:
+        name:
+          description: The name of the member
+          type: string
+        uri:
+          description: The uri of the member
+          type: string
+        type:
+          $ref: '#/components/schemas/GroupMemberType_2'
+    GroupMetadataRetrievalRequest:
+      description: Retrieves the metadata of a group
+      type: object
+      properties:
+        config:
+          type: object
+          description: config to use to retrieve the contents
+          $ref: '#/components/schemas/TileDBConfig'
     GroupMemberType_2:
       description: File types that can be included in groups
       type: string
       enum:
       - GROUP
       - ARRAY
-    GroupActivityResponse:
-      description: Object containing activity logs of a group and its content (arrays and subgroups) along with pagination metadata
+    GroupContentsRetrievalRequest:
+      description: Request the contents of a group
       type: object
       properties:
-        activity_logs:
-          description: Array of activity logs, including both group and array activities
-          type: array
-          x-omitempty: false
-          items:
-            $ref: '#/components/schemas/AssetActivityLog'
-        pagination_metadata:
-          x-omitempty: false
-          $ref: '#/components/schemas/PaginationMetadata'
-    GroupRegistrationRequest:
+        config:
+          description: config to use to retrieve the contents
+          $ref: '#/components/schemas/TileDBConfig'
+    GroupCreationRequest:
       type: object
       description: information for creating a new group with the passed configuration
       required:
@@ -2253,9 +2270,6 @@ components:
               type: string
             name:
               description: The name of the group. If must be unique within the group.
-              type: string
-            parent:
-              description: The unique name or id of the parent of the group. If empty, then the new group will be a top level group.
               type: string
             uri:
               description: uri of group.
@@ -2279,33 +2293,6 @@ components:
               type: string
               x-omitempty: true
               description: License text
-            region:
-              type: string
-              x-omitempty: true
-              description: region of the group
-            access_credentials_name:
-              description: the name of the access credentials to use. if unset, the default credentials will be used.
-              type: string
-    ActivityEventType_2:
-      description: Type of activity logged
-      type: string
-      enum:
-      - read_schema
-      - max_buffer_sizes
-      - non_empty_domain
-      - query_read
-      - query_write
-      - create
-      - delete
-      - register
-      - deregister
-      - udf
-      - array_metadata_get
-      - array_metadata_update
-      - estimated_result_sizes
-      - update
-      - info
-      - run
     GroupContentActivity_2:
       description: Object containing activity of an asset of a group
       type: object
@@ -2330,18 +2317,39 @@ components:
           description: Object containing the activity log
           type: object
           $ref: '#/components/schemas/ArrayActivityLog_2'
-    GroupMember_2:
-      description: A groups member, array or another groups, to add or remove from an existing group.
+    ActivityEventType_2:
+      description: Type of activity logged
+      type: string
+      enum:
+      - read_schema
+      - max_buffer_sizes
+      - non_empty_domain
+      - query_read
+      - query_write
+      - create
+      - delete
+      - register
+      - deregister
+      - udf
+      - array_metadata_get
+      - array_metadata_update
+      - estimated_result_sizes
+      - update
+      - info
+      - run
+    GroupActivityResponse:
+      description: Object containing activity logs of a group and its content (arrays and subgroups) along with pagination metadata
       type: object
       properties:
-        name:
-          description: The name of the member
-          type: string
-        uri:
-          description: The uri of the member
-          type: string
-        type:
-          $ref: '#/components/schemas/GroupMemberType_2'
+        activity_logs:
+          description: Array of activity logs, including both group and array activities
+          type: array
+          x-omitempty: false
+          items:
+            $ref: '#/components/schemas/AssetActivityLog'
+        pagination_metadata:
+          x-omitempty: false
+          $ref: '#/components/schemas/PaginationMetadata'
   securitySchemes:
     BasicAuth:
       type: http

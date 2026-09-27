@@ -10,6 +10,22 @@ description: >-
   is programmable through the TileDB Storage Platform REST API (v1 and v2, whose Swagger 2.0 contracts
   TileDB publishes openly on GitHub), plus first-party clients for Python, R, Java, Go, C, C++, C#,
   JavaScript and Rust. The company is focused on life sciences and precision medicine.
+deliveryModel:
+  model: saas
+  license_evidence:
+    not_product:
+    - tiledb-inc/tiledb-cloud-api-spec
+  open_source: unknown
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: low
+  source:
+  - openapi
+  - pricing
+  - repository-not-product
+  generated: '2026-09-25'
+  method: derived
 accessModel:
   pricing: paid
   onboarding: self-serve
@@ -43,7 +59,7 @@ tags:
 - Data Management
 - Cloud Storage
 - Analytics
-- Machine-Learning
+- Machine Learning
 tags_raw:
 - Company
 - Database
@@ -57,6 +73,7 @@ tags_raw:
 - Cloud Storage
 - Analytics
 - Machine Learning
+- Machine-Learning
 apis:
 - aid: tiledb:tiledb-array-api
   name: TileDB Array API

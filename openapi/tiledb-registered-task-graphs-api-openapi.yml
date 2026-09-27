@@ -210,34 +210,6 @@ components:
             x-omitempty: true
             items:
               type: number
-    Backoff:
-      description: Backoff is a backoff strategy to use within retryStrategy
-      type: object
-      properties:
-        duration:
-          description: Duration is the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
-          type: string
-        factor:
-          description: Factor is a factor to multiply the base duration after each failed retry
-          type: integer
-          format: uint32
-        maxDuration:
-          description: MaxDuration is the maximum amount of time allowed for the backoff strategy
-          type: string
-    TaskGraphActions:
-      description: actions a user can take on a UDF
-      type: string
-      enum:
-      - fetch_task_graph
-      - share_task_graph
-    RetryPolicy:
-      description: RetryPolicy is a policy of node statuses that will be retried
-      type: string
-      enum:
-      - Always
-      - OnFailure
-      - OnError
-      - OnTransientError
     Error:
       type: object
       properties:
@@ -248,6 +220,40 @@ components:
           type: string
         request_id:
           type: string
+    TGSQLNodeData:
+      description: 'A node specifying an SQL query to execute in TileDB Cloud.
+
+        '
+      type:
+      - object
+      - 'null'
+      properties:
+        init_commands:
+          description: The commands to execute before running the query itself.
+          type: array
+          items:
+            type: string
+        query:
+          description: 'The text of the SQL query to execute. Parameters are substituted in for `?`s, just as in a regular MariaDB query.
+
+            '
+          type: string
+        parameters:
+          description: 'The parameters to substitute in for arguments in the `query`. Fixed-length. Arguments must be in JSON format.
+
+            '
+          type: array
+          items:
+            $ref: '#/components/schemas/TGArgValue'
+        result_format:
+          $ref: '#/components/schemas/ResultFormat'
+        namespace:
+          description: 'If set, the non-default namespace to execute this SQL query under.
+
+            '
+          type:
+          - string
+          - 'null'
     ResultFormat:
       description: Data format of a result
       type: string
@@ -259,46 +265,12 @@ components:
       - bytes
       - tiledb_json
       - native
-    TaskGraphSharing:
-      description: details for sharing a given registered task graph
-      type: object
-      properties:
-        actions:
-          description: List of permitted actions
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/TaskGraphActions'
-          example:
-          - fetch_task_graph
-          - share_task_graph
-        namespace:
-          description: namespace being granted array access can be a user or organization
-          type: string
-          example: MyOrganization
-        namespace_type:
-          description: details on if the namespace is a organization or user
-          type: string
-          example: organization
     UDFLanguage:
       description: UDF Type
       type: string
       enum:
       - python
       - r
-    TGUDFArgument:
-      description: 'A single argument to a UDF. This may represent a positional argument or a named argument, depending upon whether `name` is set.
-
-        '
-      type: object
-      properties:
-        name:
-          description: The name of the argument, if present.
-          type:
-          - string
-          - 'null'
-        value:
-          $ref: '#/components/schemas/TGArgValue'
     Layout:
       description: Layout of array
       type: string
@@ -351,82 +323,38 @@ components:
           description: 'The structure of the graph, in the form of the nodes that make it up. As with `TaskGraphLog`, nodes must topologically sorted, so that any node appears after all the nodes it depends on.
 
             '
-    UDFArrayDetails:
-      description: Contains array details for multi-array query including uri, ranges buffers
-      type: object
-      properties:
-        parameter_id:
-          description: 'An optional client-generated identifier to distinguish between multiple range/buffer requests from the same array in the same call.
-
-            This may be set for MultiArrayUDFs that use the `argument_json` style of passing arrays.
-
-            '
-          type:
-          - string
-          - 'null'
-          x-omitempty: true
-        uri:
-          description: array to set ranges and buffers on, must be in tiledb:// format
-          type: string
-        ranges:
-          description: ranges to run against, generic format
-          $ref: '#/components/schemas/QueryRanges'
-        buffers:
-          description: List of buffers to fetch (attributes + dimensions)
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-    TaskGraphNode:
-      description: 'Information about a single node within a registered task graph. A single node represents one piece of data or a computational step; either as an input value, a data source, or a computation that acts upon earlier nodes. The structure parallels the existing `TaskGraphNodeMetadata`.
+    TGUDFArgument:
+      description: 'A single argument to a UDF. This may represent a positional argument or a named argument, depending upon whether `name` is set.
 
         '
       type: object
       properties:
-        client_node_id:
-          type: string
-          description: The client-generated UUID of the given graph node.
         name:
+          description: The name of the argument, if present.
           type:
           - string
           - 'null'
-          maxLength: 255
-          description: 'A client-specified name for the node. If provided, this must be unique.
+        value:
+          $ref: '#/components/schemas/TGArgValue'
+    TGArgValue:
+      description: "An argument provided to a node. This is one of a direct value (i.e., a raw JSON value) or a `TGSentinel`.\nFor example this Python value:\n\n    {\"a\": [1, \"pipe\", range(30), None], \"b\": b\"bytes\"}\n\nis encoded thusly (with included comments):\n\n    {  // A dictionary with string keys is JSON-encodable.\n      \"a\": [  // As is a list.\n        1,\n        \"pipe\",\n        {  // A `range` is replaced with its pickle.\n          \"__tdbudf__\": \"immediate\",\n          \"format\": \"python_pickle\",\n          \"base64_data\": \"gASVIAAAAAAAAACMCGJ1aWx0aW5zlIwFcmFuZ2WUk5RLAEseSwGHlFKULg==\"\n        },\n        null\n      ],\n      \"b\": {  // Raw binary data is encoded into base64.\n        \"__tdbudf__\": \"immediate\"\n        \"format\": \"bytes\",\n        \"base64_data\": \"Ynl0ZXM=\"\n      }\n    }\n"
+    TGInputNodeData:
+      description: 'Specifies that a node is an “input value”, allowing for parameterized task graphs. An input node may not depend upon any other nodes.
+
+        '
+      type:
+      - object
+      - 'null'
+      properties:
+        default_value:
+          $ref: '#/components/schemas/TGArgValue'
+        datatype:
+          description: 'An annotation of what datatype this node is supposed to be. Conventionally, this is a Python-format type annotation, but it’s purely for documentation purposes and not validated.
 
             '
-        depends_on:
-          type: array
-          items:
-            type: string
-          description: 'The client_node_uuid of each node that this node depends upon. Used to define the structure of the graph.
-
-            '
-        array_node:
-          $ref: '#/components/schemas/UDFArrayDetails'
-        input_node:
-          $ref: '#/components/schemas/TGInputNodeData'
-        sql_node:
-          $ref: '#/components/schemas/TGSQLNodeData'
-        udf_node:
-          $ref: '#/components/schemas/TGUDFNodeData'
-        retry_strategy:
-          $ref: '#/components/schemas/RetryStrategy'
-        expand_node_output:
           type:
           - string
           - 'null'
-          description: 'Used to create dynamic tasks based on the output of another node. The other node''s output must be a JSON list of values. The expansion process creates one task per item in the output list. The item is also passed as an argument to each task. The value is the client_node_uuid of the node that we want to expand.
-
-            '
-        deadline:
-          type:
-          - integer
-          - 'null'
-          format: int64
-          x-omitempty: true
-          description: 'Duration in seconds relative to the node start time which the node is allowed to run before it gets terminated.
-
-            '
     TGUDFEnvironment:
       description: Metadata about the environment where we want to execute a UDF.
       type: object
@@ -490,42 +418,134 @@ components:
           type:
           - number
           - 'null'
-    TGArgValue:
-      description: "An argument provided to a node. This is one of a direct value (i.e., a raw JSON value) or a `TGSentinel`.\nFor example this Python value:\n\n    {\"a\": [1, \"pipe\", range(30), None], \"b\": b\"bytes\"}\n\nis encoded thusly (with included comments):\n\n    {  // A dictionary with string keys is JSON-encodable.\n      \"a\": [  // As is a list.\n        1,\n        \"pipe\",\n        {  // A `range` is replaced with its pickle.\n          \"__tdbudf__\": \"immediate\",\n          \"format\": \"python_pickle\",\n          \"base64_data\": \"gASVIAAAAAAAAACMCGJ1aWx0aW5zlIwFcmFuZ2WUk5RLAEseSwGHlFKULg==\"\n        },\n        null\n      ],\n      \"b\": {  // Raw binary data is encoded into base64.\n        \"__tdbudf__\": \"immediate\"\n        \"format\": \"bytes\",\n        \"base64_data\": \"Ynl0ZXM=\"\n      }\n    }\n"
-    TGSQLNodeData:
-      description: 'A node specifying an SQL query to execute in TileDB Cloud.
+    TaskGraphNode:
+      description: 'Information about a single node within a registered task graph. A single node represents one piece of data or a computational step; either as an input value, a data source, or a computation that acts upon earlier nodes. The structure parallels the existing `TaskGraphNodeMetadata`.
 
         '
-      type:
-      - object
-      - 'null'
+      type: object
       properties:
-        init_commands:
-          description: The commands to execute before running the query itself.
+        client_node_id:
+          type: string
+          description: The client-generated UUID of the given graph node.
+        name:
+          type:
+          - string
+          - 'null'
+          maxLength: 255
+          description: 'A client-specified name for the node. If provided, this must be unique.
+
+            '
+        depends_on:
           type: array
           items:
             type: string
-        query:
-          description: 'The text of the SQL query to execute. Parameters are substituted in for `?`s, just as in a regular MariaDB query.
+          description: 'The client_node_uuid of each node that this node depends upon. Used to define the structure of the graph.
 
             '
+        array_node:
+          $ref: '#/components/schemas/UDFArrayDetails'
+        input_node:
+          $ref: '#/components/schemas/TGInputNodeData'
+        sql_node:
+          $ref: '#/components/schemas/TGSQLNodeData'
+        udf_node:
+          $ref: '#/components/schemas/TGUDFNodeData'
+        retry_strategy:
+          $ref: '#/components/schemas/RetryStrategy'
+        expand_node_output:
+          type:
+          - string
+          - 'null'
+          description: 'Used to create dynamic tasks based on the output of another node. The other node''s output must be a JSON list of values. The expansion process creates one task per item in the output list. The item is also passed as an argument to each task. The value is the client_node_uuid of the node that we want to expand.
+
+            '
+        deadline:
+          type:
+          - integer
+          - 'null'
+          format: int64
+          x-omitempty: true
+          description: 'Duration in seconds relative to the node start time which the node is allowed to run before it gets terminated.
+
+            '
+    RetryStrategy:
+      description: RetryStrategy provides controls on how to retry a taskgraph node
+      type: object
+      properties:
+        backoff:
+          description: Backoff is a backoff strategy
+          $ref: '#/components/schemas/Backoff'
+        expression:
+          description: Expression is a condition expression for when a node will be retried. If it evaluates to false, the node will not be retried and the retry strategy will be ignored
           type: string
-        parameters:
-          description: 'The parameters to substitute in for arguments in the `query`. Fixed-length. Arguments must be in JSON format.
-
-            '
+        limit:
+          description: Limit is the maximum number of retry attempts when retrying a container. It does not include the original container; the maximum number of total attempts will be `limit + 1`.
+          type: integer
+          format: uint32
+        retryPolicy:
+          description: RetryPolicy is a policy of NodePhase statuses that will be retried
+          $ref: '#/components/schemas/RetryPolicy'
+    TaskGraphSharing:
+      description: details for sharing a given registered task graph
+      type: object
+      properties:
+        actions:
+          description: List of permitted actions
           type: array
+          x-omitempty: true
           items:
-            $ref: '#/components/schemas/TGArgValue'
-        result_format:
-          $ref: '#/components/schemas/ResultFormat'
+            $ref: '#/components/schemas/TaskGraphActions'
+          example:
+          - fetch_task_graph
+          - share_task_graph
         namespace:
-          description: 'If set, the non-default namespace to execute this SQL query under.
+          description: namespace being granted array access can be a user or organization
+          type: string
+          example: MyOrganization
+        namespace_type:
+          description: details on if the namespace is a organization or user
+          type: string
+          example: organization
+    RetryPolicy:
+      description: RetryPolicy is a policy of node statuses that will be retried
+      type: string
+      enum:
+      - Always
+      - OnFailure
+      - OnError
+      - OnTransientError
+    UDFArrayDetails:
+      description: Contains array details for multi-array query including uri, ranges buffers
+      type: object
+      properties:
+        parameter_id:
+          description: 'An optional client-generated identifier to distinguish between multiple range/buffer requests from the same array in the same call.
+
+            This may be set for MultiArrayUDFs that use the `argument_json` style of passing arrays.
 
             '
           type:
           - string
           - 'null'
+          x-omitempty: true
+        uri:
+          description: array to set ranges and buffers on, must be in tiledb:// format
+          type: string
+        ranges:
+          description: ranges to run against, generic format
+          $ref: '#/components/schemas/QueryRanges'
+        buffers:
+          description: List of buffers to fetch (attributes + dimensions)
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+    TaskGraphActions:
+      description: actions a user can take on a UDF
+      type: string
+      enum:
+      - fetch_task_graph
+      - share_task_graph
     TGUDFNodeData:
       description: A node specifying the execution of a user-defined function.
       type:
@@ -560,40 +580,20 @@ components:
             $ref: '#/components/schemas/TGUDFArgument'
         result_format:
           $ref: '#/components/schemas/ResultFormat'
-    TGInputNodeData:
-      description: 'Specifies that a node is an “input value”, allowing for parameterized task graphs. An input node may not depend upon any other nodes.
-
-        '
-      type:
-      - object
-      - 'null'
-      properties:
-        default_value:
-          $ref: '#/components/schemas/TGArgValue'
-        datatype:
-          description: 'An annotation of what datatype this node is supposed to be. Conventionally, this is a Python-format type annotation, but it’s purely for documentation purposes and not validated.
-
-            '
-          type:
-          - string
-          - 'null'
-    RetryStrategy:
-      description: RetryStrategy provides controls on how to retry a taskgraph node
+    Backoff:
+      description: Backoff is a backoff strategy to use within retryStrategy
       type: object
       properties:
-        backoff:
-          description: Backoff is a backoff strategy
-          $ref: '#/components/schemas/Backoff'
-        expression:
-          description: Expression is a condition expression for when a node will be retried. If it evaluates to false, the node will not be retried and the retry strategy will be ignored
+        duration:
+          description: Duration is the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
           type: string
-        limit:
-          description: Limit is the maximum number of retry attempts when retrying a container. It does not include the original container; the maximum number of total attempts will be `limit + 1`.
+        factor:
+          description: Factor is a factor to multiply the base duration after each failed retry
           type: integer
           format: uint32
-        retryPolicy:
-          description: RetryPolicy is a policy of NodePhase statuses that will be retried
-          $ref: '#/components/schemas/RetryPolicy'
+        maxDuration:
+          description: MaxDuration is the maximum amount of time allowed for the backoff strategy
+          type: string
   securitySchemes:
     BasicAuth:
       type: http

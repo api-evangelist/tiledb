@@ -199,6 +199,12 @@ paths:
       x-summary-source: derived
 components:
   schemas:
+    AssetBackingType:
+      description: The technology that an asset is backed by
+      type: string
+      enum:
+      - array
+      - group
     MetadataStringifiedEntry:
       type: object
       description: key/value pair representing an asset metadata map entry
@@ -216,69 +222,6 @@ components:
           type: string
           x-omitempty: false
           example: array_metadata
-    ChangeAssetCredentialsRequest:
-      description: Request body to change the credentials of the given assets
-      type: object
-      required:
-      - access_credentials
-      - asset_uuids
-      properties:
-        access_credentials:
-          description: The name or uuid of the access credentials
-          type: string
-        asset_uuids:
-          description: The list of asset uuids to have their credentials changed
-          type: array
-          items:
-            type: string
-    PaginationMetadata:
-      properties:
-        page:
-          description: pagination offset. Use it to skip the first ((page - 1) * per_page) items
-          type: number
-          format: uint64
-          example: 1
-        per_page:
-          description: pagination limit (page size)
-          type: number
-          format: uint64
-          example: 10
-        total_pages:
-          description: number of total pages with current limit
-          type: number
-          format: uint64
-          example: 14
-        total_items:
-          description: number of total available items
-          type: number
-          format: uint64
-          example: 138
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int64
-        message:
-          type: string
-        request_id:
-          type: string
-    AssetBackingType:
-      description: The technology that an asset is backed by
-      type: string
-      enum:
-      - array
-      - group
-    MetadataStringified:
-      type: object
-      description: The user's TileDB metadata
-      properties:
-        entries:
-          description: List of metadata entries
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/MetadataStringifiedEntry'
     AssetInfo:
       description: metadata of an asset
       type: object
@@ -320,6 +263,16 @@ components:
         metadata:
           description: metadata for the asset, only included when expanded
           $ref: '#/components/schemas/MetadataStringified'
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
     AssetType:
       description: Asset types represented as TileDB arrays
       type: string
@@ -339,6 +292,28 @@ components:
       - geometry
       - raster
       - vector_search
+    PaginationMetadata:
+      properties:
+        page:
+          description: pagination offset. Use it to skip the first ((page - 1) * per_page) items
+          type: number
+          format: uint64
+          example: 1
+        per_page:
+          description: pagination limit (page size)
+          type: number
+          format: uint64
+          example: 10
+        total_pages:
+          description: number of total pages with current limit
+          type: number
+          format: uint64
+          example: 14
+        total_items:
+          description: number of total available items
+          type: number
+          format: uint64
+          example: 138
     AssetListResponse:
       description: Asset associated with a TileDB Cloud account
       type: object
@@ -351,12 +326,37 @@ components:
             $ref: '#/components/schemas/AssetInfo'
         pagination_metadata:
           $ref: '#/components/schemas/PaginationMetadata'
+    ChangeAssetCredentialsRequest:
+      description: Request body to change the credentials of the given assets
+      type: object
+      required:
+      - access_credentials
+      - asset_uuids
+      properties:
+        access_credentials:
+          description: The name or uuid of the access credentials
+          type: string
+        asset_uuids:
+          description: The list of asset uuids to have their credentials changed
+          type: array
+          items:
+            type: string
     AssetOwnershipLevel:
       description: The ownership level of the asset
       type: string
       enum:
       - owned
       - shared
+    MetadataStringified:
+      type: object
+      description: The user's TileDB metadata
+      properties:
+        entries:
+          description: List of metadata entries
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/MetadataStringifiedEntry'
   securitySchemes:
     BasicAuth:
       type: http

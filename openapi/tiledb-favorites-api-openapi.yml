@@ -555,31 +555,33 @@ paths:
       x-summary-source: derived
 components:
   schemas:
-    MLModelFavorite:
-      description: A user-favorite MLModel item
+    MetadataStringifiedEntry:
       type: object
+      description: key/value pair representing an asset metadata map entry
       properties:
-        mlmodel_uuid:
-          description: unique UUID of the MLModel
+        key:
+          description: The metadata key
           type: string
-        namespace:
-          description: the namespace of the MLModel
-          type: string
-        name:
-          description: the name of the MLModel
-          type: string
-    ArrayFavoritesData:
-      description: Object including array favorites and pagination metadata
-      type: object
-      properties:
-        arrays:
-          description: List of array infos
-          type: array
           x-omitempty: false
-          items:
-            $ref: '#/components/schemas/ArrayInfo'
-        pagination_metadata:
-          $ref: '#/components/schemas/PaginationMetadata'
+        value:
+          description: The metadata value
+          type: string
+          x-omitempty: false
+        type:
+          description: The metadata type
+          type: string
+          x-omitempty: false
+          example: array_metadata
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
     PricingCurrency:
       description: Currency of pricing
       type: string
@@ -607,33 +609,57 @@ components:
           x-omitempty: true
           items:
             $ref: '#/components/schemas/Pricing'
-    Error:
+    MLModelFavorite:
+      description: A user-favorite MLModel item
       type: object
       properties:
-        code:
-          type: integer
-          format: int64
-        message:
+        mlmodel_uuid:
+          description: unique UUID of the MLModel
           type: string
-        request_id:
+        namespace:
+          description: the namespace of the MLModel
           type: string
-    MetadataStringifiedEntry:
+        name:
+          description: the name of the MLModel
+          type: string
+    ArrayFavorite:
+      description: A user-favorite array item
       type: object
-      description: key/value pair representing an asset metadata map entry
       properties:
-        key:
-          description: The metadata key
+        array_uuid:
+          description: unique UUID of the array
           type: string
-          x-omitempty: false
-        value:
-          description: The metadata value
+        namespace:
+          description: the namespace of the array
           type: string
-          x-omitempty: false
-        type:
-          description: The metadata type
+        name:
+          description: the name of the array
           type: string
+    MLModelFavoritesData:
+      description: Object including MLModel favorites and pagination metadata
+      type: object
+      properties:
+        mlmodels:
+          description: List of MLModel infos
+          type: array
           x-omitempty: false
-          example: array_metadata
+          items:
+            $ref: '#/components/schemas/ArrayInfo'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+    NotebookFavorite:
+      description: A user-favorite notebook item
+      type: object
+      properties:
+        notebook_uuid:
+          description: unique UUID of the notebook
+          type: string
+        namespace:
+          description: the namespace of the notebook
+          type: string
+        name:
+          description: the name of the notebook
+          type: string
     Pricing:
       description: Pricing created by converting an array to product
       type: object
@@ -683,122 +709,6 @@ components:
           description: If pricing is activated
           type: boolean
           example: false
-    MLModelFavoritesData:
-      description: Object including MLModel favorites and pagination metadata
-      type: object
-      properties:
-        mlmodels:
-          description: List of MLModel infos
-          type: array
-          x-omitempty: false
-          items:
-            $ref: '#/components/schemas/ArrayInfo'
-        pagination_metadata:
-          $ref: '#/components/schemas/PaginationMetadata'
-    PricingUnitLabel:
-      description: Unit label
-      type: string
-      enum:
-      - byte
-      - second
-    UDFFavoritesData:
-      description: Object including UDF favorites and pagination metadata
-      type: object
-      properties:
-        udfs:
-          description: List of UDF infos
-          type: array
-          x-omitempty: false
-          items:
-            $ref: '#/components/schemas/ArrayInfo'
-        pagination_metadata:
-          $ref: '#/components/schemas/PaginationMetadata'
-    UDFFavorite:
-      description: A user-favorite UDF item
-      type: object
-      properties:
-        udf_uuid:
-          description: unique UUID of the UDF
-          type: string
-        namespace:
-          description: the namespace of the UDF
-          type: string
-        name:
-          description: the name of the UDF
-          type: string
-    FileType:
-      description: File types represented as TileDB arrays
-      type: string
-      enum:
-      - notebook
-      - user_defined_function
-      - ml_model
-      - file
-      - registered_task_graph
-    ArrayFavorite:
-      description: A user-favorite array item
-      type: object
-      properties:
-        array_uuid:
-          description: unique UUID of the array
-          type: string
-        namespace:
-          description: the namespace of the array
-          type: string
-        name:
-          description: the name of the array
-          type: string
-    PricingInterval:
-      description: Interval for pricing
-      type: string
-      enum:
-      - month
-    NotebookFavorite:
-      description: A user-favorite notebook item
-      type: object
-      properties:
-        notebook_uuid:
-          description: unique UUID of the notebook
-          type: string
-        namespace:
-          description: the namespace of the notebook
-          type: string
-        name:
-          description: the name of the notebook
-          type: string
-    PricingType:
-      description: Pricing types
-      type: string
-      enum:
-      - egress
-      - access
-    ArrayActions:
-      description: actions a user can take on an array
-      type: string
-      enum:
-      - read
-      - write
-      - edit
-      - read_array_logs
-      - read_array_info
-      - read_array_schema
-    NotebookFavoritesData:
-      description: Object including notebook favorites and pagination metadata
-      type: object
-      properties:
-        notebooks:
-          description: List of notebook infos
-          type: array
-          x-omitempty: false
-          items:
-            $ref: '#/components/schemas/ArrayInfo'
-        pagination_metadata:
-          $ref: '#/components/schemas/PaginationMetadata'
-    PricingAggregateUsage:
-      description: Specifies a usage aggregation strategy for pricings of usage_type=metered
-      type: string
-      enum:
-      - sum
     PaginationMetadata:
       properties:
         page:
@@ -963,6 +873,96 @@ components:
           x-omitempty: true
           items:
             $ref: '#/components/schemas/MetadataStringifiedEntry'
+    NotebookFavoritesData:
+      description: Object including notebook favorites and pagination metadata
+      type: object
+      properties:
+        notebooks:
+          description: List of notebook infos
+          type: array
+          x-omitempty: false
+          items:
+            $ref: '#/components/schemas/ArrayInfo'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+    UDFFavoritesData:
+      description: Object including UDF favorites and pagination metadata
+      type: object
+      properties:
+        udfs:
+          description: List of UDF infos
+          type: array
+          x-omitempty: false
+          items:
+            $ref: '#/components/schemas/ArrayInfo'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+    ArrayActions:
+      description: actions a user can take on an array
+      type: string
+      enum:
+      - read
+      - write
+      - edit
+      - read_array_logs
+      - read_array_info
+      - read_array_schema
+    PricingAggregateUsage:
+      description: Specifies a usage aggregation strategy for pricings of usage_type=metered
+      type: string
+      enum:
+      - sum
+    ArrayFavoritesData:
+      description: Object including array favorites and pagination metadata
+      type: object
+      properties:
+        arrays:
+          description: List of array infos
+          type: array
+          x-omitempty: false
+          items:
+            $ref: '#/components/schemas/ArrayInfo'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+    PricingUnitLabel:
+      description: Unit label
+      type: string
+      enum:
+      - byte
+      - second
+    PricingInterval:
+      description: Interval for pricing
+      type: string
+      enum:
+      - month
+    UDFFavorite:
+      description: A user-favorite UDF item
+      type: object
+      properties:
+        udf_uuid:
+          description: unique UUID of the UDF
+          type: string
+        namespace:
+          description: the namespace of the UDF
+          type: string
+        name:
+          description: the name of the UDF
+          type: string
+    FileType:
+      description: File types represented as TileDB arrays
+      type: string
+      enum:
+      - notebook
+      - user_defined_function
+      - ml_model
+      - file
+      - registered_task_graph
+    PricingType:
+      description: Pricing types
+      type: string
+      enum:
+      - egress
+      - access
   securitySchemes:
     BasicAuth:
       type: http

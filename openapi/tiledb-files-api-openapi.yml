@@ -222,7 +222,7 @@ paths:
       description: Upload a file at the specified location and wrap it in TileDB Array
       tags:
       - Files
-      operationId: HandleUploadFile
+      operationId: postFilesByNamespaceByArrayUpload
       responses:
         201:
           description: File uploaded
@@ -249,23 +249,12 @@ paths:
         required: true
       summary: Handle upload file
       x-summary-source: derived
+      x-operation-id-source: normalized
+      x-operation-id-original: HandleUploadFile
     servers:
     - url: /v2
 components:
   schemas:
-    FileCreate:
-      description: Input/Output information required to create a new file
-      type: object
-      properties:
-        input_uri:
-          type: string
-          description: storage URI of the input file
-        output_uri:
-          type: string
-          description: output location of the TileDB File
-        name:
-          type: string
-          description: name to set for registered file
     FileExport:
       description: Output information required to export a file
       type: object
@@ -290,6 +279,19 @@ components:
         output_uri:
           type: string
           description: output location of the exported file
+    FileCreate:
+      description: Input/Output information required to create a new file
+      type: object
+      properties:
+        input_uri:
+          type: string
+          description: storage URI of the input file
+        output_uri:
+          type: string
+          description: output location of the TileDB File
+        name:
+          type: string
+          description: name to set for registered file
     FileUploaded:
       description: Uploaded file name and information
       type: object

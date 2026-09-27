@@ -248,6 +248,23 @@ components:
           type: string
           example: 00000000-0000-0000-0000-000000000000
           x-omitempty: false
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
+    PodStatus:
+      description: List of all available pod statuses
+      type: string
+      enum:
+      - TERMINATING
+      - RUNNING
+      - LAUNCHING
     NotebookCopy:
       description: Output information required to copy a notebook
       type: object
@@ -261,6 +278,68 @@ components:
         namespace:
           type: string
           description: namespace to copy to
+    ArrayInfoUpdate:
+      description: metadata of an array
+      type: object
+      properties:
+        description:
+          description: description of array
+          type:
+          - string
+          - 'null'
+        name:
+          description: description of array
+          type: string
+          example: myarray1
+        uri:
+          description: uri of array
+          type: string
+          example: s3://bucket/array
+        file_type:
+          description: File type stored /wrapped by this array
+          x-omitempty: true
+          $ref: '#/components/schemas/FileType'
+        file_properties:
+          type: object
+          description: map of file properties created for this array
+          x-omitempty: true
+          additionalProperties:
+            type: string
+        access_credentials_name:
+          description: the name of the access credentials to use. if unset, the default credentials will be used
+          type: string
+        logo:
+          description: logo (base64 encoded) for the array. Optional
+          type: string
+        tags:
+          description: optional tags for array
+          x-omitempty: false
+          type: array
+          items:
+            type: string
+            description: tag must be lowercase characters or hypen [a-z-]
+        license_id:
+          type: string
+          x-omitempty: true
+          description: License identifier from SPDX License List or Custom
+        license_text:
+          type: string
+          x-omitempty: true
+          description: License text
+        read_only:
+          description: Suggests if the array is in read_only mode
+          type: boolean
+          x-omitempty: true
+          example: true
+    FileType:
+      description: File types represented as TileDB arrays
+      type: string
+      enum:
+      - notebook
+      - user_defined_function
+      - ml_model
+      - file
+      - registered_task_graph
     NotebookStatus:
       description: Status details of a notebook server
       type: object
@@ -326,78 +405,6 @@ components:
           $ref: '#/components/schemas/PodStatus'
           example: RUNNING
           x-omitempty: true
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int64
-        message:
-          type: string
-        request_id:
-          type: string
-    ArrayInfoUpdate:
-      description: metadata of an array
-      type: object
-      properties:
-        description:
-          description: description of array
-          type:
-          - string
-          - 'null'
-        name:
-          description: description of array
-          type: string
-          example: myarray1
-        uri:
-          description: uri of array
-          type: string
-          example: s3://bucket/array
-        file_type:
-          description: File type stored /wrapped by this array
-          x-omitempty: true
-          $ref: '#/components/schemas/FileType'
-        file_properties:
-          type: object
-          description: map of file properties created for this array
-          x-omitempty: true
-          additionalProperties:
-            type: string
-        access_credentials_name:
-          description: the name of the access credentials to use. if unset, the default credentials will be used
-          type: string
-        logo:
-          description: logo (base64 encoded) for the array. Optional
-          type: string
-        tags:
-          description: optional tags for array
-          x-omitempty: false
-          type: array
-          items:
-            type: string
-            description: tag must be lowercase characters or hypen [a-z-]
-        license_id:
-          type: string
-          x-omitempty: true
-          description: License identifier from SPDX License List or Custom
-        license_text:
-          type: string
-          x-omitempty: true
-          description: License text
-        read_only:
-          description: Suggests if the array is in read_only mode
-          type: boolean
-          x-omitempty: true
-          example: true
-    FileType:
-      description: File types represented as TileDB arrays
-      type: string
-      enum:
-      - notebook
-      - user_defined_function
-      - ml_model
-      - file
-      - registered_task_graph
     FileUploaded:
       description: Uploaded file name and information
       type: object
@@ -415,13 +422,6 @@ components:
           type: string
           example: 00000000-0000-0000-0000-000000000000
           x-omitempty: false
-    PodStatus:
-      description: List of all available pod statuses
-      type: string
-      enum:
-      - TERMINATING
-      - RUNNING
-      - LAUNCHING
   securitySchemes:
     BasicAuth:
       type: http
