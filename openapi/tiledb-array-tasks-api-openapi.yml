@@ -64,6 +64,16 @@ paths:
       x-summary-source: derived
 components:
   schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
     ArrayTaskBrowserSidebar:
       description: Object for ui array tasks browser page
       type: object
@@ -83,16 +93,6 @@ components:
           x-omitempty: false
           additionalProperties:
             type: integer
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int64
-        message:
-          type: string
-        request_id:
-          type: string
   securitySchemes:
     BasicAuth:
       type: http

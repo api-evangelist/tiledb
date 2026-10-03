@@ -391,77 +391,60 @@ paths:
     - url: /v1
 components:
   schemas:
-    QueryRanges:
-      description: Subarray bounds to query
+    QueryReader:
+      description: Read struct (can't be called reader due to class name conflict)
       type: object
       properties:
         layout:
           $ref: '#/components/schemas/Layout'
-        ranges:
-          description: List of ranges,
+        subarray:
+          $ref: '#/components/schemas/Subarray'
+        readState:
+          description: To handle incomplete read queries.
+          $ref: '#/components/schemas/ReadState'
+        varOffsetsMode:
+          description: The offsets format (bytes or elements) to be used.
+          type: string
+        varOffsetsAddExtraElement:
+          description: True if an extra element will be added to the end of the offsets buffer.
+          type: boolean
+        varOffsetsBitsize:
+          description: The offsets bitsize (32 or 64) to be used.
+          type: integer
+          format: uint32
+    Writer:
+      type: object
+      properties:
+        checkCoordDups:
+          type: boolean
+        checkCoordOOB:
+          type: boolean
+        dedupCoords:
+          type: boolean
+        subarray:
+          $ref: '#/components/schemas/DomainArray'
+    SubarrayRanges:
+      description: A set of 1D ranges for a subarray
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/Datatype'
+        hasDefaultRange:
+          description: True if the range is the default range
+          type: boolean
+        buffer:
+          description: The bytes of the ranges
           type: array
-          x-omitempty: true
           items:
-            type: array
-            x-omitempty: true
-            items:
-              type: number
-    Layout:
-      description: Layout of array
+            type: integer
+            format: uint8
+    Querytype:
+      description: Type of query
       type: string
       enum:
-      - row-major
-      - col-major
-      - global-order
-      - unordered
-    AttributeBufferSize:
-      type: object
-      description: object representing buffer size of an attribute
-      required:
-      - attribute
-      - offsetBytes
-      - dataBytes
-      properties:
-        attribute:
-          description: name of attribute
-          type: string
-        offsetBytes:
-          description: buffer size (in bytes) of offset buffer
-          type: integer
-          format: uint64
-        dataBytes:
-          description: buffer size (in bytes) of data buffer
-          type: integer
-          format: uint64
-    ReadState:
-      description: state for reads
-      type: object
-      properties:
-        initialized:
-          description: True if the reader has been initialized.
-          type: boolean
-        overflowed:
-          description: True if the query produced results that could not fit in some buffer.
-          type: boolean
-        unsplittable:
-          description: True if the current subarray partition is unsplittable.
-          type: boolean
-        subarrayPartitioner:
-          $ref: '#/components/schemas/SubarrayPartitioner'
-    QueryJson:
-      description: Query returning results as JSON
-      type: object
-      properties:
-        query_ranges:
-          description: ranges to run against, generic format
-          $ref: '#/components/schemas/QueryRanges'
-        fields:
-          description: List of fields to return data from, empty means return data for all fields
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-            x-omitempty: true
+      - READ
+      - WRITE
+      - DELETE
     AttributeBufferHeader:
       description: Represents an attribute buffer header information
       type: object
@@ -482,17 +465,76 @@ components:
           description: Number of bytes in the var-length attribute data buffer
           type: integer
           format: uint64
-    Writer:
+    Error:
       type: object
       properties:
-        checkCoordDups:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
+    Query:
+      type: object
+      required:
+      - type
+      - attributeBufferHeaders
+      - layout
+      - status
+      - array
+      - totalFixedLengthBufferBytes
+      - totalVarLenBufferBytes
+      properties:
+        type:
+          $ref: '#/components/schemas/Querytype'
+        layout:
+          $ref: '#/components/schemas/Layout'
+        status:
+          $ref: '#/components/schemas/Querystatus'
+        attributeBufferHeaders:
+          description: List of attribute buffer headers
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/AttributeBufferHeader'
+        writer:
+          description: writer contains data needed for continuation of global write order queries
+          $ref: '#/components/schemas/Writer'
+        reader:
+          description: reader contains data needed for continuation of reads
+          $ref: '#/components/schemas/QueryReader'
+        array:
+          description: Represents an open array
+          $ref: '#/components/schemas/Array'
+        totalFixedLengthBufferBytes:
+          description: Total number of bytes in fixed size attribute buffers.
+          type: integer
+          format: uint64
+        totalVarLenBufferBytes:
+          description: Total number of bytes in variable size attribute buffers.
+          type: integer
+          format: uint64
+      x-go-type:
+        import:
+          package: github.com/TileDB-Inc/TileDB-Go
+          alias: tiledb
+        type: Query
+    ReadState:
+      description: state for reads
+      type: object
+      properties:
+        initialized:
+          description: True if the reader has been initialized.
           type: boolean
-        checkCoordOOB:
+        overflowed:
+          description: True if the query produced results that could not fit in some buffer.
           type: boolean
-        dedupCoords:
+        unsplittable:
+          description: True if the current subarray partition is unsplittable.
           type: boolean
-        subarray:
-          $ref: '#/components/schemas/DomainArray'
+        subarrayPartitioner:
+          $ref: '#/components/schemas/SubarrayPartitioner'
     SubarrayPartitioner:
       description: The subarray partitioner
       type: object
@@ -554,73 +596,6 @@ components:
           description: The memory budget for the var-sized attributes
           type: integer
           format: uint64
-    QueryReader:
-      description: Read struct (can't be called reader due to class name conflict)
-      type: object
-      properties:
-        layout:
-          $ref: '#/components/schemas/Layout'
-        subarray:
-          $ref: '#/components/schemas/Subarray'
-        readState:
-          description: To handle incomplete read queries.
-          $ref: '#/components/schemas/ReadState'
-        varOffsetsMode:
-          description: The offsets format (bytes or elements) to be used.
-          type: string
-        varOffsetsAddExtraElement:
-          description: True if an extra element will be added to the end of the offsets buffer.
-          type: boolean
-        varOffsetsBitsize:
-          description: The offsets bitsize (32 or 64) to be used.
-          type: integer
-          format: uint32
-    Datatype:
-      description: TileDB data type
-      type: string
-      enum:
-      - INT32
-      - INT64
-      - FLOAT32
-      - FLOAT64
-      - CHAR
-      - INT8
-      - UINT8
-      - INT16
-      - UINT16
-      - UINT32
-      - UINT64
-      - STRING_ASCII
-      - STRING_UTF8
-      - STRING_UTF16
-      - STRING_UTF32
-      - STRING_UCS2
-      - STRING_UCS4
-      - ANY
-      - DATETIME_YEAR
-      - DATETIME_MONTH
-      - DATETIME_WEEK
-      - DATETIME_DAY
-      - DATETIME_HR
-      - DATETIME_MIN
-      - DATETIME_SEC
-      - DATETIME_MS
-      - DATETIME_US
-      - DATETIME_NS
-      - DATETIME_PS
-      - DATETIME_FS
-      - DATETIME_AS
-      - TIME_HR
-      - TIME_MIN
-      - TIME_SEC
-      - TIME_MS
-      - TIME_US
-      - TIME_NS
-      - TIME_PS
-      - TIME_FS
-      - TIME_AS
-      - BLOB
-      - BOOL
     DomainArray:
       description: Domain object for an array of each type
       type: object
@@ -685,6 +660,98 @@ components:
           items:
             type: number
             format: double
+    QueryRanges:
+      description: Subarray bounds to query
+      type: object
+      properties:
+        layout:
+          $ref: '#/components/schemas/Layout'
+        ranges:
+          description: List of ranges,
+          type: array
+          x-omitempty: true
+          items:
+            type: array
+            x-omitempty: true
+            items:
+              type: number
+    Layout:
+      description: Layout of array
+      type: string
+      enum:
+      - row-major
+      - col-major
+      - global-order
+      - unordered
+    Datatype:
+      description: TileDB data type
+      type: string
+      enum:
+      - INT32
+      - INT64
+      - FLOAT32
+      - FLOAT64
+      - CHAR
+      - INT8
+      - UINT8
+      - INT16
+      - UINT16
+      - UINT32
+      - UINT64
+      - STRING_ASCII
+      - STRING_UTF8
+      - STRING_UTF16
+      - STRING_UTF32
+      - STRING_UCS2
+      - STRING_UCS4
+      - ANY
+      - DATETIME_YEAR
+      - DATETIME_MONTH
+      - DATETIME_WEEK
+      - DATETIME_DAY
+      - DATETIME_HR
+      - DATETIME_MIN
+      - DATETIME_SEC
+      - DATETIME_MS
+      - DATETIME_US
+      - DATETIME_NS
+      - DATETIME_PS
+      - DATETIME_FS
+      - DATETIME_AS
+      - TIME_HR
+      - TIME_MIN
+      - TIME_SEC
+      - TIME_MS
+      - TIME_US
+      - TIME_NS
+      - TIME_PS
+      - TIME_FS
+      - TIME_AS
+      - BLOB
+      - BOOL
+    QueryJson:
+      description: Query returning results as JSON
+      type: object
+      properties:
+        query_ranges:
+          description: ranges to run against, generic format
+          $ref: '#/components/schemas/QueryRanges'
+        fields:
+          description: List of fields to return data from, empty means return data for all fields
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+            x-omitempty: true
+    Querystatus:
+      description: Status of query
+      type: string
+      enum:
+      - FAILED
+      - COMPLETED
+      - INPROGRESS
+      - INCOMPLETE
+      - UNINITIALIZED
     Array:
       description: Represents an open array
       type: object
@@ -704,25 +771,25 @@ components:
         uri:
           description: Array uri
           type: string
-    Error:
+    AttributeBufferSize:
       type: object
+      description: object representing buffer size of an attribute
+      required:
+      - attribute
+      - offsetBytes
+      - dataBytes
       properties:
-        code:
+        attribute:
+          description: name of attribute
+          type: string
+        offsetBytes:
+          description: buffer size (in bytes) of offset buffer
           type: integer
-          format: int64
-        message:
-          type: string
-        request_id:
-          type: string
-    Querystatus:
-      description: Status of query
-      type: string
-      enum:
-      - FAILED
-      - COMPLETED
-      - INPROGRESS
-      - INCOMPLETE
-      - UNINITIALIZED
+          format: uint64
+        dataBytes:
+          description: buffer size (in bytes) of data buffer
+          type: integer
+          format: uint64
     Subarray:
       description: A Subarray
       type: object
@@ -735,29 +802,42 @@ components:
           x-omitempty: true
           items:
             $ref: '#/components/schemas/SubarrayRanges'
-    SubarrayRanges:
-      description: A set of 1D ranges for a subarray
+    QueryReader_2:
+      description: Read struct (can't be called reader due to class name conflict)
       type: object
       properties:
-        type:
-          $ref: '#/components/schemas/Datatype'
-        hasDefaultRange:
-          description: True if the range is the default range
-          type: boolean
-        buffer:
-          description: The bytes of the ranges
-          type: array
-          items:
-            type: integer
-            format: uint8
-    Querytype:
+        layout:
+          $ref: '#/components/schemas/Layout'
+        subarray:
+          $ref: '#/components/schemas/Subarray'
+        readState:
+          description: To handle incomplete read queries.
+          $ref: '#/components/schemas/ReadState'
+    Querytype_2:
       description: Type of query
       type: string
       enum:
       - READ
       - WRITE
-      - DELETE
-    Query:
+    ArrayMetadataEntry:
+      type: object
+      description: key/value pair representing an array metadata map entry
+      properties:
+        key:
+          type: string
+        type:
+          type: string
+        valueNum:
+          type: integer
+          format: uint32
+        value:
+          type: array
+          items:
+            type: integer
+            format: uint8
+        del:
+          type: boolean
+    Query_2:
       type: object
       required:
       - type
@@ -769,7 +849,7 @@ components:
       - totalVarLenBufferBytes
       properties:
         type:
-          $ref: '#/components/schemas/Querytype'
+          $ref: '#/components/schemas/Querytype_2'
         layout:
           $ref: '#/components/schemas/Layout'
         status:
@@ -779,16 +859,16 @@ components:
           type: array
           x-omitempty: true
           items:
-            $ref: '#/components/schemas/AttributeBufferHeader'
+            $ref: '#/components/schemas/AttributeBufferHeader_2'
         writer:
           description: writer contains data needed for continuation of global write order queries
-          $ref: '#/components/schemas/Writer'
+          $ref: '#/components/schemas/Writer_2'
         reader:
           description: reader contains data needed for continuation of reads
-          $ref: '#/components/schemas/QueryReader'
+          $ref: '#/components/schemas/QueryReader_2'
         array:
           description: Represents an open array
-          $ref: '#/components/schemas/Array'
+          $ref: '#/components/schemas/Array_2'
         totalFixedLengthBufferBytes:
           description: Total number of bytes in fixed size attribute buffers.
           type: integer
@@ -797,11 +877,48 @@ components:
           description: Total number of bytes in variable size attribute buffers.
           type: integer
           format: uint64
+        totalValidityBufferBytes:
+          description: Total number of bytes in validity buffers
+          type: integer
+          format: uint64
       x-go-type:
         import:
           package: github.com/TileDB-Inc/TileDB-Go
           alias: tiledb
         type: Query
+    ArraySchemaEntry:
+      type: object
+      description: key/value pair representing an array schema map entry
+      properties:
+        key:
+          type: string
+        value:
+          $ref: '#/components/schemas/ArraySchema'
+    DeleteAndUpdateTileLocation:
+      type: object
+      description: the location of delete tiles
+      properties:
+        uri:
+          description: the uri
+          type: string
+        conditionMarker:
+          type: string
+        offset:
+          type: number
+          format: uint64
+    FloatScaleConfig:
+      description: FloatScaleConfig
+      type: object
+      properties:
+        scale:
+          type: integer
+          format: double
+        offset:
+          type: integer
+          format: double
+        byteWidth:
+          type: integer
+          format: uint64
     Array_2:
       description: Represents an open array
       type: object
@@ -850,16 +967,12 @@ components:
           description: The ending timestamp that the array was last opened at
           type: number
           format: uint64
-    NonEmptyDomainList:
-      type: object
-      description: object containing non empty domains
-      properties:
-        nonEmptyDomains:
-          description: Array's non empty domain
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/NonEmptyDomain'
+    ArrayType:
+      description: TileDB array type
+      type: string
+      enum:
+      - dense
+      - sparse
     Writer_2:
       type: object
       properties:
@@ -873,160 +986,91 @@ components:
           $ref: '#/components/schemas/Subarray'
         subarray:
           $ref: '#/components/schemas/DomainArray'
-    GenericTileOffsets:
-      type: object
-      description: Array directory (for reads)
-      properties:
-        rtree:
-          description: RTree serialized as a blob
-          type: number
-          format: uint64
-        tileOffsets:
-          description: tile offsets
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: uint64
-        tileVarOffsets:
-          description: variable tile offsets
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: uint64
-        tileVarSizes:
-          description: sizes of the uncompressed variable tiles offsets
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: uint64
-        tileValidityOffsets:
-          description: tile validity offsets
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: uint64
-        tileMinOffsets:
-          description: min tile offsets
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: uint64
-        tileMaxOffsets:
-          description: max tile offsets
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: uint64
-        tileSumOffsets:
-          description: tile sum offsets
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: uint64
-        tileNullCountOffsets:
-          description: null count offsets
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: uint64
-        fragmentMinMaxSumNullCountOffset:
-          description: fragment min/max/sum/nullcount offsets
-          type: number
-          format: uint64
-        processedConditionsOffsets:
-          description: processed conditions offsets
-          type: number
-          format: uint64
-    AttributeBufferHeader_2:
-      description: Represents an attribute buffer header information
+    Filter:
+      description: Filter
       type: object
       required:
-      - name
-      - fixedLenBufferSizeInBytes
-      - varLenBufferSizeInBytes
+      - type
       properties:
-        name:
-          description: Attribute name
-          type: string
-          example: attribute1
-        fixedLenBufferSizeInBytes:
-          description: Number of bytes in the fixed-length attribute data buffer (offsets for var-len attributes)
-          type: integer
-          format: uint64
-        varLenBufferSizeInBytes:
-          description: Number of bytes in the var-length attribute data buffer
-          type: integer
-          format: uint64
-        validityLenBufferSizeInBytes:
-          description: Number of bytes for validity in case attribute is nullable
-          type: integer
-          format: uint64
-        originalFixedLenBufferSizeInBytes:
-          description: Original user set number of bytes in the fixed-length attribute data buffer
-          type: integer
-          format: uint64
-        originalVarLenBufferSizeInBytes:
-          description: Original user set number of bytes in the var-length attribute data buffer
-          type: integer
-          format: uint64
-        originalValidityLenBufferSizeInBytes:
-          description: Original user set number of bytes in the validity data buffer
-          type: integer
-          format: uint64
-    QueryReader_2:
-      description: Read struct (can't be called reader due to class name conflict)
+        type:
+          description: Filter type
+          $ref: '#/components/schemas/FilterType'
+        floatScaleConfig:
+          description: Filter type
+          $ref: '#/components/schemas/FloatScaleConfig'
+        data:
+          description: Filter data
+          type: object
+          properties:
+            text:
+              type: string
+            bytes:
+              type: array
+              items:
+                type: integer
+                format: uint8
+            int8:
+              type: integer
+              format: int8
+            uint8:
+              type: integer
+              format: uint8
+            int16:
+              type: integer
+              format: int16
+            uint16:
+              type: integer
+              format: uint16
+            int32:
+              type: integer
+              format: int32
+            uint32:
+              type: integer
+              format: uint32
+            int64:
+              type: integer
+              format: int64
+            uint64:
+              type: integer
+              format: uint64
+            float32:
+              type: integer
+              format: float
+            float64:
+              type: integer
+              format: double
+    FilterPipeline:
+      description: One or more filters to apply
       type: object
       properties:
-        layout:
+        filters:
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/Filter'
+    Domain:
+      description: Domain of array
+      type: object
+      required:
+      - type
+      - tileOrder
+      - cellOrder
+      - dimensions
+      properties:
+        type:
+          $ref: '#/components/schemas/Datatype'
+          description: Domain Type
+        tileOrder:
           $ref: '#/components/schemas/Layout'
-        subarray:
-          $ref: '#/components/schemas/Subarray'
-        readState:
-          description: To handle incomplete read queries.
-          $ref: '#/components/schemas/ReadState'
-    TimestampedURI:
-      type: object
-      description: the timestamped filtered array metadata URIs, after removing the ones that need to be vacuumed and those that do not fall within
-      properties:
-        uri:
-          description: the uri
-          type: string
-        timestampStart:
-          description: start of timestamp
-          type: number
-          format: uint64
-        timestampEnd:
-          description: end of timestamp
-          type: number
-          format: uint64
-    FilterType:
-      description: TileDB filter types
-      type: string
-      enum:
-      - FILTER_NONE
-      - FILTER_GZIP
-      - FILTER_ZSTD
-      - FILTER_LZ4
-      - FILTER_RLE
-      - FILTER_BZIP2
-      - FILTER_DOUBLE_DELTA
-      - FILTER_BIT_WIDTH_REDUCTION
-      - FILTER_BITSHUFFLE
-      - FILTER_BYTESHUFFLE
-      - FILTER_POSITIVE_DELTA
-      - FILTER_SCALE_FLOAT
-      - FILTER_WEBP
-      - FILTER_CHECKSUM_MD5
-      - FILTER_CHECKSUM_SHA256
-      - FILTER_DICTIONARY
+          description: Tile Order
+        cellOrder:
+          $ref: '#/components/schemas/Layout'
+          description: Cell Order
+        dimensions:
+          type: array
+          description: Array of dimensions
+          items:
+            $ref: '#/components/schemas/Dimension'
     Dimension:
       description: Dimension of array
       type: object
@@ -1085,412 +1129,6 @@ components:
         filterPipeline:
           x-omit-empty: true
           $ref: '#/components/schemas/FilterPipeline'
-    ArrayDirectory:
-      type: object
-      description: Array directory (for reads)
-      properties:
-        unfilteredFragmentUris:
-          description: fragment URIs
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-        consolidatedCommitUris:
-          description: consolidated commit URI set
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-        arraySchemaUris:
-          description: URIs of all the array schema files
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-        latestArraySchemaUri:
-          description: latest array schema URI.
-          type: string
-        arrayMetaUrisToVacuum:
-          description: the array metadata files to vacuum
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-        arrayMetaVacUrisToVacuum:
-          description: the array metadata vac files to vacuum
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-        commitUrisToConsolidate:
-          description: the commit files to consolidate
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-        commitUrisToVacuum:
-          description: the commit files to vacuum
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-        consolidatedCommitUrisToVacuum:
-          description: the consolidated commit files to vacuum
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-        fragmentMetaUris:
-          description: the URIs of the consolidated fragment metadata files
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-        timestampStart:
-          description: Only the files created after timestamp_start are listed
-          type: number
-          format: uint64
-        timestampEnd:
-          description: Only the files created before timestamp_end are listed
-          type: number
-          format: uint64
-        arrayMetaUris:
-          description: the timestamped filtered array metadata URIs, after removing the ones that need to be vacuumed and those that do not fall within
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/TimestampedURI'
-        deleteAndUpdateTileLocation:
-          description: the location of delete tiles
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/DeleteAndUpdateTileLocation'
-    SubarrayRanges_2:
-      description: A set of 1D ranges for a subarray
-      type: object
-      properties:
-        type:
-          $ref: '#/components/schemas/Datatype'
-        hasDefaultRange:
-          description: True if the range is the default range
-          type: boolean
-        buffer:
-          description: The bytes of the ranges
-          type: array
-          items:
-            type: integer
-            format: uint8
-        bufferSizes:
-          description: The list of sizes per range
-          type: array
-          items:
-            type: integer
-            format: uint64
-        bufferStartSizes:
-          description: The list of start sizes per range
-          type: array
-          items:
-            type: integer
-            format: uint64
-    Query_2:
-      type: object
-      required:
-      - type
-      - attributeBufferHeaders
-      - layout
-      - status
-      - array
-      - totalFixedLengthBufferBytes
-      - totalVarLenBufferBytes
-      properties:
-        type:
-          $ref: '#/components/schemas/Querytype_2'
-        layout:
-          $ref: '#/components/schemas/Layout'
-        status:
-          $ref: '#/components/schemas/Querystatus'
-        attributeBufferHeaders:
-          description: List of attribute buffer headers
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/AttributeBufferHeader_2'
-        writer:
-          description: writer contains data needed for continuation of global write order queries
-          $ref: '#/components/schemas/Writer_2'
-        reader:
-          description: reader contains data needed for continuation of reads
-          $ref: '#/components/schemas/QueryReader_2'
-        array:
-          description: Represents an open array
-          $ref: '#/components/schemas/Array_2'
-        totalFixedLengthBufferBytes:
-          description: Total number of bytes in fixed size attribute buffers.
-          type: integer
-          format: uint64
-        totalVarLenBufferBytes:
-          description: Total number of bytes in variable size attribute buffers.
-          type: integer
-          format: uint64
-        totalValidityBufferBytes:
-          description: Total number of bytes in validity buffers
-          type: integer
-          format: uint64
-      x-go-type:
-        import:
-          package: github.com/TileDB-Inc/TileDB-Go
-          alias: tiledb
-        type: Query
-    ArrayType:
-      description: TileDB array type
-      type: string
-      enum:
-      - dense
-      - sparse
-    ArraySchema:
-      description: ArraySchema during creation or retrieval
-      type: object
-      required:
-      - version
-      - arrayType
-      - tileOrder
-      - cellOrder
-      - capacity
-      - coordsFilterPipeline
-      - offsetFilterPipeline
-      - domain
-      - attributes
-      properties:
-        uri:
-          description: URI of schema
-          type: string
-          example: s3://<bucket>/test_array
-        name:
-          description: name of schema
-          type: string
-        version:
-          description: file format version
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-          example:
-          - 1
-          - 3
-          - 0
-        arrayType:
-          $ref: '#/components/schemas/ArrayType'
-          description: Type of array
-          example: sparse
-        tileOrder:
-          description: Tile order setting of array
-          $ref: '#/components/schemas/Layout'
-          example: row-major
-        cellOrder:
-          description: Order of cells
-          $ref: '#/components/schemas/Layout'
-          example: row-major
-        capacity:
-          description: Capacity of array
-          type: integer
-          format: uint64
-          example: 100000
-        coordsFilterPipeline:
-          description: Filter pipeline used for coordinates (enum)
-          $ref: '#/components/schemas/FilterPipeline'
-        offsetFilterPipeline:
-          description: Filter pipeline use for variable offsets (enum)
-          $ref: '#/components/schemas/FilterPipeline'
-        validityFilterPipeline:
-          description: Type of compression for validity buffers (enum)
-          $ref: '#/components/schemas/FilterPipeline'
-        domain:
-          description: Domain of array
-          $ref: '#/components/schemas/Domain'
-        attributes:
-          description: Attributes of array
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/Attribute'
-        allowsDuplicates:
-          description: True if the array allows coordinate duplicates. Applicable only to sparse arrays.
-          type: boolean
-        timestampRange:
-          description: The list of sizes per range
-          type: array
-          items:
-            type: integer
-            format: uint64
-    NonEmptyDomain:
-      type: object
-      description: object representing a non-empty domain
-      required:
-      - nonEmptyDomain
-      - isEmpty
-      properties:
-        nonEmptyDomain:
-          description: Non Empty Domain of array
-          $ref: '#/components/schemas/DomainArray'
-        isEmpty:
-          description: Is non-empty domain really empty?
-          type: boolean
-          example: false
-        sizes:
-          description: Number of elements in DomainArray for var length
-          type: array
-          items:
-            type: integer
-            format: uint64
-    ArraySchemaEntry:
-      type: object
-      description: key/value pair representing an array schema map entry
-      properties:
-        key:
-          type: string
-        value:
-          $ref: '#/components/schemas/ArraySchema'
-    Attribute:
-      description: Attribute of array
-      type: object
-      required:
-      - name
-      - type
-      - filterPipeline
-      - cellValNum
-      properties:
-        name:
-          description: Attribute name
-          type: string
-          example: attribute1
-        type:
-          $ref: '#/components/schemas/Datatype'
-        filterPipeline:
-          $ref: '#/components/schemas/FilterPipeline'
-        cellValNum:
-          description: Attribute number of values per cell
-          type: integer
-          example: 1
-        nullable:
-          description: Is attribute nullable
-          type: boolean
-          example: true
-        fillValueValidity:
-          description: Default validity fill value for nullable attributes
-          type: boolean
-          example: true
-        fillValue:
-          description: The default fill value
-          type: array
-          items:
-            type: integer
-            format: uint8
-    FloatScaleConfig:
-      description: FloatScaleConfig
-      type: object
-      properties:
-        scale:
-          type: integer
-          format: double
-        offset:
-          type: integer
-          format: double
-        byteWidth:
-          type: integer
-          format: uint64
-    Querytype_2:
-      description: Type of query
-      type: string
-      enum:
-      - READ
-      - WRITE
-    Domain:
-      description: Domain of array
-      type: object
-      required:
-      - type
-      - tileOrder
-      - cellOrder
-      - dimensions
-      properties:
-        type:
-          $ref: '#/components/schemas/Datatype'
-          description: Domain Type
-        tileOrder:
-          $ref: '#/components/schemas/Layout'
-          description: Tile Order
-        cellOrder:
-          $ref: '#/components/schemas/Layout'
-          description: Cell Order
-        dimensions:
-          type: array
-          description: Array of dimensions
-          items:
-            $ref: '#/components/schemas/Dimension'
-    Filter:
-      description: Filter
-      type: object
-      required:
-      - type
-      properties:
-        type:
-          description: Filter type
-          $ref: '#/components/schemas/FilterType'
-        floatScaleConfig:
-          description: Filter type
-          $ref: '#/components/schemas/FloatScaleConfig'
-        data:
-          description: Filter data
-          type: object
-          properties:
-            text:
-              type: string
-            bytes:
-              type: array
-              items:
-                type: integer
-                format: uint8
-            int8:
-              type: integer
-              format: int8
-            uint8:
-              type: integer
-              format: uint8
-            int16:
-              type: integer
-              format: int16
-            uint16:
-              type: integer
-              format: uint16
-            int32:
-              type: integer
-              format: int32
-            uint32:
-              type: integer
-              format: uint32
-            int64:
-              type: integer
-              format: int64
-            uint64:
-              type: integer
-              format: uint64
-            float32:
-              type: integer
-              format: float
-            float64:
-              type: integer
-              format: double
-    ArraySchemaMap:
-      type: object
-      description: array's schemas
-      properties:
-        entries:
-          description: List of array schemas entries
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/ArraySchemaEntry'
     FragmentMetadata:
       type: object
       description: Metadata of a fragment
@@ -1683,24 +1321,230 @@ components:
         gtOffsets:
           description: The start offsets of the generic tiles stored in the metadata file
           $ref: '#/components/schemas/GenericTileOffsets'
-    ArrayMetadataEntry:
+    TimestampedURI:
       type: object
-      description: key/value pair representing an array metadata map entry
+      description: the timestamped filtered array metadata URIs, after removing the ones that need to be vacuumed and those that do not fall within
       properties:
-        key:
+        uri:
+          description: the uri
           type: string
-        type:
+        timestampStart:
+          description: start of timestamp
+          type: number
+          format: uint64
+        timestampEnd:
+          description: end of timestamp
+          type: number
+          format: uint64
+    AttributeBufferHeader_2:
+      description: Represents an attribute buffer header information
+      type: object
+      required:
+      - name
+      - fixedLenBufferSizeInBytes
+      - varLenBufferSizeInBytes
+      properties:
+        name:
+          description: Attribute name
           type: string
-        valueNum:
+          example: attribute1
+        fixedLenBufferSizeInBytes:
+          description: Number of bytes in the fixed-length attribute data buffer (offsets for var-len attributes)
           type: integer
-          format: uint32
-        value:
+          format: uint64
+        varLenBufferSizeInBytes:
+          description: Number of bytes in the var-length attribute data buffer
+          type: integer
+          format: uint64
+        validityLenBufferSizeInBytes:
+          description: Number of bytes for validity in case attribute is nullable
+          type: integer
+          format: uint64
+        originalFixedLenBufferSizeInBytes:
+          description: Original user set number of bytes in the fixed-length attribute data buffer
+          type: integer
+          format: uint64
+        originalVarLenBufferSizeInBytes:
+          description: Original user set number of bytes in the var-length attribute data buffer
+          type: integer
+          format: uint64
+        originalValidityLenBufferSizeInBytes:
+          description: Original user set number of bytes in the validity data buffer
+          type: integer
+          format: uint64
+    FilterType:
+      description: TileDB filter types
+      type: string
+      enum:
+      - FILTER_NONE
+      - FILTER_GZIP
+      - FILTER_ZSTD
+      - FILTER_LZ4
+      - FILTER_RLE
+      - FILTER_BZIP2
+      - FILTER_DOUBLE_DELTA
+      - FILTER_BIT_WIDTH_REDUCTION
+      - FILTER_BITSHUFFLE
+      - FILTER_BYTESHUFFLE
+      - FILTER_POSITIVE_DELTA
+      - FILTER_SCALE_FLOAT
+      - FILTER_WEBP
+      - FILTER_CHECKSUM_MD5
+      - FILTER_CHECKSUM_SHA256
+      - FILTER_DICTIONARY
+    NonEmptyDomainList:
+      type: object
+      description: object containing non empty domains
+      properties:
+        nonEmptyDomains:
+          description: Array's non empty domain
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/NonEmptyDomain'
+    SubarrayRanges_2:
+      description: A set of 1D ranges for a subarray
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/Datatype'
+        hasDefaultRange:
+          description: True if the range is the default range
+          type: boolean
+        buffer:
+          description: The bytes of the ranges
           type: array
           items:
             type: integer
             format: uint8
-        del:
+        bufferSizes:
+          description: The list of sizes per range
+          type: array
+          items:
+            type: integer
+            format: uint64
+        bufferStartSizes:
+          description: The list of start sizes per range
+          type: array
+          items:
+            type: integer
+            format: uint64
+    ArrayDirectory:
+      type: object
+      description: Array directory (for reads)
+      properties:
+        unfilteredFragmentUris:
+          description: fragment URIs
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        consolidatedCommitUris:
+          description: consolidated commit URI set
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        arraySchemaUris:
+          description: URIs of all the array schema files
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        latestArraySchemaUri:
+          description: latest array schema URI.
+          type: string
+        arrayMetaUrisToVacuum:
+          description: the array metadata files to vacuum
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        arrayMetaVacUrisToVacuum:
+          description: the array metadata vac files to vacuum
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        commitUrisToConsolidate:
+          description: the commit files to consolidate
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        commitUrisToVacuum:
+          description: the commit files to vacuum
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        consolidatedCommitUrisToVacuum:
+          description: the consolidated commit files to vacuum
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        fragmentMetaUris:
+          description: the URIs of the consolidated fragment metadata files
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        timestampStart:
+          description: Only the files created after timestamp_start are listed
+          type: number
+          format: uint64
+        timestampEnd:
+          description: Only the files created before timestamp_end are listed
+          type: number
+          format: uint64
+        arrayMetaUris:
+          description: the timestamped filtered array metadata URIs, after removing the ones that need to be vacuumed and those that do not fall within
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/TimestampedURI'
+        deleteAndUpdateTileLocation:
+          description: the location of delete tiles
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/DeleteAndUpdateTileLocation'
+    Attribute:
+      description: Attribute of array
+      type: object
+      required:
+      - name
+      - type
+      - filterPipeline
+      - cellValNum
+      properties:
+        name:
+          description: Attribute name
+          type: string
+          example: attribute1
+        type:
+          $ref: '#/components/schemas/Datatype'
+        filterPipeline:
+          $ref: '#/components/schemas/FilterPipeline'
+        cellValNum:
+          description: Attribute number of values per cell
+          type: integer
+          example: 1
+        nullable:
+          description: Is attribute nullable
           type: boolean
+          example: true
+        fillValueValidity:
+          description: Default validity fill value for nullable attributes
+          type: boolean
+          example: true
+        fillValue:
+          description: The default fill value
+          type: array
+          items:
+            type: integer
+            format: uint8
     ArrayMetadata:
       type: object
       description: user's TileDB array metadata
@@ -1711,25 +1555,181 @@ components:
           x-omitempty: true
           items:
             $ref: '#/components/schemas/ArrayMetadataEntry'
-    FilterPipeline:
-      description: One or more filters to apply
+    NonEmptyDomain:
       type: object
+      description: object representing a non-empty domain
+      required:
+      - nonEmptyDomain
+      - isEmpty
       properties:
-        filters:
+        nonEmptyDomain:
+          description: Non Empty Domain of array
+          $ref: '#/components/schemas/DomainArray'
+        isEmpty:
+          description: Is non-empty domain really empty?
+          type: boolean
+          example: false
+        sizes:
+          description: Number of elements in DomainArray for var length
+          type: array
+          items:
+            type: integer
+            format: uint64
+    ArraySchema:
+      description: ArraySchema during creation or retrieval
+      type: object
+      required:
+      - version
+      - arrayType
+      - tileOrder
+      - cellOrder
+      - capacity
+      - coordsFilterPipeline
+      - offsetFilterPipeline
+      - domain
+      - attributes
+      properties:
+        uri:
+          description: URI of schema
+          type: string
+          example: s3://<bucket>/test_array
+        name:
+          description: name of schema
+          type: string
+        version:
+          description: file format version
           type: array
           x-omitempty: true
           items:
-            $ref: '#/components/schemas/Filter'
-    DeleteAndUpdateTileLocation:
+            type: integer
+          example:
+          - 1
+          - 3
+          - 0
+        arrayType:
+          $ref: '#/components/schemas/ArrayType'
+          description: Type of array
+          example: sparse
+        tileOrder:
+          description: Tile order setting of array
+          $ref: '#/components/schemas/Layout'
+          example: row-major
+        cellOrder:
+          description: Order of cells
+          $ref: '#/components/schemas/Layout'
+          example: row-major
+        capacity:
+          description: Capacity of array
+          type: integer
+          format: uint64
+          example: 100000
+        coordsFilterPipeline:
+          description: Filter pipeline used for coordinates (enum)
+          $ref: '#/components/schemas/FilterPipeline'
+        offsetFilterPipeline:
+          description: Filter pipeline use for variable offsets (enum)
+          $ref: '#/components/schemas/FilterPipeline'
+        validityFilterPipeline:
+          description: Type of compression for validity buffers (enum)
+          $ref: '#/components/schemas/FilterPipeline'
+        domain:
+          description: Domain of array
+          $ref: '#/components/schemas/Domain'
+        attributes:
+          description: Attributes of array
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/Attribute'
+        allowsDuplicates:
+          description: True if the array allows coordinate duplicates. Applicable only to sparse arrays.
+          type: boolean
+        timestampRange:
+          description: The list of sizes per range
+          type: array
+          items:
+            type: integer
+            format: uint64
+    ArraySchemaMap:
       type: object
-      description: the location of delete tiles
+      description: array's schemas
       properties:
-        uri:
-          description: the uri
-          type: string
-        conditionMarker:
-          type: string
-        offset:
+        entries:
+          description: List of array schemas entries
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/ArraySchemaEntry'
+    GenericTileOffsets:
+      type: object
+      description: Array directory (for reads)
+      properties:
+        rtree:
+          description: RTree serialized as a blob
+          type: number
+          format: uint64
+        tileOffsets:
+          description: tile offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileVarOffsets:
+          description: variable tile offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileVarSizes:
+          description: sizes of the uncompressed variable tiles offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileValidityOffsets:
+          description: tile validity offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileMinOffsets:
+          description: min tile offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileMaxOffsets:
+          description: max tile offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileSumOffsets:
+          description: tile sum offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileNullCountOffsets:
+          description: null count offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        fragmentMinMaxSumNullCountOffset:
+          description: fragment min/max/sum/nullcount offsets
+          type: number
+          format: uint64
+        processedConditionsOffsets:
+          description: processed conditions offsets
           type: number
           format: uint64
   securitySchemes:

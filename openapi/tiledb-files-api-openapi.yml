@@ -255,30 +255,6 @@ paths:
     - url: /v2
 components:
   schemas:
-    FileExport:
-      description: Output information required to export a file
-      type: object
-      properties:
-        output_uri:
-          type: string
-          description: output location of the TileDB File
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int64
-        message:
-          type: string
-        request_id:
-          type: string
-    FileExported:
-      description: Output uri of the exported file
-      type: object
-      properties:
-        output_uri:
-          type: string
-          description: output location of the exported file
     FileCreate:
       description: Input/Output information required to create a new file
       type: object
@@ -292,6 +268,16 @@ components:
         name:
           type: string
           description: name to set for registered file
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
     FileUploaded:
       description: Uploaded file name and information
       type: object
@@ -309,6 +295,13 @@ components:
           type: string
           example: 00000000-0000-0000-0000-000000000000
           x-omitempty: false
+    FileExport:
+      description: Output information required to export a file
+      type: object
+      properties:
+        output_uri:
+          type: string
+          description: output location of the TileDB File
     FileCreated:
       description: Created file name and information
       type: object
@@ -319,6 +312,13 @@ components:
         file_name:
           type: string
           description: name of the file created
+    FileExported:
+      description: Output uri of the exported file
+      type: object
+      properties:
+        output_uri:
+          type: string
+          description: output location of the exported file
   securitySchemes:
     BasicAuth:
       type: http

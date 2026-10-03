@@ -555,188 +555,6 @@ paths:
       x-summary-source: derived
 components:
   schemas:
-    MetadataStringifiedEntry:
-      type: object
-      description: key/value pair representing an asset metadata map entry
-      properties:
-        key:
-          description: The metadata key
-          type: string
-          x-omitempty: false
-        value:
-          description: The metadata value
-          type: string
-          x-omitempty: false
-        type:
-          description: The metadata type
-          type: string
-          x-omitempty: false
-          example: array_metadata
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int64
-        message:
-          type: string
-        request_id:
-          type: string
-    PricingCurrency:
-      description: Currency of pricing
-      type: string
-      enum:
-      - USD
-    Subscription:
-      description: Subscription of a user (customer) to another user's arrays
-      type: object
-      properties:
-        id:
-          description: Unique ID of subscription as defined by Stripe
-          type: string
-          example: subscriptionID
-        owner_namespace_uuid:
-          description: Unique ID of the array (product) owner
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        customer_namespace_uuid:
-          description: Unique ID of the array (product) user (customer)
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        pricing:
-          description: list of pricing used by this subscription
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/Pricing'
-    MLModelFavorite:
-      description: A user-favorite MLModel item
-      type: object
-      properties:
-        mlmodel_uuid:
-          description: unique UUID of the MLModel
-          type: string
-        namespace:
-          description: the namespace of the MLModel
-          type: string
-        name:
-          description: the name of the MLModel
-          type: string
-    ArrayFavorite:
-      description: A user-favorite array item
-      type: object
-      properties:
-        array_uuid:
-          description: unique UUID of the array
-          type: string
-        namespace:
-          description: the namespace of the array
-          type: string
-        name:
-          description: the name of the array
-          type: string
-    MLModelFavoritesData:
-      description: Object including MLModel favorites and pagination metadata
-      type: object
-      properties:
-        mlmodels:
-          description: List of MLModel infos
-          type: array
-          x-omitempty: false
-          items:
-            $ref: '#/components/schemas/ArrayInfo'
-        pagination_metadata:
-          $ref: '#/components/schemas/PaginationMetadata'
-    NotebookFavorite:
-      description: A user-favorite notebook item
-      type: object
-      properties:
-        notebook_uuid:
-          description: unique UUID of the notebook
-          type: string
-        namespace:
-          description: the namespace of the notebook
-          type: string
-        name:
-          description: the name of the notebook
-          type: string
-    Pricing:
-      description: Pricing created by converting an array to product
-      type: object
-      properties:
-        id:
-          description: Unique ID of plan as defined by Stripe
-          type: string
-          example: planID
-        array_uuid:
-          description: Unique ID of registered array
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        pricing_name:
-          description: Name of pricing
-          type: string
-        pricing_type:
-          description: Type of pricing
-          $ref: '#/components/schemas/PricingType'
-        product_name:
-          description: Name of product
-          type: string
-        product_statement_descriptor:
-          description: Extra information about a product which will appear on the credit card statement of the customer
-          type: string
-        product_unit_label:
-          description: A label that represents units of this product in Stripe and receipts and invoices of the customer
-          $ref: '#/components/schemas/PricingUnitLabel'
-        currency:
-          description: Currency of pricing
-          $ref: '#/components/schemas/PricingCurrency'
-        aggregate_usage:
-          description: Specifies a usage aggregation strategy for pricings of usage_type=metered
-          $ref: '#/components/schemas/PricingAggregateUsage'
-        interval:
-          description: The frequency with which a subscription should be billed
-          $ref: '#/components/schemas/PricingInterval'
-        divided_by:
-          description: Group of n product unit labels
-          type: integer
-          format: int64
-          example: 1048576
-        charge:
-          description: Price in cents (decimal) per unitlabel
-          type: number
-          format: double
-        activated:
-          description: If pricing is activated
-          type: boolean
-          example: false
-    PaginationMetadata:
-      properties:
-        page:
-          description: pagination offset. Use it to skip the first ((page - 1) * per_page) items
-          type: number
-          format: uint64
-          example: 1
-        per_page:
-          description: pagination limit (page size)
-          type: number
-          format: uint64
-          example: 10
-        total_pages:
-          description: number of total pages with current limit
-          type: number
-          format: uint64
-          example: 14
-        total_items:
-          description: number of total available items
-          type: number
-          format: uint64
-          example: 138
-    ArrayType:
-      description: TileDB array type
-      type: string
-      enum:
-      - dense
-      - sparse
     ArrayInfo:
       description: metadata of an array
       type: object
@@ -873,45 +691,6 @@ components:
           x-omitempty: true
           items:
             $ref: '#/components/schemas/MetadataStringifiedEntry'
-    NotebookFavoritesData:
-      description: Object including notebook favorites and pagination metadata
-      type: object
-      properties:
-        notebooks:
-          description: List of notebook infos
-          type: array
-          x-omitempty: false
-          items:
-            $ref: '#/components/schemas/ArrayInfo'
-        pagination_metadata:
-          $ref: '#/components/schemas/PaginationMetadata'
-    UDFFavoritesData:
-      description: Object including UDF favorites and pagination metadata
-      type: object
-      properties:
-        udfs:
-          description: List of UDF infos
-          type: array
-          x-omitempty: false
-          items:
-            $ref: '#/components/schemas/ArrayInfo'
-        pagination_metadata:
-          $ref: '#/components/schemas/PaginationMetadata'
-    ArrayActions:
-      description: actions a user can take on an array
-      type: string
-      enum:
-      - read
-      - write
-      - edit
-      - read_array_logs
-      - read_array_info
-      - read_array_schema
-    PricingAggregateUsage:
-      description: Specifies a usage aggregation strategy for pricings of usage_type=metered
-      type: string
-      enum:
-      - sum
     ArrayFavoritesData:
       description: Object including array favorites and pagination metadata
       type: object
@@ -924,17 +703,85 @@ components:
             $ref: '#/components/schemas/ArrayInfo'
         pagination_metadata:
           $ref: '#/components/schemas/PaginationMetadata'
-    PricingUnitLabel:
-      description: Unit label
+    MetadataStringifiedEntry:
+      type: object
+      description: key/value pair representing an asset metadata map entry
+      properties:
+        key:
+          description: The metadata key
+          type: string
+          x-omitempty: false
+        value:
+          description: The metadata value
+          type: string
+          x-omitempty: false
+        type:
+          description: The metadata type
+          type: string
+          x-omitempty: false
+          example: array_metadata
+    PricingType:
+      description: Pricing types
       type: string
       enum:
-      - byte
-      - second
+      - egress
+      - access
+    ArrayActions:
+      description: actions a user can take on an array
+      type: string
+      enum:
+      - read
+      - write
+      - edit
+      - read_array_logs
+      - read_array_info
+      - read_array_schema
+    ArrayType:
+      description: TileDB array type
+      type: string
+      enum:
+      - dense
+      - sparse
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
     PricingInterval:
       description: Interval for pricing
       type: string
       enum:
       - month
+    MLModelFavoritesData:
+      description: Object including MLModel favorites and pagination metadata
+      type: object
+      properties:
+        mlmodels:
+          description: List of MLModel infos
+          type: array
+          x-omitempty: false
+          items:
+            $ref: '#/components/schemas/ArrayInfo'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+    MLModelFavorite:
+      description: A user-favorite MLModel item
+      type: object
+      properties:
+        mlmodel_uuid:
+          description: unique UUID of the MLModel
+          type: string
+        namespace:
+          description: the namespace of the MLModel
+          type: string
+        name:
+          description: the name of the MLModel
+          type: string
     UDFFavorite:
       description: A user-favorite UDF item
       type: object
@@ -948,6 +795,11 @@ components:
         name:
           description: the name of the UDF
           type: string
+    PricingAggregateUsage:
+      description: Specifies a usage aggregation strategy for pricings of usage_type=metered
+      type: string
+      enum:
+      - sum
     FileType:
       description: File types represented as TileDB arrays
       type: string
@@ -957,12 +809,160 @@ components:
       - ml_model
       - file
       - registered_task_graph
-    PricingType:
-      description: Pricing types
+    ArrayFavorite:
+      description: A user-favorite array item
+      type: object
+      properties:
+        array_uuid:
+          description: unique UUID of the array
+          type: string
+        namespace:
+          description: the namespace of the array
+          type: string
+        name:
+          description: the name of the array
+          type: string
+    NotebookFavoritesData:
+      description: Object including notebook favorites and pagination metadata
+      type: object
+      properties:
+        notebooks:
+          description: List of notebook infos
+          type: array
+          x-omitempty: false
+          items:
+            $ref: '#/components/schemas/ArrayInfo'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+    PaginationMetadata:
+      properties:
+        page:
+          description: pagination offset. Use it to skip the first ((page - 1) * per_page) items
+          type: number
+          format: uint64
+          example: 1
+        per_page:
+          description: pagination limit (page size)
+          type: number
+          format: uint64
+          example: 10
+        total_pages:
+          description: number of total pages with current limit
+          type: number
+          format: uint64
+          example: 14
+        total_items:
+          description: number of total available items
+          type: number
+          format: uint64
+          example: 138
+    UDFFavoritesData:
+      description: Object including UDF favorites and pagination metadata
+      type: object
+      properties:
+        udfs:
+          description: List of UDF infos
+          type: array
+          x-omitempty: false
+          items:
+            $ref: '#/components/schemas/ArrayInfo'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+    NotebookFavorite:
+      description: A user-favorite notebook item
+      type: object
+      properties:
+        notebook_uuid:
+          description: unique UUID of the notebook
+          type: string
+        namespace:
+          description: the namespace of the notebook
+          type: string
+        name:
+          description: the name of the notebook
+          type: string
+    Pricing:
+      description: Pricing created by converting an array to product
+      type: object
+      properties:
+        id:
+          description: Unique ID of plan as defined by Stripe
+          type: string
+          example: planID
+        array_uuid:
+          description: Unique ID of registered array
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        pricing_name:
+          description: Name of pricing
+          type: string
+        pricing_type:
+          description: Type of pricing
+          $ref: '#/components/schemas/PricingType'
+        product_name:
+          description: Name of product
+          type: string
+        product_statement_descriptor:
+          description: Extra information about a product which will appear on the credit card statement of the customer
+          type: string
+        product_unit_label:
+          description: A label that represents units of this product in Stripe and receipts and invoices of the customer
+          $ref: '#/components/schemas/PricingUnitLabel'
+        currency:
+          description: Currency of pricing
+          $ref: '#/components/schemas/PricingCurrency'
+        aggregate_usage:
+          description: Specifies a usage aggregation strategy for pricings of usage_type=metered
+          $ref: '#/components/schemas/PricingAggregateUsage'
+        interval:
+          description: The frequency with which a subscription should be billed
+          $ref: '#/components/schemas/PricingInterval'
+        divided_by:
+          description: Group of n product unit labels
+          type: integer
+          format: int64
+          example: 1048576
+        charge:
+          description: Price in cents (decimal) per unitlabel
+          type: number
+          format: double
+        activated:
+          description: If pricing is activated
+          type: boolean
+          example: false
+    PricingUnitLabel:
+      description: Unit label
       type: string
       enum:
-      - egress
-      - access
+      - byte
+      - second
+    PricingCurrency:
+      description: Currency of pricing
+      type: string
+      enum:
+      - USD
+    Subscription:
+      description: Subscription of a user (customer) to another user's arrays
+      type: object
+      properties:
+        id:
+          description: Unique ID of subscription as defined by Stripe
+          type: string
+          example: subscriptionID
+        owner_namespace_uuid:
+          description: Unique ID of the array (product) owner
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        customer_namespace_uuid:
+          description: Unique ID of the array (product) user (customer)
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        pricing:
+          description: list of pricing used by this subscription
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/Pricing'
   securitySchemes:
     BasicAuth:
       type: http

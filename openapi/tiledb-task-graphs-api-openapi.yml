@@ -178,112 +178,6 @@ paths:
       x-summary-source: derived
 components:
   schemas:
-    QueryRanges:
-      description: Subarray bounds to query
-      type: object
-      properties:
-        layout:
-          $ref: '#/components/schemas/Layout'
-        ranges:
-          description: List of ranges,
-          type: array
-          x-omitempty: true
-          items:
-            type: array
-            x-omitempty: true
-            items:
-              type: number
-    MetadataStringifiedEntry:
-      type: object
-      description: key/value pair representing an asset metadata map entry
-      properties:
-        key:
-          description: The metadata key
-          type: string
-          x-omitempty: false
-        value:
-          description: The metadata value
-          type: string
-          x-omitempty: false
-        type:
-          description: The metadata type
-          type: string
-          x-omitempty: false
-          example: array_metadata
-    ArrayTaskType:
-      description: Synchronous Task Type
-      type: string
-      enum:
-      - SQL
-      - UDF
-      - QUERY
-      - GENERIC_UDF
-      - BATCH_UDF
-      - CLIENT_COMPUTATION
-    ArrayTaskStatus:
-      description: Status of array task
-      type: string
-      enum:
-      - QUEUED
-      - FAILED
-      - COMPLETED
-      - RUNNING
-      - RESOURCES_UNAVAILABLE
-      - UNKNOWN
-      - CANCELLED
-      - DENIED
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int64
-        message:
-          type: string
-        request_id:
-          type: string
-    TGSQLNodeData:
-      description: 'A node specifying an SQL query to execute in TileDB Cloud.
-
-        '
-      type:
-      - object
-      - 'null'
-      properties:
-        init_commands:
-          description: The commands to execute before running the query itself.
-          type: array
-          items:
-            type: string
-        query:
-          description: 'The text of the SQL query to execute. Parameters are substituted in for `?`s, just as in a regular MariaDB query.
-
-            '
-          type: string
-        parameters:
-          description: 'The parameters to substitute in for arguments in the `query`. Fixed-length. Arguments must be in JSON format.
-
-            '
-          type: array
-          items:
-            $ref: '#/components/schemas/TGArgValue'
-        result_format:
-          $ref: '#/components/schemas/ResultFormat'
-        namespace:
-          description: 'If set, the non-default namespace to execute this SQL query under.
-
-            '
-          type:
-          - string
-          - 'null'
-    TaskGraphType:
-      description: 'The type of a task graph.
-
-        '
-      type: string
-      enum:
-      - batch
-      - realtime
     ArrayTask:
       description: Synchronous Task to Run
       type: object
@@ -429,522 +323,18 @@ components:
           type: string
           x-omitempty: true
           description: The region of the cloud provider where this task executed.
-    ResultFormat:
-      description: Data format of a result
+    ArrayTaskStatus:
+      description: Status of array task
       type: string
       enum:
-      - python_pickle
-      - r_serialization
-      - json
-      - arrow
-      - bytes
-      - tiledb_json
-      - native
-    TaskGraphNodeMetadata:
-      description: Metadata about an individual node in a task graph.
-      type: object
-      properties:
-        client_node_uuid:
-          type: string
-          description: The client-generated UUID of the given graph node.
-        name:
-          type: string
-          maxLength: 255
-          description: 'The client-generated name of the node. This is not guaranteed to be unique.
-
-            '
-        depends_on:
-          type: array
-          items:
-            type: string
-          description: 'The client_node_uuid of each node that this node depends upon. Used to define the structure of the graph.
-
-            '
-        run_location:
-          $ref: '#/components/schemas/TaskGraphLogRunLocation'
-        status:
-          description: 'If present, the overall execution status of this node, taking into account the latest execution information.
-
-            For nodes that have not yet been executed, this will be listed as `QUEUED`. For nodes that are set to run locally and have not reported any status information, this will be listed as `UNKNOWN`.
-
-            '
-          $ref: '#/components/schemas/ArrayTaskStatus'
-        status_message:
-          description: The reason the array task status is in the state
-          type:
-          - string
-          - 'null'
-          x-omitempty: true
-        executions:
-          type: array
-          items:
-            $ref: '#/components/schemas/ArrayTask'
-          readOnly: true
-          description: 'ArrayTasks representing each execution attempt for this node. For nodes that have never been submitted, this will be empty. For nodes that have been retried, this may have multiple entries. The last one in the list represents the most recent execution.
-
-            This is read-only and generated by the server based on the tasks it has actually executed.
-
-            '
-    PricingCurrency:
-      description: Currency of pricing
-      type: string
-      enum:
-      - USD
-    TaskGraph:
-      description: Information about a task graph.
-      type: object
-      properties:
-        uuid:
-          type: string
-          readOnly: true
-          description: The server-generated UUID of the task graph.
-        namespace:
-          type: string
-          description: 'The namespace that owns this task graph. When creating a task graph log, this is used as the namespace to create the log in; thereafter it is read-only.
-
-            '
-        created_by:
-          type: string
-          readOnly: true
-          description: The name of the user who created this task graph log.
-        name:
-          type: string
-          maxLength: 255
-          description: 'A name for this task graph, displayed in the UI. Does not need to be unique.
-
-            '
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-          description: 'The date/time when this task graph was originally created.
-
-            '
-        nodes:
-          type: array
-          items:
-            $ref: '#/components/schemas/TaskGraphNode'
-          description: 'The structure of the graph. This is provided by the client when first setting up the task graph. This must be topographically sorted; that is, each node must appear after all nodes that it depends upon.
-
-            '
-        parallelism:
-          type:
-          - integer
-          - 'null'
-          format: int64
-          x-omitempty: true
-          description: 'Parallelism limits the max total parallel pods that can execute at the same time in a workflow.
-
-            '
-        retry_strategy:
-          $ref: '#/components/schemas/RetryStrategy'
-        deadline:
-          type:
-          - integer
-          - 'null'
-          format: int64
-          x-omitempty: true
-          description: 'Duration in seconds relative to the workflow start time which the workflow is allowed to run before it gets terminated. Defaults to 24h when unset
-
-            '
-        task_graph_type:
-          $ref: '#/components/schemas/TaskGraphType'
-    UDFLanguage:
-      description: UDF Type
-      type: string
-      enum:
-      - python
-      - r
-    Layout:
-      description: Layout of array
-      type: string
-      enum:
-      - row-major
-      - col-major
-      - global-order
-      - unordered
-    Subscription:
-      description: Subscription of a user (customer) to another user's arrays
-      type: object
-      properties:
-        id:
-          description: Unique ID of subscription as defined by Stripe
-          type: string
-          example: subscriptionID
-        owner_namespace_uuid:
-          description: Unique ID of the array (product) owner
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        customer_namespace_uuid:
-          description: Unique ID of the array (product) user (customer)
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        pricing:
-          description: list of pricing used by this subscription
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/Pricing'
-    TGUDFArgument:
-      description: 'A single argument to a UDF. This may represent a positional argument or a named argument, depending upon whether `name` is set.
-
-        '
-      type: object
-      properties:
-        name:
-          description: The name of the argument, if present.
-          type:
-          - string
-          - 'null'
-        value:
-          $ref: '#/components/schemas/TGArgValue'
-    TGArgValue:
-      description: "An argument provided to a node. This is one of a direct value (i.e., a raw JSON value) or a `TGSentinel`.\nFor example this Python value:\n\n    {\"a\": [1, \"pipe\", range(30), None], \"b\": b\"bytes\"}\n\nis encoded thusly (with included comments):\n\n    {  // A dictionary with string keys is JSON-encodable.\n      \"a\": [  // As is a list.\n        1,\n        \"pipe\",\n        {  // A `range` is replaced with its pickle.\n          \"__tdbudf__\": \"immediate\",\n          \"format\": \"python_pickle\",\n          \"base64_data\": \"gASVIAAAAAAAAACMCGJ1aWx0aW5zlIwFcmFuZ2WUk5RLAEseSwGHlFKULg==\"\n        },\n        null\n      ],\n      \"b\": {  // Raw binary data is encoded into base64.\n        \"__tdbudf__\": \"immediate\"\n        \"format\": \"bytes\",\n        \"base64_data\": \"Ynl0ZXM=\"\n      }\n    }\n"
-    TGInputNodeData:
-      description: 'Specifies that a node is an “input value”, allowing for parameterized task graphs. An input node may not depend upon any other nodes.
-
-        '
-      type:
-      - object
-      - 'null'
-      properties:
-        default_value:
-          $ref: '#/components/schemas/TGArgValue'
-        datatype:
-          description: 'An annotation of what datatype this node is supposed to be. Conventionally, this is a Python-format type annotation, but it’s purely for documentation purposes and not validated.
-
-            '
-          type:
-          - string
-          - 'null'
-    TaskGraphLog:
-      description: Logging information about the execution of a task graph.
-      type: object
-      properties:
-        uuid:
-          type: string
-          readOnly: true
-          description: The server-generated UUID of the task graph.
-        namespace:
-          type: string
-          description: 'The namespace that owns this task graph log. When creating a task graph log, this is used as the namespace to create the log in; thereafter it is read-only.
-
-            '
-        created_by:
-          type: string
-          readOnly: true
-          description: The name of the user who created this task graph log.
-        name:
-          type: string
-          description: 'A name for this task graph log, displayed in the UI. Does not need to be unique.
-
-            '
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-          description: 'The date/time when this task graph log was originally created. This is distinct from the execution start_time.
-
-            '
-        start_time:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          readOnly: true
-          x-omitempty: true
-          description: 'The start time of the task graph, recorded when the server starts executing the first node.
-
-            '
-        end_time:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          readOnly: true
-          x-omitempty: true
-          description: 'The end time of the task graph, recorded when the client reports completion.
-
-            '
-        status:
-          $ref: '#/components/schemas/TaskGraphLogStatus'
-        total_cost:
-          type:
-          - number
-          - 'null'
-          description: 'If present, the total cost of executing all nodes in this task graph.
-
-            '
-        access_cost:
-          type:
-          - number
-          - 'null'
-          description: 'If present, the total cost of access from execution of the nodes in this task graph.
-
-            '
-        egress_cost:
-          type:
-          - number
-          - 'null'
-          description: 'If present, the total cost of access from execution of the nodes in this task graph.
-
-            '
-        execution_time:
-          type: string
-          description: 'The total execution time of all the nodes in this graph, in ISO 8601 format with hours, minutes, and seconds.
-
-            '
-          example: P15H22M0.45S
-        status_count:
-          type: object
-          description: 'A mapping from `ArrayTaskStatus` string value to the number of nodes in this graph that are in that status.
-
-            '
-          additionalProperties:
-            description: The number of nodes that are in the given state.
-            type: number
-        nodes:
-          type: array
-          items:
-            $ref: '#/components/schemas/TaskGraphNodeMetadata'
-          description: 'The structure of the graph. This is provided by the client when first setting up the task graph. Thereafter, it is read-only. This must be topographically sorted; that is, each node must appear after all nodes that it depends upon.
-
-            '
-        task_graph_type:
-          $ref: '#/components/schemas/TaskGraphType'
-        task_graph_id:
-          type: string
-          description: The UUID of the task graph.
-        cloud_provider:
-          type: string
-          x-omitempty: true
-          description: The name of the cloud provider where this task graph executed.
-        cloud_region:
-          type: string
-          x-omitempty: true
-          description: The region of the cloud provider where this task graph executed.
-    Pricing:
-      description: Pricing created by converting an array to product
-      type: object
-      properties:
-        id:
-          description: Unique ID of plan as defined by Stripe
-          type: string
-          example: planID
-        array_uuid:
-          description: Unique ID of registered array
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        pricing_name:
-          description: Name of pricing
-          type: string
-        pricing_type:
-          description: Type of pricing
-          $ref: '#/components/schemas/PricingType'
-        product_name:
-          description: Name of product
-          type: string
-        product_statement_descriptor:
-          description: Extra information about a product which will appear on the credit card statement of the customer
-          type: string
-        product_unit_label:
-          description: A label that represents units of this product in Stripe and receipts and invoices of the customer
-          $ref: '#/components/schemas/PricingUnitLabel'
-        currency:
-          description: Currency of pricing
-          $ref: '#/components/schemas/PricingCurrency'
-        aggregate_usage:
-          description: Specifies a usage aggregation strategy for pricings of usage_type=metered
-          $ref: '#/components/schemas/PricingAggregateUsage'
-        interval:
-          description: The frequency with which a subscription should be billed
-          $ref: '#/components/schemas/PricingInterval'
-        divided_by:
-          description: Group of n product unit labels
-          type: integer
-          format: int64
-          example: 1048576
-        charge:
-          description: Price in cents (decimal) per unitlabel
-          type: number
-          format: double
-        activated:
-          description: If pricing is activated
-          type: boolean
-          example: false
-    TGUDFEnvironment:
-      description: Metadata about the environment where we want to execute a UDF.
-      type: object
-      properties:
-        language:
-          $ref: '#/components/schemas/UDFLanguage'
-        language_version:
-          description: 'The language version used to execute this UDF. Neither this nor `language` needs to be set for registered UDFs, since the language and version are stored server-side with the UDF itself.
-
-            '
-          type: string
-        image_name:
-          description: 'The name of the image to use for the execution environment.
-
-            '
-          type: string
-        access_credentials_name:
-          description: 'The name of the access credentials to use. if unset, no credentials will be configured in the environment.
-
-            '
-          type: string
-        namespace:
-          description: 'If set, the non-default namespace to execute this UDF under (and to query any Array Nodes that are used as inputs to this UDF).
-
-            '
-          type:
-          - string
-          - 'null'
-        resource_class:
-          description: 'The resource class to use for the UDF execution. Resource classes define resource limits for memory and CPUs. If this is empty, then the UDF will execute in the standard resource class of the TileDB Cloud provider.
-
-            '
-          type: string
-          x-omitempty: true
-        resources:
-          type: object
-          description: 'The resources requested for this particular node. If resources are not specified resource_class is used, if it is not set the standard resource // defaults are used
-
-            '
-          properties:
-            cpu:
-              type: string
-              example: 500m
-            memory:
-              type: string
-              example: 8Gi
-            gpu:
-              type: integer
-              example: 1
-          x-omitempty: true
-        run_client_side:
-          description: 'A hint that, if possible, this function should be executed on the client side rather than on the server. Registered UDFs and functions which take arrays as inputs can never be executed client-side. If the client’s environment is incompatible, or the client does not support client-side execution, the function will be executed on the server.
-
-            '
-          type: boolean
-          x-omitempty: true
-        timeout:
-          description: 'The maximum length of time this UDF is allowed to execute for before it is killed and fails. If not present (or zero), the function is allowed to run indefinitely (subject to the server’s global limits).
-
-            '
-          type:
-          - number
-          - 'null'
-    ArrayActivityLog:
-      description: Actvity of an Array
-      type: object
-      properties:
-        event_at:
-          description: time event took place (RFC3339)
-          type: string
-          format: date-time
-        action:
-          description: Type of the event
-          $ref: '#/components/schemas/ActivityEventType'
-        username:
-          description: User who performed action
-          type: string
-          example: user1
-        bytes_sent:
-          description: Bytes sent to client
-          type: integer
-          format: uint64
-          example: 1073741824
-        bytes_received:
-          description: Bytes recieved from client
-          type: integer
-          format: uint64
-          example: 1073741824
-        array_task_id:
-          description: UUID of associated array task
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        id:
-          description: ID of the activity
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        query_ranges:
-          description: ranges for query
-          x-omitempty: true
-          type: string
-          example: '{"rows":[{"start": 1, "end": 1},{"start": 3, "end": 4}],"cols":[{"start": 1, "end": 4}]}'
-        query_stats:
-          description: stats for query
-          x-omitempty: true
-          type: string
-          example: '{"timers": {"Context.StorageManager.read_load_array_schema_from_uri.sum": 0.0255293, "...": "..."}, "counters": {"Context.StorageManager.read_unfiltered_byte_num": 191, "...": "..."}}'
-    TaskGraphs:
-      description: Information about a series of task graphs.
-      type: object
-      properties:
-        graphs:
-          type: array
-          items:
-            $ref: '#/components/schemas/TaskGraph'
-          description: 'The series of graphs.
-
-            '
-    TaskGraphNode:
-      description: 'Information about a single node within a registered task graph. A single node represents one piece of data or a computational step; either as an input value, a data source, or a computation that acts upon earlier nodes. The structure parallels the existing `TaskGraphNodeMetadata`.
-
-        '
-      type: object
-      properties:
-        client_node_id:
-          type: string
-          description: The client-generated UUID of the given graph node.
-        name:
-          type:
-          - string
-          - 'null'
-          maxLength: 255
-          description: 'A client-specified name for the node. If provided, this must be unique.
-
-            '
-        depends_on:
-          type: array
-          items:
-            type: string
-          description: 'The client_node_uuid of each node that this node depends upon. Used to define the structure of the graph.
-
-            '
-        array_node:
-          $ref: '#/components/schemas/UDFArrayDetails'
-        input_node:
-          $ref: '#/components/schemas/TGInputNodeData'
-        sql_node:
-          $ref: '#/components/schemas/TGSQLNodeData'
-        udf_node:
-          $ref: '#/components/schemas/TGUDFNodeData'
-        retry_strategy:
-          $ref: '#/components/schemas/RetryStrategy'
-        expand_node_output:
-          type:
-          - string
-          - 'null'
-          description: 'Used to create dynamic tasks based on the output of another node. The other node''s output must be a JSON list of values. The expansion process creates one task per item in the output list. The item is also passed as an argument to each task. The value is the client_node_uuid of the node that we want to expand.
-
-            '
-        deadline:
-          type:
-          - integer
-          - 'null'
-          format: int64
-          x-omitempty: true
-          description: 'Duration in seconds relative to the node start time which the node is allowed to run before it gets terminated.
-
-            '
-    ArrayType:
-      description: TileDB array type
-      type: string
-      enum:
-      - dense
-      - sparse
+      - QUEUED
+      - FAILED
+      - COMPLETED
+      - RUNNING
+      - RESOURCES_UNAVAILABLE
+      - UNKNOWN
+      - CANCELLED
+      - DENIED
     ArrayInfo:
       description: metadata of an array
       type: object
@@ -1081,6 +471,369 @@ components:
           x-omitempty: true
           items:
             $ref: '#/components/schemas/MetadataStringifiedEntry'
+    Querytype:
+      description: Type of query
+      type: string
+      enum:
+      - READ
+      - WRITE
+      - DELETE
+    MetadataStringifiedEntry:
+      type: object
+      description: key/value pair representing an asset metadata map entry
+      properties:
+        key:
+          description: The metadata key
+          type: string
+          x-omitempty: false
+        value:
+          description: The metadata value
+          type: string
+          x-omitempty: false
+        type:
+          description: The metadata type
+          type: string
+          x-omitempty: false
+          example: array_metadata
+    PricingType:
+      description: Pricing types
+      type: string
+      enum:
+      - egress
+      - access
+    ArrayActions:
+      description: actions a user can take on an array
+      type: string
+      enum:
+      - read
+      - write
+      - edit
+      - read_array_logs
+      - read_array_info
+      - read_array_schema
+    ActivityEventType:
+      description: Type of activity logged
+      type: string
+      enum:
+      - read_schema
+      - max_buffer_sizes
+      - non_empty_domain
+      - query_read
+      - query_write
+      - query_delete
+      - create
+      - delete
+      - register
+      - deregister
+      - udf
+      - array_metadata_get
+      - array_metadata_update
+      - estimated_result_sizes
+      - read_fragment_info
+      - read_enumerations
+    ArrayType:
+      description: TileDB array type
+      type: string
+      enum:
+      - dense
+      - sparse
+    UDFArrayDetails:
+      description: Contains array details for multi-array query including uri, ranges buffers
+      type: object
+      properties:
+        parameter_id:
+          description: 'An optional client-generated identifier to distinguish between multiple range/buffer requests from the same array in the same call.
+
+            This may be set for MultiArrayUDFs that use the `argument_json` style of passing arrays.
+
+            '
+          type:
+          - string
+          - 'null'
+          x-omitempty: true
+        uri:
+          description: array to set ranges and buffers on, must be in tiledb:// format
+          type: string
+        ranges:
+          description: ranges to run against, generic format
+          $ref: '#/components/schemas/QueryRanges'
+        buffers:
+          description: List of buffers to fetch (attributes + dimensions)
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+    UDFLanguage:
+      description: UDF Type
+      type: string
+      enum:
+      - python
+      - r
+    TaskGraphNode:
+      description: 'Information about a single node within a registered task graph. A single node represents one piece of data or a computational step; either as an input value, a data source, or a computation that acts upon earlier nodes. The structure parallels the existing `TaskGraphNodeMetadata`.
+
+        '
+      type: object
+      properties:
+        client_node_id:
+          type: string
+          description: The client-generated UUID of the given graph node.
+        name:
+          type:
+          - string
+          - 'null'
+          maxLength: 255
+          description: 'A client-specified name for the node. If provided, this must be unique.
+
+            '
+        depends_on:
+          type: array
+          items:
+            type: string
+          description: 'The client_node_uuid of each node that this node depends upon. Used to define the structure of the graph.
+
+            '
+        array_node:
+          $ref: '#/components/schemas/UDFArrayDetails'
+        input_node:
+          $ref: '#/components/schemas/TGInputNodeData'
+        sql_node:
+          $ref: '#/components/schemas/TGSQLNodeData'
+        udf_node:
+          $ref: '#/components/schemas/TGUDFNodeData'
+        retry_strategy:
+          $ref: '#/components/schemas/RetryStrategy'
+        expand_node_output:
+          type:
+          - string
+          - 'null'
+          description: 'Used to create dynamic tasks based on the output of another node. The other node''s output must be a JSON list of values. The expansion process creates one task per item in the output list. The item is also passed as an argument to each task. The value is the client_node_uuid of the node that we want to expand.
+
+            '
+        deadline:
+          type:
+          - integer
+          - 'null'
+          format: int64
+          x-omitempty: true
+          description: 'Duration in seconds relative to the node start time which the node is allowed to run before it gets terminated.
+
+            '
+    RetryPolicy:
+      description: RetryPolicy is a policy of node statuses that will be retried
+      type: string
+      enum:
+      - Always
+      - OnFailure
+      - OnError
+      - OnTransientError
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
+    PricingInterval:
+      description: Interval for pricing
+      type: string
+      enum:
+      - month
+    Backoff:
+      description: Backoff is a backoff strategy to use within retryStrategy
+      type: object
+      properties:
+        duration:
+          description: Duration is the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
+          type: string
+        factor:
+          description: Factor is a factor to multiply the base duration after each failed retry
+          type: integer
+          format: uint32
+        maxDuration:
+          description: MaxDuration is the maximum amount of time allowed for the backoff strategy
+          type: string
+    TaskGraphs:
+      description: Information about a series of task graphs.
+      type: object
+      properties:
+        graphs:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskGraph'
+          description: 'The series of graphs.
+
+            '
+    TGSQLNodeData:
+      description: 'A node specifying an SQL query to execute in TileDB Cloud.
+
+        '
+      type:
+      - object
+      - 'null'
+      properties:
+        init_commands:
+          description: The commands to execute before running the query itself.
+          type: array
+          items:
+            type: string
+        query:
+          description: 'The text of the SQL query to execute. Parameters are substituted in for `?`s, just as in a regular MariaDB query.
+
+            '
+          type: string
+        parameters:
+          description: 'The parameters to substitute in for arguments in the `query`. Fixed-length. Arguments must be in JSON format.
+
+            '
+          type: array
+          items:
+            $ref: '#/components/schemas/TGArgValue'
+        result_format:
+          $ref: '#/components/schemas/ResultFormat'
+        namespace:
+          description: 'If set, the non-default namespace to execute this SQL query under.
+
+            '
+          type:
+          - string
+          - 'null'
+    TGUDFNodeData:
+      description: A node specifying the execution of a user-defined function.
+      type:
+      - object
+      - 'null'
+      properties:
+        registered_udf_name:
+          description: 'If set, the name of the registered UDF to execute, in the format `namespace/name`. Either this or `executable_code` should be set, but not both.
+
+            '
+          type:
+          - string
+          - 'null'
+        executable_code:
+          description: 'If set, the base64 serialization of the code for this step, encoded in a language-specific format (e.g. Pickle for Python, serialization for R).
+
+            '
+          type:
+          - string
+          - 'null'
+        source_text:
+          description: 'Optionally, the source text for the code passed in `executable_code`. *For reference only; only the code in `executable_code` is actually executed.* This will be included in activity logs and may be useful for debugging.
+
+            '
+          type: string
+        environment:
+          $ref: '#/components/schemas/TGUDFEnvironment'
+        arguments:
+          description: "The arguments to a UDF function. This encompasses both named and positional arguments. The format is designed to provide compatibility across languages like Python which have a fairly traditional split between positional arguments and named arguments, and languages like R which has a rather unique way of specifying arguments.\nFor Python (and most other languages), all positional arguments will come before all named arguments (if any are present):\n\n    // fn(arg1, arg2, arg3)\n    [\n      {value: arg1},\n      {value: arg2},\n      {value: arg3},\n    ]\n    // fn(arg1, arg2, n=kw1, a=kw2)\n    [\n      {value: arg1},\n      {value: arg2},\n      {name: \"n\", value: kw1},\n      {name: \"a\", value: kw2},\n    ]\n    // fn(kw=k1, only=k2)\n    [\n      {name: \"kw\", value: k1},\n      {name: \"only\", value: k2},\n    ]\n\nHowever, in R, named and positional arguments may be intermixed freely:\n\n    // fn(arg, n=kw1, arg2)\n    [\n      {value: arg},\n      {name: \"n\", value: kw1},\n      {value: arg2},\n    ]\n"
+          type: array
+          items:
+            $ref: '#/components/schemas/TGUDFArgument'
+        result_format:
+          $ref: '#/components/schemas/ResultFormat'
+    ResultFormat:
+      description: Data format of a result
+      type: string
+      enum:
+      - python_pickle
+      - r_serialization
+      - json
+      - arrow
+      - bytes
+      - tiledb_json
+      - native
+    TaskGraphNodeMetadata:
+      description: Metadata about an individual node in a task graph.
+      type: object
+      properties:
+        client_node_uuid:
+          type: string
+          description: The client-generated UUID of the given graph node.
+        name:
+          type: string
+          maxLength: 255
+          description: 'The client-generated name of the node. This is not guaranteed to be unique.
+
+            '
+        depends_on:
+          type: array
+          items:
+            type: string
+          description: 'The client_node_uuid of each node that this node depends upon. Used to define the structure of the graph.
+
+            '
+        run_location:
+          $ref: '#/components/schemas/TaskGraphLogRunLocation'
+        status:
+          description: 'If present, the overall execution status of this node, taking into account the latest execution information.
+
+            For nodes that have not yet been executed, this will be listed as `QUEUED`. For nodes that are set to run locally and have not reported any status information, this will be listed as `UNKNOWN`.
+
+            '
+          $ref: '#/components/schemas/ArrayTaskStatus'
+        status_message:
+          description: The reason the array task status is in the state
+          type:
+          - string
+          - 'null'
+          x-omitempty: true
+        executions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArrayTask'
+          readOnly: true
+          description: 'ArrayTasks representing each execution attempt for this node. For nodes that have never been submitted, this will be empty. For nodes that have been retried, this may have multiple entries. The last one in the list represents the most recent execution.
+
+            This is read-only and generated by the server based on the tasks it has actually executed.
+
+            '
+    ArrayActivityLog:
+      description: Actvity of an Array
+      type: object
+      properties:
+        event_at:
+          description: time event took place (RFC3339)
+          type: string
+          format: date-time
+        action:
+          description: Type of the event
+          $ref: '#/components/schemas/ActivityEventType'
+        username:
+          description: User who performed action
+          type: string
+          example: user1
+        bytes_sent:
+          description: Bytes sent to client
+          type: integer
+          format: uint64
+          example: 1073741824
+        bytes_received:
+          description: Bytes recieved from client
+          type: integer
+          format: uint64
+          example: 1073741824
+        array_task_id:
+          description: UUID of associated array task
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        id:
+          description: ID of the activity
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        query_ranges:
+          description: ranges for query
+          x-omitempty: true
+          type: string
+          example: '{"rows":[{"start": 1, "end": 1},{"start": 3, "end": 4}],"cols":[{"start": 1, "end": 4}]}'
+        query_stats:
+          description: stats for query
+          x-omitempty: true
+          type: string
+          example: '{"timers": {"Context.StorageManager.read_load_array_schema_from_uri.sum": 0.0255293, "...": "..."}, "counters": {"Context.StorageManager.read_unfiltered_byte_num": 191, "...": "..."}}'
     RetryStrategy:
       description: RetryStrategy provides controls on how to retry a taskgraph node
       type: object
@@ -1098,6 +851,87 @@ components:
         retryPolicy:
           description: RetryPolicy is a policy of NodePhase statuses that will be retried
           $ref: '#/components/schemas/RetryPolicy'
+    TGUDFEnvironment:
+      description: Metadata about the environment where we want to execute a UDF.
+      type: object
+      properties:
+        language:
+          $ref: '#/components/schemas/UDFLanguage'
+        language_version:
+          description: 'The language version used to execute this UDF. Neither this nor `language` needs to be set for registered UDFs, since the language and version are stored server-side with the UDF itself.
+
+            '
+          type: string
+        image_name:
+          description: 'The name of the image to use for the execution environment.
+
+            '
+          type: string
+        access_credentials_name:
+          description: 'The name of the access credentials to use. if unset, no credentials will be configured in the environment.
+
+            '
+          type: string
+        namespace:
+          description: 'If set, the non-default namespace to execute this UDF under (and to query any Array Nodes that are used as inputs to this UDF).
+
+            '
+          type:
+          - string
+          - 'null'
+        resource_class:
+          description: 'The resource class to use for the UDF execution. Resource classes define resource limits for memory and CPUs. If this is empty, then the UDF will execute in the standard resource class of the TileDB Cloud provider.
+
+            '
+          type: string
+          x-omitempty: true
+        resources:
+          type: object
+          description: 'The resources requested for this particular node. If resources are not specified resource_class is used, if it is not set the standard resource // defaults are used
+
+            '
+          properties:
+            cpu:
+              type: string
+              example: 500m
+            memory:
+              type: string
+              example: 8Gi
+            gpu:
+              type: integer
+              example: 1
+          x-omitempty: true
+        run_client_side:
+          description: 'A hint that, if possible, this function should be executed on the client side rather than on the server. Registered UDFs and functions which take arrays as inputs can never be executed client-side. If the client’s environment is incompatible, or the client does not support client-side execution, the function will be executed on the server.
+
+            '
+          type: boolean
+          x-omitempty: true
+        timeout:
+          description: 'The maximum length of time this UDF is allowed to execute for before it is killed and fails. If not present (or zero), the function is allowed to run indefinitely (subject to the server’s global limits).
+
+            '
+          type:
+          - number
+          - 'null'
+    PricingAggregateUsage:
+      description: Specifies a usage aggregation strategy for pricings of usage_type=metered
+      type: string
+      enum:
+      - sum
+    TGUDFArgument:
+      description: 'A single argument to a UDF. This may represent a positional argument or a named argument, depending upon whether `name` is set.
+
+        '
+      type: object
+      properties:
+        name:
+          description: The name of the argument, if present.
+          type:
+          - string
+          - 'null'
+        value:
+          $ref: '#/components/schemas/TGArgValue'
     DomainArray:
       description: Domain object for an array of each type
       type: object
@@ -1162,36 +996,15 @@ components:
           items:
             type: number
             format: double
-    ArrayActions:
-      description: actions a user can take on an array
+    FileType:
+      description: File types represented as TileDB arrays
       type: string
       enum:
-      - read
-      - write
-      - edit
-      - read_array_logs
-      - read_array_info
-      - read_array_schema
-    PricingAggregateUsage:
-      description: Specifies a usage aggregation strategy for pricings of usage_type=metered
-      type: string
-      enum:
-      - sum
-    Querytype:
-      description: Type of query
-      type: string
-      enum:
-      - READ
-      - WRITE
-      - DELETE
-    RetryPolicy:
-      description: RetryPolicy is a policy of node statuses that will be retried
-      type: string
-      enum:
-      - Always
-      - OnFailure
-      - OnError
-      - OnTransientError
+      - notebook
+      - user_defined_function
+      - ml_model
+      - file
+      - registered_task_graph
     TaskGraphLogRunLocation:
       description: 'The location where an individual node of a task graph is executed.
 
@@ -1201,12 +1014,6 @@ components:
       - server
       - client
       - virtual
-    PricingUnitLabel:
-      description: Unit label
-      type: string
-      enum:
-      - byte
-      - second
     TaskGraphLogStatus:
       description: The status of a given task graph execution.
       type: string
@@ -1218,120 +1025,313 @@ components:
       - succeeded
       - failed
       - cancelled
-    PricingInterval:
-      description: Interval for pricing
+    TaskGraphType:
+      description: 'The type of a task graph.
+
+        '
       type: string
       enum:
-      - month
-    ActivityEventType:
-      description: Type of activity logged
-      type: string
-      enum:
-      - read_schema
-      - max_buffer_sizes
-      - non_empty_domain
-      - query_read
-      - query_write
-      - query_delete
-      - create
-      - delete
-      - register
-      - deregister
-      - udf
-      - array_metadata_get
-      - array_metadata_update
-      - estimated_result_sizes
-      - read_fragment_info
-      - read_enumerations
-    UDFArrayDetails:
-      description: Contains array details for multi-array query including uri, ranges buffers
+      - batch
+      - realtime
+    Subscription:
+      description: Subscription of a user (customer) to another user's arrays
       type: object
       properties:
-        parameter_id:
-          description: 'An optional client-generated identifier to distinguish between multiple range/buffer requests from the same array in the same call.
-
-            This may be set for MultiArrayUDFs that use the `argument_json` style of passing arrays.
-
-            '
-          type:
-          - string
-          - 'null'
-          x-omitempty: true
-        uri:
-          description: array to set ranges and buffers on, must be in tiledb:// format
+        id:
+          description: Unique ID of subscription as defined by Stripe
           type: string
-        ranges:
-          description: ranges to run against, generic format
-          $ref: '#/components/schemas/QueryRanges'
-        buffers:
-          description: List of buffers to fetch (attributes + dimensions)
+          example: subscriptionID
+        owner_namespace_uuid:
+          description: Unique ID of the array (product) owner
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        customer_namespace_uuid:
+          description: Unique ID of the array (product) user (customer)
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        pricing:
+          description: list of pricing used by this subscription
           type: array
           x-omitempty: true
           items:
-            type: string
-    FileType:
-      description: File types represented as TileDB arrays
+            $ref: '#/components/schemas/Pricing'
+    TaskGraph:
+      description: Information about a task graph.
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: The server-generated UUID of the task graph.
+        namespace:
+          type: string
+          description: 'The namespace that owns this task graph. When creating a task graph log, this is used as the namespace to create the log in; thereafter it is read-only.
+
+            '
+        created_by:
+          type: string
+          readOnly: true
+          description: The name of the user who created this task graph log.
+        name:
+          type: string
+          maxLength: 255
+          description: 'A name for this task graph, displayed in the UI. Does not need to be unique.
+
+            '
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: 'The date/time when this task graph was originally created.
+
+            '
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskGraphNode'
+          description: 'The structure of the graph. This is provided by the client when first setting up the task graph. This must be topographically sorted; that is, each node must appear after all nodes that it depends upon.
+
+            '
+        parallelism:
+          type:
+          - integer
+          - 'null'
+          format: int64
+          x-omitempty: true
+          description: 'Parallelism limits the max total parallel pods that can execute at the same time in a workflow.
+
+            '
+        retry_strategy:
+          $ref: '#/components/schemas/RetryStrategy'
+        deadline:
+          type:
+          - integer
+          - 'null'
+          format: int64
+          x-omitempty: true
+          description: 'Duration in seconds relative to the workflow start time which the workflow is allowed to run before it gets terminated. Defaults to 24h when unset
+
+            '
+        task_graph_type:
+          $ref: '#/components/schemas/TaskGraphType'
+    Pricing:
+      description: Pricing created by converting an array to product
+      type: object
+      properties:
+        id:
+          description: Unique ID of plan as defined by Stripe
+          type: string
+          example: planID
+        array_uuid:
+          description: Unique ID of registered array
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        pricing_name:
+          description: Name of pricing
+          type: string
+        pricing_type:
+          description: Type of pricing
+          $ref: '#/components/schemas/PricingType'
+        product_name:
+          description: Name of product
+          type: string
+        product_statement_descriptor:
+          description: Extra information about a product which will appear on the credit card statement of the customer
+          type: string
+        product_unit_label:
+          description: A label that represents units of this product in Stripe and receipts and invoices of the customer
+          $ref: '#/components/schemas/PricingUnitLabel'
+        currency:
+          description: Currency of pricing
+          $ref: '#/components/schemas/PricingCurrency'
+        aggregate_usage:
+          description: Specifies a usage aggregation strategy for pricings of usage_type=metered
+          $ref: '#/components/schemas/PricingAggregateUsage'
+        interval:
+          description: The frequency with which a subscription should be billed
+          $ref: '#/components/schemas/PricingInterval'
+        divided_by:
+          description: Group of n product unit labels
+          type: integer
+          format: int64
+          example: 1048576
+        charge:
+          description: Price in cents (decimal) per unitlabel
+          type: number
+          format: double
+        activated:
+          description: If pricing is activated
+          type: boolean
+          example: false
+    PricingUnitLabel:
+      description: Unit label
       type: string
       enum:
-      - notebook
-      - user_defined_function
-      - ml_model
-      - file
-      - registered_task_graph
-    PricingType:
-      description: Pricing types
+      - byte
+      - second
+    QueryRanges:
+      description: Subarray bounds to query
+      type: object
+      properties:
+        layout:
+          $ref: '#/components/schemas/Layout'
+        ranges:
+          description: List of ranges,
+          type: array
+          x-omitempty: true
+          items:
+            type: array
+            x-omitempty: true
+            items:
+              type: number
+    Layout:
+      description: Layout of array
       type: string
       enum:
-      - egress
-      - access
-    TGUDFNodeData:
-      description: A node specifying the execution of a user-defined function.
+      - row-major
+      - col-major
+      - global-order
+      - unordered
+    TaskGraphLog:
+      description: Logging information about the execution of a task graph.
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: The server-generated UUID of the task graph.
+        namespace:
+          type: string
+          description: 'The namespace that owns this task graph log. When creating a task graph log, this is used as the namespace to create the log in; thereafter it is read-only.
+
+            '
+        created_by:
+          type: string
+          readOnly: true
+          description: The name of the user who created this task graph log.
+        name:
+          type: string
+          description: 'A name for this task graph log, displayed in the UI. Does not need to be unique.
+
+            '
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: 'The date/time when this task graph log was originally created. This is distinct from the execution start_time.
+
+            '
+        start_time:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          readOnly: true
+          x-omitempty: true
+          description: 'The start time of the task graph, recorded when the server starts executing the first node.
+
+            '
+        end_time:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          readOnly: true
+          x-omitempty: true
+          description: 'The end time of the task graph, recorded when the client reports completion.
+
+            '
+        status:
+          $ref: '#/components/schemas/TaskGraphLogStatus'
+        total_cost:
+          type:
+          - number
+          - 'null'
+          description: 'If present, the total cost of executing all nodes in this task graph.
+
+            '
+        access_cost:
+          type:
+          - number
+          - 'null'
+          description: 'If present, the total cost of access from execution of the nodes in this task graph.
+
+            '
+        egress_cost:
+          type:
+          - number
+          - 'null'
+          description: 'If present, the total cost of access from execution of the nodes in this task graph.
+
+            '
+        execution_time:
+          type: string
+          description: 'The total execution time of all the nodes in this graph, in ISO 8601 format with hours, minutes, and seconds.
+
+            '
+          example: P15H22M0.45S
+        status_count:
+          type: object
+          description: 'A mapping from `ArrayTaskStatus` string value to the number of nodes in this graph that are in that status.
+
+            '
+          additionalProperties:
+            description: The number of nodes that are in the given state.
+            type: number
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskGraphNodeMetadata'
+          description: 'The structure of the graph. This is provided by the client when first setting up the task graph. Thereafter, it is read-only. This must be topographically sorted; that is, each node must appear after all nodes that it depends upon.
+
+            '
+        task_graph_type:
+          $ref: '#/components/schemas/TaskGraphType'
+        task_graph_id:
+          type: string
+          description: The UUID of the task graph.
+        cloud_provider:
+          type: string
+          x-omitempty: true
+          description: The name of the cloud provider where this task graph executed.
+        cloud_region:
+          type: string
+          x-omitempty: true
+          description: The region of the cloud provider where this task graph executed.
+    PricingCurrency:
+      description: Currency of pricing
+      type: string
+      enum:
+      - USD
+    TGInputNodeData:
+      description: 'Specifies that a node is an “input value”, allowing for parameterized task graphs. An input node may not depend upon any other nodes.
+
+        '
       type:
       - object
       - 'null'
       properties:
-        registered_udf_name:
-          description: 'If set, the name of the registered UDF to execute, in the format `namespace/name`. Either this or `executable_code` should be set, but not both.
+        default_value:
+          $ref: '#/components/schemas/TGArgValue'
+        datatype:
+          description: 'An annotation of what datatype this node is supposed to be. Conventionally, this is a Python-format type annotation, but it’s purely for documentation purposes and not validated.
 
             '
           type:
           - string
           - 'null'
-        executable_code:
-          description: 'If set, the base64 serialization of the code for this step, encoded in a language-specific format (e.g. Pickle for Python, serialization for R).
-
-            '
-          type:
-          - string
-          - 'null'
-        source_text:
-          description: 'Optionally, the source text for the code passed in `executable_code`. *For reference only; only the code in `executable_code` is actually executed.* This will be included in activity logs and may be useful for debugging.
-
-            '
-          type: string
-        environment:
-          $ref: '#/components/schemas/TGUDFEnvironment'
-        arguments:
-          description: "The arguments to a UDF function. This encompasses both named and positional arguments. The format is designed to provide compatibility across languages like Python which have a fairly traditional split between positional arguments and named arguments, and languages like R which has a rather unique way of specifying arguments.\nFor Python (and most other languages), all positional arguments will come before all named arguments (if any are present):\n\n    // fn(arg1, arg2, arg3)\n    [\n      {value: arg1},\n      {value: arg2},\n      {value: arg3},\n    ]\n    // fn(arg1, arg2, n=kw1, a=kw2)\n    [\n      {value: arg1},\n      {value: arg2},\n      {name: \"n\", value: kw1},\n      {name: \"a\", value: kw2},\n    ]\n    // fn(kw=k1, only=k2)\n    [\n      {name: \"kw\", value: k1},\n      {name: \"only\", value: k2},\n    ]\n\nHowever, in R, named and positional arguments may be intermixed freely:\n\n    // fn(arg, n=kw1, arg2)\n    [\n      {value: arg},\n      {name: \"n\", value: kw1},\n      {value: arg2},\n    ]\n"
-          type: array
-          items:
-            $ref: '#/components/schemas/TGUDFArgument'
-        result_format:
-          $ref: '#/components/schemas/ResultFormat'
-    Backoff:
-      description: Backoff is a backoff strategy to use within retryStrategy
-      type: object
-      properties:
-        duration:
-          description: Duration is the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
-          type: string
-        factor:
-          description: Factor is a factor to multiply the base duration after each failed retry
-          type: integer
-          format: uint32
-        maxDuration:
-          description: MaxDuration is the maximum amount of time allowed for the backoff strategy
-          type: string
+    ArrayTaskType:
+      description: Synchronous Task Type
+      type: string
+      enum:
+      - SQL
+      - UDF
+      - QUERY
+      - GENERIC_UDF
+      - BATCH_UDF
+      - CLIENT_COMPUTATION
+    TGArgValue:
+      description: "An argument provided to a node. This is one of a direct value (i.e., a raw JSON value) or a `TGSentinel`.\nFor example this Python value:\n\n    {\"a\": [1, \"pipe\", range(30), None], \"b\": b\"bytes\"}\n\nis encoded thusly (with included comments):\n\n    {  // A dictionary with string keys is JSON-encodable.\n      \"a\": [  // As is a list.\n        1,\n        \"pipe\",\n        {  // A `range` is replaced with its pickle.\n          \"__tdbudf__\": \"immediate\",\n          \"format\": \"python_pickle\",\n          \"base64_data\": \"gASVIAAAAAAAAACMCGJ1aWx0aW5zlIwFcmFuZ2WUk5RLAEseSwGHlFKULg==\"\n        },\n        null\n      ],\n      \"b\": {  // Raw binary data is encoded into base64.\n        \"__tdbudf__\": \"immediate\"\n        \"format\": \"bytes\",\n        \"base64_data\": \"Ynl0ZXM=\"\n      }\n    }\n"
   securitySchemes:
     BasicAuth:
       type: http
