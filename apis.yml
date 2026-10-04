@@ -417,6 +417,9 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: CapabilityMap
+  url: capabilities/tiledb-capability-edges.yml
+  name: TileDB Business Capability Map
 - type: Overlay
   url: overlays/tiledb-cloud-v1-overlay.yaml
 - type: Overlay
