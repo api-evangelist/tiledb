@@ -808,53 +808,42 @@ components:
       - read_write_delete
       - read_write
       - read_only
-    TokenScope:
-      description: An api token scope available for creation
-      type: string
-      enum:
-      - password_reset
-      - confirm_email
-      - '*'
-      - user:read
-      - user:read-write
-      - user:admin
-      - array:read
-      - array:read-write
-      - array:admin
-      - organization:read
-      - organization:read-write
-      - organization:admin
-      - group:read
-      - group:read-write
-      - group:admin
-    Error:
+    OrganizationUser:
+      description: user in an organization
       type: object
       properties:
-        code:
-          type: integer
-          format: int64
-        message:
+        user_id:
           type: string
-        request_id:
+          description: unique ID of user
+          example: 00000000-0000-0000-0000-000000000000
+        organization_id:
           type: string
-    TokenRequest:
-      description: A request from a user for an api token
-      type: object
-      properties:
-        expires:
-          description: Expiration date for token, if empty token defaults to 30 minutes
+          description: unique ID of organization
+          example: 00000000-0000-0000-0000-000000000000
+        username:
+          description: username for user
           type: string
-          format: date-time
-          example: 2018-12-31 12:13:14+00:00
-        name:
-          description: Optional name for token, if the name already exists for the user it will be auto incremented (i.e. myToken-1)
+          example: username
+        user_full_name:
+          description: full name of the user; available to organization admins
           type: string
-          example: myToken
-        scope:
-          description: Optional scope to limit token, defaults to all permissions, current supported values are password_reset or *
+          example: Alice Hanna
+        user_email:
+          description: email address of the user; available to organization admins
+          type: string
+          example: alice@example.com
+        organization_name:
+          description: name of organization
+          type: string
+          example: MyOrganization
+        role:
+          $ref: '#/components/schemas/OrganizationRoles'
+        allowed_actions:
+          description: list of actions user is allowed to do on this organization
           type: array
+          x-omitempty: true
           items:
-            $ref: '#/components/schemas/TokenScope'
+            $ref: '#/components/schemas/NamespaceActions'
     Token:
       description: A api token and its metadata
       type: object
@@ -878,64 +867,32 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TokenScope'
-    AssetLocations:
-      description: 'Custom storage locations on a per–asset type basis. If any is unset, a suffix of the owning (user/organization) `default_s3_path` is used.
-
-        '
+    Error:
       type: object
       properties:
-        arrays:
-          $ref: '#/components/schemas/StorageLocation'
-        files:
-          $ref: '#/components/schemas/StorageLocation'
-        groups:
-          $ref: '#/components/schemas/StorageLocation'
-        ml_models:
-          $ref: '#/components/schemas/StorageLocation'
-        notebooks:
-          $ref: '#/components/schemas/StorageLocation'
-        task_graphs:
-          $ref: '#/components/schemas/StorageLocation'
-        udfs:
-          $ref: '#/components/schemas/StorageLocation'
-    AWSAccessCredentials:
-      description: Model representing aws keys or service role, service roles are currently ignored, but will be preferred option in the future
-      type: object
-      properties:
-        secret_access_key:
+        code:
+          type: integer
+          format: int64
+        message:
           type: string
-          description: aws secret access key, never returned in get requests
-        access_key_id:
+        request_id:
           type: string
-          description: aws access key
-        service_role_arn:
-          type: string
-          description: aws service role to use for access
-        name:
-          type: string
-          description: human readable name
-        default:
-          type: boolean
-          description: true if this is the default credential to be used within this namespace
-          x-omitempty: true
-        buckets:
-          description: a whitelist of one or more buckets this key should access
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-            description: A bucket or path of a bucket that is granted access by these credentials
-            example: s3://company-bucket-1/tiledb/
-        created_at:
-          description: Time when UDF dependencies were created (rfc3339)
-          type: string
-          format: date-time
-          readOnly: true
-        updated_at:
-          description: Time when UDF dependencies was last updated (rfc3339)
-          type: string
-          format: date-time
-          readOnly: true
+    NamespaceActions:
+      description: actions a user can take on an organization
+      type: string
+      enum:
+      - read
+      - write
+      - create
+      - delete
+      - edit
+      - read_array_logs
+      - read_job_logs
+      - read_object_logs
+      - run_job
+      - delete_organization
+      - edit_organization
+      - edit_billing
     User:
       description: User
       type: object
@@ -1033,42 +990,81 @@ components:
 
             '
           type: string
-    OrganizationUser:
-      description: user in an organization
+    TokenRequest:
+      description: A request from a user for an api token
       type: object
       properties:
-        user_id:
+        expires:
+          description: Expiration date for token, if empty token defaults to 30 minutes
           type: string
-          description: unique ID of user
-          example: 00000000-0000-0000-0000-000000000000
-        organization_id:
+          format: date-time
+          example: 2018-12-31 12:13:14+00:00
+        name:
+          description: Optional name for token, if the name already exists for the user it will be auto incremented (i.e. myToken-1)
           type: string
-          description: unique ID of organization
-          example: 00000000-0000-0000-0000-000000000000
-        username:
-          description: username for user
+          example: myToken
+        scope:
+          description: Optional scope to limit token, defaults to all permissions, current supported values are password_reset or *
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenScope'
+    AWSAccessCredentials:
+      description: Model representing aws keys or service role, service roles are currently ignored, but will be preferred option in the future
+      type: object
+      properties:
+        secret_access_key:
           type: string
-          example: username
-        user_full_name:
-          description: full name of the user; available to organization admins
+          description: aws secret access key, never returned in get requests
+        access_key_id:
           type: string
-          example: Alice Hanna
-        user_email:
-          description: email address of the user; available to organization admins
+          description: aws access key
+        service_role_arn:
           type: string
-          example: alice@example.com
-        organization_name:
-          description: name of organization
+          description: aws service role to use for access
+        name:
           type: string
-          example: MyOrganization
-        role:
-          $ref: '#/components/schemas/OrganizationRoles'
-        allowed_actions:
-          description: list of actions user is allowed to do on this organization
+          description: human readable name
+        default:
+          type: boolean
+          description: true if this is the default credential to be used within this namespace
+          x-omitempty: true
+        buckets:
+          description: a whitelist of one or more buckets this key should access
           type: array
           x-omitempty: true
           items:
-            $ref: '#/components/schemas/NamespaceActions'
+            type: string
+            description: A bucket or path of a bucket that is granted access by these credentials
+            example: s3://company-bucket-1/tiledb/
+        created_at:
+          description: Time when UDF dependencies were created (rfc3339)
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          description: Time when UDF dependencies was last updated (rfc3339)
+          type: string
+          format: date-time
+          readOnly: true
+    TokenScope:
+      description: An api token scope available for creation
+      type: string
+      enum:
+      - password_reset
+      - confirm_email
+      - '*'
+      - user:read
+      - user:read-write
+      - user:admin
+      - array:read
+      - array:read-write
+      - array:admin
+      - organization:read
+      - organization:read-write
+      - organization:admin
+      - group:read
+      - group:read-write
+      - group:admin
     StorageLocation:
       description: 'The path at which a given asset will be stored, and the credentials used to access that asset.
 
@@ -1089,35 +1085,103 @@ components:
           type:
           - string
           - 'null'
-    NamespaceActions:
-      description: actions a user can take on an organization
-      type: string
-      enum:
-      - read
-      - write
-      - create
-      - delete
-      - edit
-      - read_array_logs
-      - read_job_logs
-      - read_object_logs
-      - run_job
-      - delete_organization
-      - edit_organization
-      - edit_billing
-    AzureCredential:
-      description: Credential information to access Microsoft Azure. Each supported property is the snake_case version of its name in an Azure Storage connection string.
+    AssetLocations:
+      description: 'Custom storage locations on a per–asset type basis. If any is unset, a suffix of the owning (user/organization) `default_s3_path` is used.
+
+        '
+      type: object
+      properties:
+        arrays:
+          $ref: '#/components/schemas/StorageLocation'
+        files:
+          $ref: '#/components/schemas/StorageLocation'
+        groups:
+          $ref: '#/components/schemas/StorageLocation'
+        ml_models:
+          $ref: '#/components/schemas/StorageLocation'
+        notebooks:
+          $ref: '#/components/schemas/StorageLocation'
+        task_graphs:
+          $ref: '#/components/schemas/StorageLocation'
+        udfs:
+          $ref: '#/components/schemas/StorageLocation'
+    AccessCredential:
+      description: A union type which may contain a credential to access any one cloud provider.
+      type: object
+      properties:
+        uuid:
+          description: The UUID of the credential
+          type: string
+        name:
+          description: A user-specified name for the key
+          type: string
+        provider:
+          description: The service provider that this credential provides access to. This is derived from the one field which is set when creating or updating the credential data.
+          $ref: '#/components/schemas/CloudProvider'
+          readOnly: true
+        provider_default:
+          description: True if this is the namespace's default credential to be used when connecting to the given cloud provider. There can be at most one default for each unique provider.
+          type:
+          - boolean
+          - 'null'
+        created_at:
+          description: Time when the credential was created (rfc3339)
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          description: Time when the credential was last updated (rfc3339)
+          type: string
+          format: date-time
+          readOnly: true
+        allowed_in_tasks:
+          description: Is this credential allowed to be used in tasks
+          type:
+          - boolean
+          - 'null'
+        credential:
+          description: The credential information itself. Exactly one sub-field may be set. The names match those in the CloudProvider enum.
+          type: object
+          x-omitempty: true
+          x-go-custom-tag: tdbrest:"cred_field"
+          properties:
+            aws:
+              $ref: '#/components/schemas/AWSCredential'
+            azure:
+              $ref: '#/components/schemas/AzureCredential'
+            gcp:
+              $ref: '#/components/schemas/GCPInteroperabilityCredential'
+        role:
+          description: The role information itself. Exactly one sub-field may be set. The names match those in the CloudProvider enum.
+          type: object
+          x-omitempty: true
+          x-go-custom-tag: tdbrest:"cred_field"
+          properties:
+            aws:
+              $ref: '#/components/schemas/AWSRole'
+        token:
+          description: The token information itself. Exactly one sub-field may be set. The names match those in the CloudProvider enum.
+          type: object
+          x-omitempty: true
+          x-go-custom-tag: tdbrest:"cred_field"
+          properties:
+            azure:
+              $ref: '#/components/schemas/AzureToken'
+            gcp:
+              $ref: '#/components/schemas/GCPServiceAccountKey'
+    GCPInteroperabilityCredential:
+      description: Credential information to access Google Cloud. using well knows key/secret pair to access storage.
       type:
       - object
       - 'null'
       x-omitempty: true
       properties:
-        account_name:
-          description: The name of the Azure account to access
+        access_key_id:
+          description: The ID of the access key
           type: string
-          x-go-custom-tag: tdbrest:"key_id" validate:"required"
-        account_key:
-          description: The secret key. Never returned in responses.
+          x-go-custom-tag: validate:"required"
+        secret_access_key:
+          description: The access key's secret. Never returned in responses.
           type: string
           x-go-custom-tag: tdbrest:"secret" validate:"required"
     PaginationMetadata:
@@ -1186,21 +1250,6 @@ components:
           type: string
           x-go-custom-tag: tdbrest:"secret"
           example: <the JSON key file issued by Google Cloud for a service account>
-    GCPInteroperabilityCredential:
-      description: Credential information to access Google Cloud. using well knows key/secret pair to access storage.
-      type:
-      - object
-      - 'null'
-      x-omitempty: true
-      properties:
-        access_key_id:
-          description: The ID of the access key
-          type: string
-          x-go-custom-tag: validate:"required"
-        secret_access_key:
-          description: The access key's secret. Never returned in responses.
-          type: string
-          x-go-custom-tag: tdbrest:"secret" validate:"required"
     CloudProvider:
       description: A service where data is stored or computations take place.
       type: string
@@ -1208,33 +1257,6 @@ components:
       - AWS
       - AZURE
       - GCP
-    AWSCredential:
-      description: Credential information to access Amazon Web Services
-      type:
-      - object
-      - 'null'
-      x-omitempty: true
-      properties:
-        access_key_id:
-          description: The ID of the access key
-          type: string
-          x-go-custom-tag: tdbrest:"key_id" validate:"required"
-        secret_access_key:
-          description: The access key's secret. Never returned in responses.
-          type: string
-          x-go-custom-tag: tdbrest:"secret" validate:"required"
-        endpoint:
-          description: The endpoint used for this credential
-          type:
-          - string
-          - 'null'
-          example: https://example.us-west-2.amazonaws.com
-        sse_kms_key_id:
-          description: The key ID, key ARN, or key alias of the AWS KMS key to use with this credential
-          type:
-          - string
-          - 'null'
-          example: arn:aws:kms:us-east-1:1234:key/mykey
     AccessCredentialsData:
       description: Object including credentials and pagination metadata
       type: object
@@ -1247,87 +1269,21 @@ components:
             $ref: '#/components/schemas/AccessCredential'
         pagination_metadata:
           $ref: '#/components/schemas/PaginationMetadata'
-    AccessCredential:
-      description: A union type which may contain a credential to access any one cloud provider.
-      type: object
-      properties:
-        uuid:
-          description: The UUID of the credential
-          type: string
-        name:
-          description: A user-specified name for the key
-          type: string
-        provider:
-          description: The service provider that this credential provides access to. This is derived from the one field which is set when creating or updating the credential data.
-          $ref: '#/components/schemas/CloudProvider'
-          readOnly: true
-        provider_default:
-          description: True if this is the namespace's default credential to be used when connecting to the given cloud provider. There can be at most one default for each unique provider.
-          type:
-          - boolean
-          - 'null'
-        created_at:
-          description: Time when the credential was created (rfc3339)
-          type: string
-          format: date-time
-          readOnly: true
-        updated_at:
-          description: Time when the credential was last updated (rfc3339)
-          type: string
-          format: date-time
-          readOnly: true
-        allowed_in_tasks:
-          description: Is this credential allowed to be used in tasks
-          type:
-          - boolean
-          - 'null'
-        credential:
-          description: The credential information itself. Exactly one sub-field may be set. The names match those in the CloudProvider enum.
-          type: object
-          x-omitempty: true
-          x-go-custom-tag: tdbrest:"cred_field"
-          properties:
-            aws:
-              $ref: '#/components/schemas/AWSCredential'
-            azure:
-              $ref: '#/components/schemas/AzureCredential'
-            gcp:
-              $ref: '#/components/schemas/GCPInteroperabilityCredential'
-        role:
-          description: The role information itself. Exactly one sub-field may be set. The names match those in the CloudProvider enum.
-          type: object
-          x-omitempty: true
-          x-go-custom-tag: tdbrest:"cred_field"
-          properties:
-            aws:
-              $ref: '#/components/schemas/AWSRole'
-        token:
-          description: The token information itself. Exactly one sub-field may be set. The names match those in the CloudProvider enum.
-          type: object
-          x-omitempty: true
-          x-go-custom-tag: tdbrest:"cred_field"
-          properties:
-            azure:
-              $ref: '#/components/schemas/AzureToken'
-            gcp:
-              $ref: '#/components/schemas/GCPServiceAccountKey'
-    AzureToken:
-      description: Token information to access Azure services
+    AzureCredential:
+      description: Credential information to access Microsoft Azure. Each supported property is the snake_case version of its name in an Azure Storage connection string.
       type:
       - object
       - 'null'
       x-omitempty: true
       properties:
         account_name:
-          description: The account name of the configuration
-          x-go-name: AccountName
+          description: The name of the Azure account to access
           type: string
-          x-go-custom-tag: validate:"required"
-          example: tiledbpoc
-        sas_token:
-          description: The token to use for this account
+          x-go-custom-tag: tdbrest:"key_id" validate:"required"
+        account_key:
+          description: The secret key. Never returned in responses.
           type: string
-          example: sv=2022-11-02&ss=bfqt&srt=sco&sp=dsafdssdfafasdfsda&se=2024-03-28T03:02:08Z&st=2024-03-27T19:02:08Z&spr=https&sig=444444555555555555555555555555555555555%3D
+          x-go-custom-tag: tdbrest:"secret" validate:"required"
     AWSRole:
       description: Role information to access Amazon Web Services
       type:
@@ -1349,6 +1305,50 @@ components:
           example: MzU0M2UwMTItMWJhYy00NWUwLThmZDItZTgwYmQ1NjE5Yjhm
         endpoint:
           description: The endpoint used for this role
+          type:
+          - string
+          - 'null'
+          example: https://example.us-west-2.amazonaws.com
+        sse_kms_key_id:
+          description: The key ID, key ARN, or key alias of the AWS KMS key to use with this credential
+          type:
+          - string
+          - 'null'
+          example: arn:aws:kms:us-east-1:1234:key/mykey
+    AzureToken:
+      description: Token information to access Azure services
+      type:
+      - object
+      - 'null'
+      x-omitempty: true
+      properties:
+        account_name:
+          description: The account name of the configuration
+          x-go-name: AccountName
+          type: string
+          x-go-custom-tag: validate:"required"
+          example: tiledbpoc
+        sas_token:
+          description: The token to use for this account
+          type: string
+          example: sv=2022-11-02&ss=bfqt&srt=sco&sp=dsafdssdfafasdfsda&se=2024-03-28T03:02:08Z&st=2024-03-27T19:02:08Z&spr=https&sig=444444555555555555555555555555555555555%3D
+    AWSCredential:
+      description: Credential information to access Amazon Web Services
+      type:
+      - object
+      - 'null'
+      x-omitempty: true
+      properties:
+        access_key_id:
+          description: The ID of the access key
+          type: string
+          x-go-custom-tag: tdbrest:"key_id" validate:"required"
+        secret_access_key:
+          description: The access key's secret. Never returned in responses.
+          type: string
+          x-go-custom-tag: tdbrest:"secret" validate:"required"
+        endpoint:
+          description: The endpoint used for this credential
           type:
           - string
           - 'null'

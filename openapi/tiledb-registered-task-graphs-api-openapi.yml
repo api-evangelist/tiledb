@@ -195,38 +195,49 @@ paths:
       x-summary-source: derived
 components:
   schemas:
-    UDFArrayDetails:
-      description: Contains array details for multi-array query including uri, ranges buffers
+    TaskGraphSharing:
+      description: details for sharing a given registered task graph
       type: object
       properties:
-        parameter_id:
-          description: 'An optional client-generated identifier to distinguish between multiple range/buffer requests from the same array in the same call.
-
-            This may be set for MultiArrayUDFs that use the `argument_json` style of passing arrays.
-
-            '
-          type:
-          - string
-          - 'null'
-          x-omitempty: true
-        uri:
-          description: array to set ranges and buffers on, must be in tiledb:// format
-          type: string
-        ranges:
-          description: ranges to run against, generic format
-          $ref: '#/components/schemas/QueryRanges'
-        buffers:
-          description: List of buffers to fetch (attributes + dimensions)
+        actions:
+          description: List of permitted actions
           type: array
           x-omitempty: true
           items:
-            type: string
+            $ref: '#/components/schemas/TaskGraphActions'
+          example:
+          - fetch_task_graph
+          - share_task_graph
+        namespace:
+          description: namespace being granted array access can be a user or organization
+          type: string
+          example: MyOrganization
+        namespace_type:
+          description: details on if the namespace is a organization or user
+          type: string
+          example: organization
+    TGArgValue:
+      description: "An argument provided to a node. This is one of a direct value (i.e., a raw JSON value) or a `TGSentinel`.\nFor example this Python value:\n\n    {\"a\": [1, \"pipe\", range(30), None], \"b\": b\"bytes\"}\n\nis encoded thusly (with included comments):\n\n    {  // A dictionary with string keys is JSON-encodable.\n      \"a\": [  // As is a list.\n        1,\n        \"pipe\",\n        {  // A `range` is replaced with its pickle.\n          \"__tdbudf__\": \"immediate\",\n          \"format\": \"python_pickle\",\n          \"base64_data\": \"gASVIAAAAAAAAACMCGJ1aWx0aW5zlIwFcmFuZ2WUk5RLAEseSwGHlFKULg==\"\n        },\n        null\n      ],\n      \"b\": {  // Raw binary data is encoded into base64.\n        \"__tdbudf__\": \"immediate\"\n        \"format\": \"bytes\",\n        \"base64_data\": \"Ynl0ZXM=\"\n      }\n    }\n"
     UDFLanguage:
       description: UDF Type
       type: string
       enum:
       - python
       - r
+    Backoff:
+      description: Backoff is a backoff strategy to use within retryStrategy
+      type: object
+      properties:
+        duration:
+          description: Duration is the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
+          type: string
+        factor:
+          description: Factor is a factor to multiply the base duration after each failed retry
+          type: integer
+          format: uint32
+        maxDuration:
+          description: MaxDuration is the maximum amount of time allowed for the backoff strategy
+          type: string
     TaskGraphNode:
       description: 'Information about a single node within a registered task graph. A single node represents one piece of data or a computational step; either as an input value, a data source, or a computation that acts upon earlier nodes. The structure parallels the existing `TaskGraphNodeMetadata`.
 
@@ -277,44 +288,19 @@ components:
           description: 'Duration in seconds relative to the node start time which the node is allowed to run before it gets terminated.
 
             '
-    RetryPolicy:
-      description: RetryPolicy is a policy of node statuses that will be retried
-      type: string
-      enum:
-      - Always
-      - OnFailure
-      - OnError
-      - OnTransientError
-    Error:
+    TGUDFArgument:
+      description: 'A single argument to a UDF. This may represent a positional argument or a named argument, depending upon whether `name` is set.
+
+        '
       type: object
       properties:
-        code:
-          type: integer
-          format: int64
-        message:
-          type: string
-        request_id:
-          type: string
-    TaskGraphActions:
-      description: actions a user can take on a UDF
-      type: string
-      enum:
-      - fetch_task_graph
-      - share_task_graph
-    Backoff:
-      description: Backoff is a backoff strategy to use within retryStrategy
-      type: object
-      properties:
-        duration:
-          description: Duration is the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
-          type: string
-        factor:
-          description: Factor is a factor to multiply the base duration after each failed retry
-          type: integer
-          format: uint32
-        maxDuration:
-          description: MaxDuration is the maximum amount of time allowed for the backoff strategy
-          type: string
+        name:
+          description: The name of the argument, if present.
+          type:
+          - string
+          - 'null'
+        value:
+          $ref: '#/components/schemas/TGArgValue'
     TGSQLNodeData:
       description: 'A node specifying an SQL query to execute in TileDB Cloud.
 
@@ -349,6 +335,14 @@ components:
           type:
           - string
           - 'null'
+    RetryPolicy:
+      description: RetryPolicy is a policy of node statuses that will be retried
+      type: string
+      enum:
+      - Always
+      - OnFailure
+      - OnError
+      - OnTransientError
     TGUDFNodeData:
       description: A node specifying the execution of a user-defined function.
       type:
@@ -383,17 +377,44 @@ components:
             $ref: '#/components/schemas/TGUDFArgument'
         result_format:
           $ref: '#/components/schemas/ResultFormat'
-    ResultFormat:
-      description: Data format of a result
+    QueryRanges:
+      description: Subarray bounds to query
+      type: object
+      properties:
+        layout:
+          $ref: '#/components/schemas/Layout'
+        ranges:
+          description: List of ranges,
+          type: array
+          x-omitempty: true
+          items:
+            type: array
+            x-omitempty: true
+            items:
+              type: number
+    TGInputNodeData:
+      description: 'Specifies that a node is an “input value”, allowing for parameterized task graphs. An input node may not depend upon any other nodes.
+
+        '
+      type:
+      - object
+      - 'null'
+      properties:
+        default_value:
+          $ref: '#/components/schemas/TGArgValue'
+        datatype:
+          description: 'An annotation of what datatype this node is supposed to be. Conventionally, this is a Python-format type annotation, but it’s purely for documentation purposes and not validated.
+
+            '
+          type:
+          - string
+          - 'null'
+    TaskGraphActions:
+      description: actions a user can take on a UDF
       type: string
       enum:
-      - python_pickle
-      - r_serialization
-      - json
-      - arrow
-      - bytes
-      - tiledb_json
-      - native
+      - fetch_task_graph
+      - share_task_graph
     RetryStrategy:
       description: RetryStrategy provides controls on how to retry a taskgraph node
       type: object
@@ -455,6 +476,61 @@ components:
           description: 'The structure of the graph, in the form of the nodes that make it up. As with `TaskGraphLog`, nodes must topologically sorted, so that any node appears after all the nodes it depends on.
 
             '
+    UDFArrayDetails:
+      description: Contains array details for multi-array query including uri, ranges buffers
+      type: object
+      properties:
+        parameter_id:
+          description: 'An optional client-generated identifier to distinguish between multiple range/buffer requests from the same array in the same call.
+
+            This may be set for MultiArrayUDFs that use the `argument_json` style of passing arrays.
+
+            '
+          type:
+          - string
+          - 'null'
+          x-omitempty: true
+        uri:
+          description: array to set ranges and buffers on, must be in tiledb:// format
+          type: string
+        ranges:
+          description: ranges to run against, generic format
+          $ref: '#/components/schemas/QueryRanges'
+        buffers:
+          description: List of buffers to fetch (attributes + dimensions)
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+    ResultFormat:
+      description: Data format of a result
+      type: string
+      enum:
+      - python_pickle
+      - r_serialization
+      - json
+      - arrow
+      - bytes
+      - tiledb_json
+      - native
+    Layout:
+      description: Layout of array
+      type: string
+      enum:
+      - row-major
+      - col-major
+      - global-order
+      - unordered
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
     TGUDFEnvironment:
       description: Metadata about the environment where we want to execute a UDF.
       type: object
@@ -518,82 +594,6 @@ components:
           type:
           - number
           - 'null'
-    TGUDFArgument:
-      description: 'A single argument to a UDF. This may represent a positional argument or a named argument, depending upon whether `name` is set.
-
-        '
-      type: object
-      properties:
-        name:
-          description: The name of the argument, if present.
-          type:
-          - string
-          - 'null'
-        value:
-          $ref: '#/components/schemas/TGArgValue'
-    TaskGraphSharing:
-      description: details for sharing a given registered task graph
-      type: object
-      properties:
-        actions:
-          description: List of permitted actions
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/TaskGraphActions'
-          example:
-          - fetch_task_graph
-          - share_task_graph
-        namespace:
-          description: namespace being granted array access can be a user or organization
-          type: string
-          example: MyOrganization
-        namespace_type:
-          description: details on if the namespace is a organization or user
-          type: string
-          example: organization
-    QueryRanges:
-      description: Subarray bounds to query
-      type: object
-      properties:
-        layout:
-          $ref: '#/components/schemas/Layout'
-        ranges:
-          description: List of ranges,
-          type: array
-          x-omitempty: true
-          items:
-            type: array
-            x-omitempty: true
-            items:
-              type: number
-    Layout:
-      description: Layout of array
-      type: string
-      enum:
-      - row-major
-      - col-major
-      - global-order
-      - unordered
-    TGInputNodeData:
-      description: 'Specifies that a node is an “input value”, allowing for parameterized task graphs. An input node may not depend upon any other nodes.
-
-        '
-      type:
-      - object
-      - 'null'
-      properties:
-        default_value:
-          $ref: '#/components/schemas/TGArgValue'
-        datatype:
-          description: 'An annotation of what datatype this node is supposed to be. Conventionally, this is a Python-format type annotation, but it’s purely for documentation purposes and not validated.
-
-            '
-          type:
-          - string
-          - 'null'
-    TGArgValue:
-      description: "An argument provided to a node. This is one of a direct value (i.e., a raw JSON value) or a `TGSentinel`.\nFor example this Python value:\n\n    {\"a\": [1, \"pipe\", range(30), None], \"b\": b\"bytes\"}\n\nis encoded thusly (with included comments):\n\n    {  // A dictionary with string keys is JSON-encodable.\n      \"a\": [  // As is a list.\n        1,\n        \"pipe\",\n        {  // A `range` is replaced with its pickle.\n          \"__tdbudf__\": \"immediate\",\n          \"format\": \"python_pickle\",\n          \"base64_data\": \"gASVIAAAAAAAAACMCGJ1aWx0aW5zlIwFcmFuZ2WUk5RLAEseSwGHlFKULg==\"\n        },\n        null\n      ],\n      \"b\": {  // Raw binary data is encoded into base64.\n        \"__tdbudf__\": \"immediate\"\n        \"format\": \"bytes\",\n        \"base64_data\": \"Ynl0ZXM=\"\n      }\n    }\n"
   securitySchemes:
     BasicAuth:
       type: http

@@ -368,6 +368,311 @@ paths:
       x-summary-source: derived
 components:
   schemas:
+    PaginationMetadata:
+      properties:
+        page:
+          description: pagination offset. Use it to skip the first ((page - 1) * per_page) items
+          type: number
+          format: uint64
+          example: 1
+        per_page:
+          description: pagination limit (page size)
+          type: number
+          format: uint64
+          example: 10
+        total_pages:
+          description: number of total pages with current limit
+          type: number
+          format: uint64
+          example: 14
+        total_items:
+          description: number of total available items
+          type: number
+          format: uint64
+          example: 138
+    PricingUnitLabel:
+      description: Unit label
+      type: string
+      enum:
+      - byte
+      - second
+    PricingInterval:
+      description: Interval for pricing
+      type: string
+      enum:
+      - month
+    TaskGraphLogStatus:
+      description: The status of a given task graph execution.
+      type: string
+      enum:
+      - submitted
+      - running
+      - idle
+      - abandoned
+      - succeeded
+      - failed
+      - cancelled
+    DomainArray:
+      description: Domain object for an array of each type
+      type: object
+      properties:
+        int8:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: int8
+        uint8:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint8
+        int16:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: int16
+        uint16:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint16
+        int32:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: int32
+        uint32:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint32
+        int64:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: int64
+        uint64:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint64
+        float32:
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: float
+        float64:
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: double
+    ActivityEventType:
+      description: Type of activity logged
+      type: string
+      enum:
+      - read_schema
+      - max_buffer_sizes
+      - non_empty_domain
+      - query_read
+      - query_write
+      - query_delete
+      - create
+      - delete
+      - register
+      - deregister
+      - udf
+      - array_metadata_get
+      - array_metadata_update
+      - estimated_result_sizes
+      - read_fragment_info
+      - read_enumerations
+    TaskGraphLogsData:
+      description: Response data for a task graph list, including pagination metadata.
+      type: object
+      properties:
+        task_graph_logs:
+          description: The requested task graph logs.
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskGraphLog'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+    TaskGraphLog:
+      description: Logging information about the execution of a task graph.
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: The server-generated UUID of the task graph.
+        namespace:
+          type: string
+          description: 'The namespace that owns this task graph log. When creating a task graph log, this is used as the namespace to create the log in; thereafter it is read-only.
+
+            '
+        created_by:
+          type: string
+          readOnly: true
+          description: The name of the user who created this task graph log.
+        name:
+          type: string
+          description: 'A name for this task graph log, displayed in the UI. Does not need to be unique.
+
+            '
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: 'The date/time when this task graph log was originally created. This is distinct from the execution start_time.
+
+            '
+        start_time:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          readOnly: true
+          x-omitempty: true
+          description: 'The start time of the task graph, recorded when the server starts executing the first node.
+
+            '
+        end_time:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          readOnly: true
+          x-omitempty: true
+          description: 'The end time of the task graph, recorded when the client reports completion.
+
+            '
+        status:
+          $ref: '#/components/schemas/TaskGraphLogStatus'
+        total_cost:
+          type:
+          - number
+          - 'null'
+          description: 'If present, the total cost of executing all nodes in this task graph.
+
+            '
+        access_cost:
+          type:
+          - number
+          - 'null'
+          description: 'If present, the total cost of access from execution of the nodes in this task graph.
+
+            '
+        egress_cost:
+          type:
+          - number
+          - 'null'
+          description: 'If present, the total cost of access from execution of the nodes in this task graph.
+
+            '
+        execution_time:
+          type: string
+          description: 'The total execution time of all the nodes in this graph, in ISO 8601 format with hours, minutes, and seconds.
+
+            '
+          example: P15H22M0.45S
+        status_count:
+          type: object
+          description: 'A mapping from `ArrayTaskStatus` string value to the number of nodes in this graph that are in that status.
+
+            '
+          additionalProperties:
+            description: The number of nodes that are in the given state.
+            type: number
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskGraphNodeMetadata'
+          description: 'The structure of the graph. This is provided by the client when first setting up the task graph. Thereafter, it is read-only. This must be topographically sorted; that is, each node must appear after all nodes that it depends upon.
+
+            '
+        task_graph_type:
+          $ref: '#/components/schemas/TaskGraphType'
+        task_graph_id:
+          type: string
+          description: The UUID of the task graph.
+        cloud_provider:
+          type: string
+          x-omitempty: true
+          description: The name of the cloud provider where this task graph executed.
+        cloud_region:
+          type: string
+          x-omitempty: true
+          description: The region of the cloud provider where this task graph executed.
+    ArrayActivityLog:
+      description: Actvity of an Array
+      type: object
+      properties:
+        event_at:
+          description: time event took place (RFC3339)
+          type: string
+          format: date-time
+        action:
+          description: Type of the event
+          $ref: '#/components/schemas/ActivityEventType'
+        username:
+          description: User who performed action
+          type: string
+          example: user1
+        bytes_sent:
+          description: Bytes sent to client
+          type: integer
+          format: uint64
+          example: 1073741824
+        bytes_received:
+          description: Bytes recieved from client
+          type: integer
+          format: uint64
+          example: 1073741824
+        array_task_id:
+          description: UUID of associated array task
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        id:
+          description: ID of the activity
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        query_ranges:
+          description: ranges for query
+          x-omitempty: true
+          type: string
+          example: '{"rows":[{"start": 1, "end": 1},{"start": 3, "end": 4}],"cols":[{"start": 1, "end": 4}]}'
+        query_stats:
+          description: stats for query
+          x-omitempty: true
+          type: string
+          example: '{"timers": {"Context.StorageManager.read_load_array_schema_from_uri.sum": 0.0255293, "...": "..."}, "counters": {"Context.StorageManager.read_unfiltered_byte_num": 191, "...": "..."}}'
+    MetadataStringifiedEntry:
+      type: object
+      description: key/value pair representing an asset metadata map entry
+      properties:
+        key:
+          description: The metadata key
+          type: string
+          x-omitempty: false
+        value:
+          description: The metadata value
+          type: string
+          x-omitempty: false
+        type:
+          description: The metadata type
+          type: string
+          x-omitempty: false
+          example: array_metadata
     ArrayTask:
       description: Synchronous Task to Run
       type: object
@@ -513,18 +818,6 @@ components:
           type: string
           x-omitempty: true
           description: The region of the cloud provider where this task executed.
-    ArrayTaskStatus:
-      description: Status of array task
-      type: string
-      enum:
-      - QUEUED
-      - FAILED
-      - COMPLETED
-      - RUNNING
-      - RESOURCES_UNAVAILABLE
-      - UNKNOWN
-      - CANCELLED
-      - DENIED
     ArrayInfo:
       description: metadata of an array
       type: object
@@ -661,87 +954,81 @@ components:
           x-omitempty: true
           items:
             $ref: '#/components/schemas/MetadataStringifiedEntry'
-    Querytype:
-      description: Type of query
+    Subscription:
+      description: Subscription of a user (customer) to another user's arrays
+      type: object
+      properties:
+        id:
+          description: Unique ID of subscription as defined by Stripe
+          type: string
+          example: subscriptionID
+        owner_namespace_uuid:
+          description: Unique ID of the array (product) owner
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        customer_namespace_uuid:
+          description: Unique ID of the array (product) user (customer)
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        pricing:
+          description: list of pricing used by this subscription
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/Pricing'
+    TaskGraphLogRunLocation:
+      description: 'The location where an individual node of a task graph is executed.
+
+        '
       type: string
       enum:
-      - READ
-      - WRITE
-      - DELETE
-    MetadataStringifiedEntry:
-      type: object
-      description: key/value pair representing an asset metadata map entry
-      properties:
-        key:
-          description: The metadata key
-          type: string
-          x-omitempty: false
-        value:
-          description: The metadata value
-          type: string
-          x-omitempty: false
-        type:
-          description: The metadata type
-          type: string
-          x-omitempty: false
-          example: array_metadata
+      - server
+      - client
+      - virtual
+    FileType:
+      description: File types represented as TileDB arrays
+      type: string
+      enum:
+      - notebook
+      - user_defined_function
+      - ml_model
+      - file
+      - registered_task_graph
+    ArrayTaskType:
+      description: Synchronous Task Type
+      type: string
+      enum:
+      - SQL
+      - UDF
+      - QUERY
+      - GENERIC_UDF
+      - BATCH_UDF
+      - CLIENT_COMPUTATION
+    TaskGraphType:
+      description: 'The type of a task graph.
+
+        '
+      type: string
+      enum:
+      - batch
+      - realtime
+    PricingAggregateUsage:
+      description: Specifies a usage aggregation strategy for pricings of usage_type=metered
+      type: string
+      enum:
+      - sum
     PricingType:
       description: Pricing types
       type: string
       enum:
       - egress
       - access
-    ArrayActions:
-      description: actions a user can take on an array
-      type: string
-      enum:
-      - read
-      - write
-      - edit
-      - read_array_logs
-      - read_array_info
-      - read_array_schema
-    ActivityEventType:
-      description: Type of activity logged
-      type: string
-      enum:
-      - read_schema
-      - max_buffer_sizes
-      - non_empty_domain
-      - query_read
-      - query_write
-      - query_delete
-      - create
-      - delete
-      - register
-      - deregister
-      - udf
-      - array_metadata_get
-      - array_metadata_update
-      - estimated_result_sizes
-      - read_fragment_info
-      - read_enumerations
     ArrayType:
       description: TileDB array type
       type: string
       enum:
       - dense
       - sparse
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int64
-        message:
-          type: string
-        request_id:
-          type: string
-    PricingInterval:
-      description: Interval for pricing
-      type: string
-      enum:
-      - month
     TaskGraphNodeMetadata:
       description: Metadata about an individual node in a task graph.
       type: object
@@ -798,148 +1085,33 @@ components:
       - bytes
       - tiledb_json
       - native
-    ArrayActivityLog:
-      description: Actvity of an Array
-      type: object
-      properties:
-        event_at:
-          description: time event took place (RFC3339)
-          type: string
-          format: date-time
-        action:
-          description: Type of the event
-          $ref: '#/components/schemas/ActivityEventType'
-        username:
-          description: User who performed action
-          type: string
-          example: user1
-        bytes_sent:
-          description: Bytes sent to client
-          type: integer
-          format: uint64
-          example: 1073741824
-        bytes_received:
-          description: Bytes recieved from client
-          type: integer
-          format: uint64
-          example: 1073741824
-        array_task_id:
-          description: UUID of associated array task
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        id:
-          description: ID of the activity
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        query_ranges:
-          description: ranges for query
-          x-omitempty: true
-          type: string
-          example: '{"rows":[{"start": 1, "end": 1},{"start": 3, "end": 4}],"cols":[{"start": 1, "end": 4}]}'
-        query_stats:
-          description: stats for query
-          x-omitempty: true
-          type: string
-          example: '{"timers": {"Context.StorageManager.read_load_array_schema_from_uri.sum": 0.0255293, "...": "..."}, "counters": {"Context.StorageManager.read_unfiltered_byte_num": 191, "...": "..."}}'
-    PricingAggregateUsage:
-      description: Specifies a usage aggregation strategy for pricings of usage_type=metered
+    ArrayTaskStatus:
+      description: Status of array task
       type: string
       enum:
-      - sum
-    DomainArray:
-      description: Domain object for an array of each type
-      type: object
-      properties:
-        int8:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: int8
-        uint8:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: uint8
-        int16:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: int16
-        uint16:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: uint16
-        int32:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: int32
-        uint32:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: uint32
-        int64:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: int64
-        uint64:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: uint64
-        float32:
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: float
-        float64:
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: double
-    ArrayTaskType:
-      description: Synchronous Task Type
+      - QUEUED
+      - FAILED
+      - COMPLETED
+      - RUNNING
+      - RESOURCES_UNAVAILABLE
+      - UNKNOWN
+      - CANCELLED
+      - DENIED
+    PricingCurrency:
+      description: Currency of pricing
       type: string
       enum:
-      - SQL
-      - UDF
-      - QUERY
-      - GENERIC_UDF
-      - BATCH_UDF
-      - CLIENT_COMPUTATION
-    FileType:
-      description: File types represented as TileDB arrays
+      - USD
+    ArrayActions:
+      description: actions a user can take on an array
       type: string
       enum:
-      - notebook
-      - user_defined_function
-      - ml_model
-      - file
-      - registered_task_graph
-    TaskGraphLogsData:
-      description: Response data for a task graph list, including pagination metadata.
-      type: object
-      properties:
-        task_graph_logs:
-          description: The requested task graph logs.
-          type: array
-          items:
-            $ref: '#/components/schemas/TaskGraphLog'
-        pagination_metadata:
-          $ref: '#/components/schemas/PaginationMetadata'
+      - read
+      - write
+      - edit
+      - read_array_logs
+      - read_array_info
+      - read_array_schema
     TaskGraphClientNodeStatus:
       description: 'A report of the execution status of a node that ran on the client side.
 
@@ -950,56 +1122,23 @@ components:
           type: string
         status:
           $ref: '#/components/schemas/ArrayTaskStatus'
-    TaskGraphLogRunLocation:
-      description: 'The location where an individual node of a task graph is executed.
-
-        '
-      type: string
-      enum:
-      - server
-      - client
-      - virtual
-    TaskGraphLogStatus:
-      description: The status of a given task graph execution.
-      type: string
-      enum:
-      - submitted
-      - running
-      - idle
-      - abandoned
-      - succeeded
-      - failed
-      - cancelled
-    PaginationMetadata:
+    Error:
+      type: object
       properties:
-        page:
-          description: pagination offset. Use it to skip the first ((page - 1) * per_page) items
-          type: number
-          format: uint64
-          example: 1
-        per_page:
-          description: pagination limit (page size)
-          type: number
-          format: uint64
-          example: 10
-        total_pages:
-          description: number of total pages with current limit
-          type: number
-          format: uint64
-          example: 14
-        total_items:
-          description: number of total available items
-          type: number
-          format: uint64
-          example: 138
-    TaskGraphType:
-      description: 'The type of a task graph.
-
-        '
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
+    Querytype:
+      description: Type of query
       type: string
       enum:
-      - batch
-      - realtime
+      - READ
+      - WRITE
+      - DELETE
     Pricing:
       description: Pricing created by converting an array to product
       type: object
@@ -1049,145 +1188,6 @@ components:
           description: If pricing is activated
           type: boolean
           example: false
-    PricingUnitLabel:
-      description: Unit label
-      type: string
-      enum:
-      - byte
-      - second
-    TaskGraphLog:
-      description: Logging information about the execution of a task graph.
-      type: object
-      properties:
-        uuid:
-          type: string
-          readOnly: true
-          description: The server-generated UUID of the task graph.
-        namespace:
-          type: string
-          description: 'The namespace that owns this task graph log. When creating a task graph log, this is used as the namespace to create the log in; thereafter it is read-only.
-
-            '
-        created_by:
-          type: string
-          readOnly: true
-          description: The name of the user who created this task graph log.
-        name:
-          type: string
-          description: 'A name for this task graph log, displayed in the UI. Does not need to be unique.
-
-            '
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-          description: 'The date/time when this task graph log was originally created. This is distinct from the execution start_time.
-
-            '
-        start_time:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          readOnly: true
-          x-omitempty: true
-          description: 'The start time of the task graph, recorded when the server starts executing the first node.
-
-            '
-        end_time:
-          type:
-          - string
-          - 'null'
-          format: date-time
-          readOnly: true
-          x-omitempty: true
-          description: 'The end time of the task graph, recorded when the client reports completion.
-
-            '
-        status:
-          $ref: '#/components/schemas/TaskGraphLogStatus'
-        total_cost:
-          type:
-          - number
-          - 'null'
-          description: 'If present, the total cost of executing all nodes in this task graph.
-
-            '
-        access_cost:
-          type:
-          - number
-          - 'null'
-          description: 'If present, the total cost of access from execution of the nodes in this task graph.
-
-            '
-        egress_cost:
-          type:
-          - number
-          - 'null'
-          description: 'If present, the total cost of access from execution of the nodes in this task graph.
-
-            '
-        execution_time:
-          type: string
-          description: 'The total execution time of all the nodes in this graph, in ISO 8601 format with hours, minutes, and seconds.
-
-            '
-          example: P15H22M0.45S
-        status_count:
-          type: object
-          description: 'A mapping from `ArrayTaskStatus` string value to the number of nodes in this graph that are in that status.
-
-            '
-          additionalProperties:
-            description: The number of nodes that are in the given state.
-            type: number
-        nodes:
-          type: array
-          items:
-            $ref: '#/components/schemas/TaskGraphNodeMetadata'
-          description: 'The structure of the graph. This is provided by the client when first setting up the task graph. Thereafter, it is read-only. This must be topographically sorted; that is, each node must appear after all nodes that it depends upon.
-
-            '
-        task_graph_type:
-          $ref: '#/components/schemas/TaskGraphType'
-        task_graph_id:
-          type: string
-          description: The UUID of the task graph.
-        cloud_provider:
-          type: string
-          x-omitempty: true
-          description: The name of the cloud provider where this task graph executed.
-        cloud_region:
-          type: string
-          x-omitempty: true
-          description: The region of the cloud provider where this task graph executed.
-    PricingCurrency:
-      description: Currency of pricing
-      type: string
-      enum:
-      - USD
-    Subscription:
-      description: Subscription of a user (customer) to another user's arrays
-      type: object
-      properties:
-        id:
-          description: Unique ID of subscription as defined by Stripe
-          type: string
-          example: subscriptionID
-        owner_namespace_uuid:
-          description: Unique ID of the array (product) owner
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        customer_namespace_uuid:
-          description: Unique ID of the array (product) user (customer)
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        pricing:
-          description: list of pricing used by this subscription
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/Pricing'
   securitySchemes:
     BasicAuth:
       type: http
