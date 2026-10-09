@@ -47,3 +47,38 @@ free_tier:
   source: https://documentation.cloud.tiledb.com/academy/accounts/individual/apply-for-free-tier/
 self_serve_paid: false
 enterprise_contact: https://www.tiledb.com/talk-to-us
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - hybrid
+  - seat
+  - subscription
+  units:
+  - compute
+  - seat
+  plans:
+  - name: User Seats
+    access: other
+    model: seat
+    model_how: derived
+    units:
+    - seat
+    periods:
+    - month
+  - name: vCPUs
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods:
+    - month
+  - name: Dedicated Success Engineer (DSE)
+    access: other
+    model: hybrid
+    model_how: derived
+    units:
+    - compute
+    periods:
+    - hour
