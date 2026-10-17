@@ -173,6 +173,16 @@ paths:
     - url: /v2
 components:
   schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
     PaginationMetadata:
       properties:
         page:
@@ -195,16 +205,6 @@ components:
           type: number
           format: uint64
           example: 138
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int64
-        message:
-          type: string
-        request_id:
-          type: string
     ArrayEndTimestampData:
       description: Object including array end_timestamps (list of Unix epoch timestamps in milliseconds) and pagination metadata
       type: object

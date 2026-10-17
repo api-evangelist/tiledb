@@ -475,18 +475,6 @@ paths:
       x-summary-source: derived
 components:
   schemas:
-    InvitationData:
-      description: Object including invitations and metadata
-      type: object
-      properties:
-        invitations:
-          description: List of invitations
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/Invitation'
-        pagination_metadata:
-          $ref: '#/components/schemas/PaginationMetadata'
     ArrayActions:
       description: actions a user can take on an array
       type: string
@@ -497,91 +485,6 @@ components:
       - read_array_logs
       - read_array_info
       - read_array_schema
-    InvitationType:
-      description: List of values that InvitationType can take
-      type: string
-      enum:
-      - ARRAY_SHARE
-      - GROUP_SHARE
-      - JOIN_ORGANIZATION
-      - PAYMENT_SHARE
-    PaginationMetadata:
-      properties:
-        page:
-          description: pagination offset. Use it to skip the first ((page - 1) * per_page) items
-          type: number
-          format: uint64
-          example: 1
-        per_page:
-          description: pagination limit (page size)
-          type: number
-          format: uint64
-          example: 10
-        total_pages:
-          description: number of total pages with current limit
-          type: number
-          format: uint64
-          example: 14
-        total_items:
-          description: number of total available items
-          type: number
-          format: uint64
-          example: 138
-    OrganizationRoles:
-      description: role user has in organization
-      type: string
-      enum:
-      - owner
-      - admin
-      - read_write_delete
-      - read_write
-      - read_only
-    InvitationGroupShareEmail:
-      description: Encapsulates information regarding inviting people using email to share group, same permissions for all invitees
-      type: object
-      required:
-      - array_actions
-      - group_actions
-      - invitee_email_or_name
-      properties:
-        array_actions:
-          description: List of permitted array actions
-          type: array
-          items:
-            $ref: '#/components/schemas/ArrayActions'
-          example:
-          - read
-          - write
-        group_actions:
-          description: List of permitted group actions
-          type: array
-          items:
-            $ref: '#/components/schemas/GroupActions'
-          example:
-          - read
-          - write
-        invitee_email_or_name:
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-    GroupActions:
-      description: actions a user can take on a group
-      type: string
-      enum:
-      - read
-      - write
-      - edit
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int64
-        message:
-          type: string
-        request_id:
-          type: string
     NamespaceActions:
       description: actions a user can take on an organization
       type: string
@@ -604,30 +507,14 @@ components:
       enum:
       - PENDING
       - ACCEPTED
-    InvitationOrganizationJoinEmail:
-      description: Encapsulates information regarding inviting people using email to join organization, same permissions for all invitees
-      type: object
-      required:
-      - invitee_email
-      - organization_role
-      properties:
-        actions:
-          description: List of permitted actions
-          type: array
-          items:
-            $ref: '#/components/schemas/NamespaceActions'
-          example:
-          - read
-          - write
-        organization_role:
-          description: Role of the invited namespace in the joined organization
-          $ref: '#/components/schemas/OrganizationRoles'
-          x-omitempty: false
-        invitee_email:
-          type: array
-          x-omitempty: true
-          items:
-            type: string
+    InvitationType:
+      description: List of values that InvitationType can take
+      type: string
+      enum:
+      - ARRAY_SHARE
+      - GROUP_SHARE
+      - JOIN_ORGANIZATION
+      - PAYMENT_SHARE
     InvitationArrayShareEmail:
       description: Encapsulates information regarding inviting people using email to share array, same permissions for all invitees
       type: object
@@ -644,6 +531,51 @@ components:
           - read
           - write
         invitee_email:
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+    PaginationMetadata:
+      properties:
+        page:
+          description: pagination offset. Use it to skip the first ((page - 1) * per_page) items
+          type: number
+          format: uint64
+          example: 1
+        per_page:
+          description: pagination limit (page size)
+          type: number
+          format: uint64
+          example: 10
+        total_pages:
+          description: number of total pages with current limit
+          type: number
+          format: uint64
+          example: 14
+        total_items:
+          description: number of total available items
+          type: number
+          format: uint64
+          example: 138
+    InvitationData:
+      description: Object including invitations and metadata
+      type: object
+      properties:
+        invitations:
+          description: List of invitations
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/Invitation'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
+    InvitationFailedRecipients:
+      description: Encapsulates information regarding the failed invitation recipients
+      type: object
+      required:
+      - failed_recipients
+      properties:
+        failed_recipients:
           type: array
           x-omitempty: true
           items:
@@ -742,13 +674,81 @@ components:
           description: The namespace invited (user or organization, if it exists in the DB)
           type: string
           x-omitempty: true
-    InvitationFailedRecipients:
-      description: Encapsulates information regarding the failed invitation recipients
+    OrganizationRoles:
+      description: role user has in organization
+      type: string
+      enum:
+      - owner
+      - admin
+      - read_write_delete
+      - read_write
+      - read_only
+    InvitationOrganizationJoinEmail:
+      description: Encapsulates information regarding inviting people using email to join organization, same permissions for all invitees
       type: object
       required:
-      - failed_recipients
+      - invitee_email
+      - organization_role
       properties:
-        failed_recipients:
+        actions:
+          description: List of permitted actions
+          type: array
+          items:
+            $ref: '#/components/schemas/NamespaceActions'
+          example:
+          - read
+          - write
+        organization_role:
+          description: Role of the invited namespace in the joined organization
+          $ref: '#/components/schemas/OrganizationRoles'
+          x-omitempty: false
+        invitee_email:
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+    GroupActions:
+      description: actions a user can take on a group
+      type: string
+      enum:
+      - read
+      - write
+      - edit
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
+    InvitationGroupShareEmail:
+      description: Encapsulates information regarding inviting people using email to share group, same permissions for all invitees
+      type: object
+      required:
+      - array_actions
+      - group_actions
+      - invitee_email_or_name
+      properties:
+        array_actions:
+          description: List of permitted array actions
+          type: array
+          items:
+            $ref: '#/components/schemas/ArrayActions'
+          example:
+          - read
+          - write
+        group_actions:
+          description: List of permitted group actions
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupActions'
+          example:
+          - read
+          - write
+        invitee_email_or_name:
           type: array
           x-omitempty: true
           items:

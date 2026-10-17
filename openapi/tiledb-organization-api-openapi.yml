@@ -751,65 +751,41 @@ paths:
     - url: /v2
 components:
   schemas:
-    SSODomainConfigResponse:
-      description: 'The response to a request for the list of domain claims associated with a particular organization.
+    SSODomainSetup:
+      description: 'Configuration settings to verify ownership of a given domain. At least one of these must be completed enable user login from the domain.
 
         '
       type: object
       properties:
-        domain_configs:
-          type: array
-          items:
-            $ref: '#/components/schemas/SSODomainConfig'
-    DomainCheckResult:
-      description: The record of a check of a single domain's status.
-      type: object
-      properties:
-        time:
+        txt:
+          description: a DNS TXT record to set on the domain to claim.
           type: string
-          format: date-time
-          description: The timestamp when the check was performed.
-        status:
-          $ref: '#/components/schemas/DomainCheckStatus'
-    SSODomainConfig:
-      description: 'The information used to set up a single-sign on connection to a customer domain.
+        cname_src:
+          description: a DNS name to set a CNAME record on
+          type: string
+        cname_dst:
+          description: the CNAME target of `cname_src`.
+          type: string
+    StorageLocation:
+      description: 'The path at which a given asset will be stored, and the credentials used to access that asset.
 
         '
       type: object
       properties:
-        uuid:
-          type: string
-          description: A server-generated ID for the configuration.
-        domain:
+        path:
+          description: 'The path to store this asset type. If unset, a suffix of the user''s `default_s3_path` is used. When updating, explicitly set to `""`, the empty string, to clear this path; leaving it `null` (or absent) will leave the path unchanged.
+
+            '
           type:
           - string
           - 'null'
-          description: 'The fully-qualified domain (but with no trailing dot) to connect for single sign-on. This may not be changed after creation.
+        credentials_name:
+          description: 'The name of the credentials used to acess this storage path. If unset, the `default_s3_path_credentials_name` is used. When updating, explicitly set to `""`, the empty string, to clear this name; leaving it `null` (or absent) will leave the name unchanged.
 
             '
-        oidc_issuer:
-          type: string
-          description: 'The URL of the OpenID Connect issuer that can be used to authenticate this domain''s users. The prefix where the `/.well-known/openid-configuration` file can be found; usually without a trailing slash.
-
-            '
-        oidc_client_id:
-          type: string
-          description: The OpenID Connect client ID for this SSO instance.
-        oidc_client_secret:
-          type: string
-          description: The OpenID Connect client secret for this SSO instance.
-          x-go-custom-tag: tdbrest:"secret"
-        domain_setup:
-          $ref: '#/components/schemas/SSODomainSetup'
-        verification_status:
-          $ref: '#/components/schemas/DomainVerificationStatus'
-        check_results:
-          description: 'A list of the results of recent attempts to verify this domain.
-
-            '
-          type: array
-          items:
-            $ref: '#/components/schemas/DomainCheckResult'
+          type:
+          - string
+          - 'null'
     DomainVerificationStatus:
       description: The current status of the claim on the domain.
       type: string
@@ -818,61 +794,6 @@ components:
       - verified
       - grace_period
       - failed
-    OrganizationRoles:
-      description: role user has in organization
-      type: string
-      enum:
-      - owner
-      - admin
-      - read_write_delete
-      - read_write
-      - read_only
-    OrganizationUser:
-      description: user in an organization
-      type: object
-      properties:
-        user_id:
-          type: string
-          description: unique ID of user
-          example: 00000000-0000-0000-0000-000000000000
-        organization_id:
-          type: string
-          description: unique ID of organization
-          example: 00000000-0000-0000-0000-000000000000
-        username:
-          description: username for user
-          type: string
-          example: username
-        user_full_name:
-          description: full name of the user; available to organization admins
-          type: string
-          example: Alice Hanna
-        user_email:
-          description: email address of the user; available to organization admins
-          type: string
-          example: alice@example.com
-        organization_name:
-          description: name of organization
-          type: string
-          example: MyOrganization
-        role:
-          $ref: '#/components/schemas/OrganizationRoles'
-        allowed_actions:
-          description: list of actions user is allowed to do on this organization
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/NamespaceActions'
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int64
-        message:
-          type: string
-        request_id:
-          type: string
     NamespaceActions:
       description: actions a user can take on an organization
       type: string
@@ -889,6 +810,13 @@ components:
       - delete_organization
       - edit_organization
       - edit_billing
+    DomainCheckStatus:
+      description: The status of a single check on a domain's status.
+      type: string
+      enum:
+      - verified
+      - failed
+      - error
     OrganizationUpdate:
       description: OrganizationUpdate
       type: object
@@ -965,21 +893,101 @@ components:
           type: string
           format: date-time
           readOnly: true
-    SSODomainSetup:
-      description: 'Configuration settings to verify ownership of a given domain. At least one of these must be completed enable user login from the domain.
+    SSODomainConfigResponse:
+      description: 'The response to a request for the list of domain claims associated with a particular organization.
 
         '
       type: object
       properties:
-        txt:
-          description: a DNS TXT record to set on the domain to claim.
+        domain_configs:
+          type: array
+          items:
+            $ref: '#/components/schemas/SSODomainConfig'
+    OrganizationUser:
+      description: user in an organization
+      type: object
+      properties:
+        user_id:
           type: string
-        cname_src:
-          description: a DNS name to set a CNAME record on
+          description: unique ID of user
+          example: 00000000-0000-0000-0000-000000000000
+        organization_id:
           type: string
-        cname_dst:
-          description: the CNAME target of `cname_src`.
+          description: unique ID of organization
+          example: 00000000-0000-0000-0000-000000000000
+        username:
+          description: username for user
           type: string
+          example: username
+        user_full_name:
+          description: full name of the user; available to organization admins
+          type: string
+          example: Alice Hanna
+        user_email:
+          description: email address of the user; available to organization admins
+          type: string
+          example: alice@example.com
+        organization_name:
+          description: name of organization
+          type: string
+          example: MyOrganization
+        role:
+          $ref: '#/components/schemas/OrganizationRoles'
+        allowed_actions:
+          description: list of actions user is allowed to do on this organization
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/NamespaceActions'
+    DomainCheckResult:
+      description: The record of a check of a single domain's status.
+      type: object
+      properties:
+        time:
+          type: string
+          format: date-time
+          description: The timestamp when the check was performed.
+        status:
+          $ref: '#/components/schemas/DomainCheckStatus'
+    SSODomainConfig:
+      description: 'The information used to set up a single-sign on connection to a customer domain.
+
+        '
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: A server-generated ID for the configuration.
+        domain:
+          type:
+          - string
+          - 'null'
+          description: 'The fully-qualified domain (but with no trailing dot) to connect for single sign-on. This may not be changed after creation.
+
+            '
+        oidc_issuer:
+          type: string
+          description: 'The URL of the OpenID Connect issuer that can be used to authenticate this domain''s users. The prefix where the `/.well-known/openid-configuration` file can be found; usually without a trailing slash.
+
+            '
+        oidc_client_id:
+          type: string
+          description: The OpenID Connect client ID for this SSO instance.
+        oidc_client_secret:
+          type: string
+          description: The OpenID Connect client secret for this SSO instance.
+          x-go-custom-tag: tdbrest:"secret"
+        domain_setup:
+          $ref: '#/components/schemas/SSODomainSetup'
+        verification_status:
+          $ref: '#/components/schemas/DomainVerificationStatus'
+        check_results:
+          description: 'A list of the results of recent attempts to verify this domain.
+
+            '
+          type: array
+          items:
+            $ref: '#/components/schemas/DomainCheckResult'
     Organization:
       description: Organization
       type: object
@@ -1068,33 +1076,6 @@ components:
             '
           type: string
           x-omitempty: true
-    DomainCheckStatus:
-      description: The status of a single check on a domain's status.
-      type: string
-      enum:
-      - verified
-      - failed
-      - error
-    StorageLocation:
-      description: 'The path at which a given asset will be stored, and the credentials used to access that asset.
-
-        '
-      type: object
-      properties:
-        path:
-          description: 'The path to store this asset type. If unset, a suffix of the user''s `default_s3_path` is used. When updating, explicitly set to `""`, the empty string, to clear this path; leaving it `null` (or absent) will leave the path unchanged.
-
-            '
-          type:
-          - string
-          - 'null'
-        credentials_name:
-          description: 'The name of the credentials used to acess this storage path. If unset, the `default_s3_path_credentials_name` is used. When updating, explicitly set to `""`, the empty string, to clear this name; leaving it `null` (or absent) will leave the name unchanged.
-
-            '
-          type:
-          - string
-          - 'null'
     AssetLocations:
       description: 'Custom storage locations on a per–asset type basis. If any is unset, a suffix of the owning (user/organization) `default_s3_path` is used.
 
@@ -1115,6 +1096,144 @@ components:
           $ref: '#/components/schemas/StorageLocation'
         udfs:
           $ref: '#/components/schemas/StorageLocation'
+    OrganizationRoles:
+      description: role user has in organization
+      type: string
+      enum:
+      - owner
+      - admin
+      - read_write_delete
+      - read_write
+      - read_only
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
+    GCPServiceAccountKey:
+      description: The key to a Google Cloud Platform service account.
+      type:
+      - object
+      - 'null'
+      x-omitempty: true
+      properties:
+        account_id:
+          description: 'The ID of the service account (i.e., its email address).
+
+
+            This is ignored when uploading key information, and is only provided
+
+            by the server when downloading metadata about an existing key.
+
+            '
+          type: string
+          x-go-custom-tag: tdbrest:"key_id,output_only"
+          example: identity-data-reader@cinco-research.iam.gserviceaccount.com
+        key_id:
+          description: 'The ID of the particular key. This identifies it among other keys
+
+            issued for this service account.
+
+
+            This is ignored when uploading key information, and is only provided
+
+            by the server when downloading metadata about an existing key.
+
+            '
+          type: string
+          x-go-custom-tag: tdbrest:"output_only"
+          example: b85b7bac16fabf44fd9cd6885d4d1b444f07e9ab
+        key_text:
+          description: 'The full file provided by Google Cloud. This is usually in the form of
+
+            a JSON document, but TileDB Cloud treats it as opaque (except to
+
+            attempt to extract the service account ID and the key ID).
+
+            '
+          type: string
+          x-go-custom-tag: tdbrest:"secret"
+          example: <the JSON key file issued by Google Cloud for a service account>
+    GCPInteroperabilityCredential:
+      description: Credential information to access Google Cloud. using well knows key/secret pair to access storage.
+      type:
+      - object
+      - 'null'
+      x-omitempty: true
+      properties:
+        access_key_id:
+          description: The ID of the access key
+          type: string
+          x-go-custom-tag: validate:"required"
+        secret_access_key:
+          description: The access key's secret. Never returned in responses.
+          type: string
+          x-go-custom-tag: tdbrest:"secret" validate:"required"
+    PaginationMetadata:
+      properties:
+        page:
+          description: pagination offset. Use it to skip the first ((page - 1) * per_page) items
+          type: number
+          format: uint64
+          example: 1
+        per_page:
+          description: pagination limit (page size)
+          type: number
+          format: uint64
+          example: 10
+        total_pages:
+          description: number of total pages with current limit
+          type: number
+          format: uint64
+          example: 14
+        total_items:
+          description: number of total available items
+          type: number
+          format: uint64
+          example: 138
+    CloudProvider:
+      description: A service where data is stored or computations take place.
+      type: string
+      enum:
+      - AWS
+      - AZURE
+      - GCP
+    AWSRole:
+      description: Role information to access Amazon Web Services
+      type:
+      - object
+      - 'null'
+      x-omitempty: true
+      properties:
+        role_arn:
+          description: The role arn used to access
+          x-go-name: RoleARN
+          type: string
+          x-go-custom-tag: validate:"required" tdbrest:"key_id,limit_20"
+          example: arn:partition:service:region:account-id:resource-type:resource-id
+        external_id:
+          description: The role external id used to access
+          x-go-custom-tag: validate:"required" tdbrest:"secret"
+          x-go-name: RoleExternalID
+          type: string
+          example: MzU0M2UwMTItMWJhYy00NWUwLThmZDItZTgwYmQ1NjE5Yjhm
+        endpoint:
+          description: The endpoint used for this role
+          type:
+          - string
+          - 'null'
+          example: https://example.us-west-2.amazonaws.com
+        sse_kms_key_id:
+          description: The key ID, key ARN, or key alias of the AWS KMS key to use with this credential
+          type:
+          - string
+          - 'null'
+          example: arn:aws:kms:us-east-1:1234:key/mykey
     AccessCredential:
       description: A union type which may contain a credential to access any one cloud provider.
       type: object
@@ -1179,169 +1298,6 @@ components:
               $ref: '#/components/schemas/AzureToken'
             gcp:
               $ref: '#/components/schemas/GCPServiceAccountKey'
-    GCPInteroperabilityCredential:
-      description: Credential information to access Google Cloud. using well knows key/secret pair to access storage.
-      type:
-      - object
-      - 'null'
-      x-omitempty: true
-      properties:
-        access_key_id:
-          description: The ID of the access key
-          type: string
-          x-go-custom-tag: validate:"required"
-        secret_access_key:
-          description: The access key's secret. Never returned in responses.
-          type: string
-          x-go-custom-tag: tdbrest:"secret" validate:"required"
-    PaginationMetadata:
-      properties:
-        page:
-          description: pagination offset. Use it to skip the first ((page - 1) * per_page) items
-          type: number
-          format: uint64
-          example: 1
-        per_page:
-          description: pagination limit (page size)
-          type: number
-          format: uint64
-          example: 10
-        total_pages:
-          description: number of total pages with current limit
-          type: number
-          format: uint64
-          example: 14
-        total_items:
-          description: number of total available items
-          type: number
-          format: uint64
-          example: 138
-    GCPServiceAccountKey:
-      description: The key to a Google Cloud Platform service account.
-      type:
-      - object
-      - 'null'
-      x-omitempty: true
-      properties:
-        account_id:
-          description: 'The ID of the service account (i.e., its email address).
-
-
-            This is ignored when uploading key information, and is only provided
-
-            by the server when downloading metadata about an existing key.
-
-            '
-          type: string
-          x-go-custom-tag: tdbrest:"key_id,output_only"
-          example: identity-data-reader@cinco-research.iam.gserviceaccount.com
-        key_id:
-          description: 'The ID of the particular key. This identifies it among other keys
-
-            issued for this service account.
-
-
-            This is ignored when uploading key information, and is only provided
-
-            by the server when downloading metadata about an existing key.
-
-            '
-          type: string
-          x-go-custom-tag: tdbrest:"output_only"
-          example: b85b7bac16fabf44fd9cd6885d4d1b444f07e9ab
-        key_text:
-          description: 'The full file provided by Google Cloud. This is usually in the form of
-
-            a JSON document, but TileDB Cloud treats it as opaque (except to
-
-            attempt to extract the service account ID and the key ID).
-
-            '
-          type: string
-          x-go-custom-tag: tdbrest:"secret"
-          example: <the JSON key file issued by Google Cloud for a service account>
-    CloudProvider:
-      description: A service where data is stored or computations take place.
-      type: string
-      enum:
-      - AWS
-      - AZURE
-      - GCP
-    AccessCredentialsData:
-      description: Object including credentials and pagination metadata
-      type: object
-      properties:
-        credentials:
-          description: List of credentials
-          type: array
-          x-omitempty: false
-          items:
-            $ref: '#/components/schemas/AccessCredential'
-        pagination_metadata:
-          $ref: '#/components/schemas/PaginationMetadata'
-    AzureCredential:
-      description: Credential information to access Microsoft Azure. Each supported property is the snake_case version of its name in an Azure Storage connection string.
-      type:
-      - object
-      - 'null'
-      x-omitempty: true
-      properties:
-        account_name:
-          description: The name of the Azure account to access
-          type: string
-          x-go-custom-tag: tdbrest:"key_id" validate:"required"
-        account_key:
-          description: The secret key. Never returned in responses.
-          type: string
-          x-go-custom-tag: tdbrest:"secret" validate:"required"
-    AWSRole:
-      description: Role information to access Amazon Web Services
-      type:
-      - object
-      - 'null'
-      x-omitempty: true
-      properties:
-        role_arn:
-          description: The role arn used to access
-          x-go-name: RoleARN
-          type: string
-          x-go-custom-tag: validate:"required" tdbrest:"key_id,limit_20"
-          example: arn:partition:service:region:account-id:resource-type:resource-id
-        external_id:
-          description: The role external id used to access
-          x-go-custom-tag: validate:"required" tdbrest:"secret"
-          x-go-name: RoleExternalID
-          type: string
-          example: MzU0M2UwMTItMWJhYy00NWUwLThmZDItZTgwYmQ1NjE5Yjhm
-        endpoint:
-          description: The endpoint used for this role
-          type:
-          - string
-          - 'null'
-          example: https://example.us-west-2.amazonaws.com
-        sse_kms_key_id:
-          description: The key ID, key ARN, or key alias of the AWS KMS key to use with this credential
-          type:
-          - string
-          - 'null'
-          example: arn:aws:kms:us-east-1:1234:key/mykey
-    AzureToken:
-      description: Token information to access Azure services
-      type:
-      - object
-      - 'null'
-      x-omitempty: true
-      properties:
-        account_name:
-          description: The account name of the configuration
-          x-go-name: AccountName
-          type: string
-          x-go-custom-tag: validate:"required"
-          example: tiledbpoc
-        sas_token:
-          description: The token to use for this account
-          type: string
-          example: sv=2022-11-02&ss=bfqt&srt=sco&sp=dsafdssdfafasdfsda&se=2024-03-28T03:02:08Z&st=2024-03-27T19:02:08Z&spr=https&sig=444444555555555555555555555555555555555%3D
     AWSCredential:
       description: Credential information to access Amazon Web Services
       type:
@@ -1369,6 +1325,50 @@ components:
           - string
           - 'null'
           example: arn:aws:kms:us-east-1:1234:key/mykey
+    AzureCredential:
+      description: Credential information to access Microsoft Azure. Each supported property is the snake_case version of its name in an Azure Storage connection string.
+      type:
+      - object
+      - 'null'
+      x-omitempty: true
+      properties:
+        account_name:
+          description: The name of the Azure account to access
+          type: string
+          x-go-custom-tag: tdbrest:"key_id" validate:"required"
+        account_key:
+          description: The secret key. Never returned in responses.
+          type: string
+          x-go-custom-tag: tdbrest:"secret" validate:"required"
+    AzureToken:
+      description: Token information to access Azure services
+      type:
+      - object
+      - 'null'
+      x-omitempty: true
+      properties:
+        account_name:
+          description: The account name of the configuration
+          x-go-name: AccountName
+          type: string
+          x-go-custom-tag: validate:"required"
+          example: tiledbpoc
+        sas_token:
+          description: The token to use for this account
+          type: string
+          example: sv=2022-11-02&ss=bfqt&srt=sco&sp=dsafdssdfafasdfsda&se=2024-03-28T03:02:08Z&st=2024-03-27T19:02:08Z&spr=https&sig=444444555555555555555555555555555555555%3D
+    AccessCredentialsData:
+      description: Object including credentials and pagination metadata
+      type: object
+      properties:
+        credentials:
+          description: List of credentials
+          type: array
+          x-omitempty: false
+          items:
+            $ref: '#/components/schemas/AccessCredential'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
   securitySchemes:
     BasicAuth:
       type: http

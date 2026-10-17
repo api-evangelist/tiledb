@@ -255,36 +255,6 @@ paths:
     - url: /v2
 components:
   schemas:
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int64
-        message:
-          type: string
-        request_id:
-          type: string
-    FileCreate:
-      description: Input/Output information required to create a new file
-      type: object
-      properties:
-        input_uri:
-          type: string
-          description: storage URI of the input file
-        output_uri:
-          type: string
-          description: output location of the TileDB File
-        name:
-          type: string
-          description: name to set for registered file
-    FileExport:
-      description: Output information required to export a file
-      type: object
-      properties:
-        output_uri:
-          type: string
-          description: output location of the TileDB File
     FileExported:
       description: Output uri of the exported file
       type: object
@@ -309,6 +279,29 @@ components:
           type: string
           example: 00000000-0000-0000-0000-000000000000
           x-omitempty: false
+    FileCreate:
+      description: Input/Output information required to create a new file
+      type: object
+      properties:
+        input_uri:
+          type: string
+          description: storage URI of the input file
+        output_uri:
+          type: string
+          description: output location of the TileDB File
+        name:
+          type: string
+          description: name to set for registered file
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        request_id:
+          type: string
     FileCreated:
       description: Created file name and information
       type: object
@@ -319,6 +312,13 @@ components:
         file_name:
           type: string
           description: name of the file created
+    FileExport:
+      description: Output information required to export a file
+      type: object
+      properties:
+        output_uri:
+          type: string
+          description: output location of the TileDB File
   securitySchemes:
     BasicAuth:
       type: http

@@ -1789,13 +1789,31 @@ paths:
     - url: /v1
 components:
   schemas:
-    FragmentInfoRequest:
-      description: Fragment info request
+    LoadEnumerationsRequest:
+      description: Request to return enumerations for attributes
       type: object
       properties:
         config:
-          description: config to use for opening
+          type: object
+          description: config to use to retrieve the contents
           $ref: '#/components/schemas/TileDBConfig'
+        enumerations:
+          type: array
+          items:
+            type: string
+    ArrayEndTimestampData:
+      description: Object including array end_timestamps (list of Unix epoch timestamps in milliseconds) and pagination metadata
+      type: object
+      properties:
+        end_timestamps:
+          description: List of timestamps expressed in milliseconds since Unix epoch
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint64
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
     PaginationMetadata:
       properties:
         page:
@@ -1818,462 +1836,10 @@ components:
           type: number
           format: uint64
           example: 138
-    PricingUnitLabel:
-      description: Unit label
-      type: string
-      enum:
-      - byte
-      - second
-    ArrayMetadataEntry:
+    NonEmptyDomainJson:
       type: object
-      description: key/value pair representing an array metadata map entry
-      properties:
-        key:
-          type: string
-        type:
-          type: string
-        valueNum:
-          type: integer
-          format: uint32
-        value:
-          type: array
-          items:
-            type: integer
-            format: uint8
-        del:
-          type: boolean
-    Dimension:
-      description: Dimension of array
-      type: object
-      required:
-      - type
-      - domain
-      - nullTileExtent
-      properties:
-        name:
-          description: Dimension name
-          type: string
-          example: row
-        type:
-          $ref: '#/components/schemas/Datatype'
-        domain:
-          description: extent of domain
-          $ref: '#/components/schemas/DomainArray'
-        nullTileExtent:
-          description: Is tile extent null
-          type: boolean
-          example: true
-        tileExtent:
-          description: Extent of tile
-          type: object
-          properties:
-            int8:
-              type: integer
-              format: int8
-            uint8:
-              type: integer
-              format: uint8
-            int16:
-              type: integer
-              format: int16
-            uint16:
-              type: integer
-              format: uint16
-            int32:
-              type: integer
-              format: int32
-            uint32:
-              type: integer
-              format: uint32
-            int64:
-              type: integer
-              format: int64
-            uint64:
-              type: integer
-              format: uint64
-            float32:
-              type: integer
-              format: float
-            float64:
-              type: integer
-              format: double
-        filterPipeline:
-          x-omit-empty: true
-          $ref: '#/components/schemas/FilterPipeline'
-    FilterType:
-      description: TileDB filter types
-      type: string
-      enum:
-      - FILTER_NONE
-      - FILTER_GZIP
-      - FILTER_ZSTD
-      - FILTER_LZ4
-      - FILTER_RLE
-      - FILTER_BZIP2
-      - FILTER_DOUBLE_DELTA
-      - FILTER_BIT_WIDTH_REDUCTION
-      - FILTER_BITSHUFFLE
-      - FILTER_BYTESHUFFLE
-      - FILTER_POSITIVE_DELTA
-    Pricing:
-      description: Pricing created by converting an array to product
-      type: object
-      properties:
-        id:
-          description: Unique ID of plan as defined by Stripe
-          type: string
-          example: planID
-        array_uuid:
-          description: Unique ID of registered array
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        pricing_name:
-          description: Name of pricing
-          type: string
-        pricing_type:
-          description: Type of pricing
-          $ref: '#/components/schemas/PricingType'
-        product_name:
-          description: Name of product
-          type: string
-        product_statement_descriptor:
-          description: Extra information about a product which will appear on the credit card statement of the customer
-          type: string
-        product_unit_label:
-          description: A label that represents units of this product in Stripe and receipts and invoices of the customer
-          $ref: '#/components/schemas/PricingUnitLabel'
-        currency:
-          description: Currency of pricing
-          $ref: '#/components/schemas/PricingCurrency'
-        aggregate_usage:
-          description: Specifies a usage aggregation strategy for pricings of usage_type=metered
-          $ref: '#/components/schemas/PricingAggregateUsage'
-        interval:
-          description: The frequency with which a subscription should be billed
-          $ref: '#/components/schemas/PricingInterval'
-        divided_by:
-          description: Group of n product unit labels
-          type: integer
-          format: int64
-          example: 1048576
-        charge:
-          description: Price in cents (decimal) per unitlabel
-          type: number
-          format: double
-        activated:
-          description: If pricing is activated
-          type: boolean
-          example: false
-    PricingInterval:
-      description: Interval for pricing
-      type: string
-      enum:
-      - month
-    AttributeBufferSize:
-      type: object
-      description: object representing buffer size of an attribute
-      required:
-      - attribute
-      - offsetBytes
-      - dataBytes
-      properties:
-        attribute:
-          description: name of attribute
-          type: string
-        offsetBytes:
-          description: buffer size (in bytes) of offset buffer
-          type: integer
-          format: uint64
-        dataBytes:
-          description: buffer size (in bytes) of data buffer
-          type: integer
-          format: uint64
-    ArrayEndTimestampData:
-      description: Object including array end_timestamps (list of Unix epoch timestamps in milliseconds) and pagination metadata
-      type: object
-      properties:
-        end_timestamps:
-          description: List of timestamps expressed in milliseconds since Unix epoch
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: uint64
-        pagination_metadata:
-          $ref: '#/components/schemas/PaginationMetadata'
-    ArrayMetadataJson:
-      type: object
-      description: Metadata from array in Json format
+      description: Non-empty domain from array in Json format
       additionalProperties: true
-    ArrayConsolidationRequest:
-      description: Request to consolidate an array
-      type: object
-      properties:
-        config:
-          type: object
-          description: config to use to retrieve the contents
-          $ref: '#/components/schemas/TileDBConfig'
-        fragments:
-          description: list of fragments in the array to consolidate
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-    DomainArray:
-      description: Domain object for an array of each type
-      type: object
-      properties:
-        int8:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: int8
-        uint8:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: uint8
-        int16:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: int16
-        uint16:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: uint16
-        int32:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: int32
-        uint32:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: uint32
-        int64:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: int64
-        uint64:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: uint64
-        float32:
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: float
-        float64:
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: double
-    LoadEnumerationsRequest:
-      description: Request to return enumerations for attributes
-      type: object
-      properties:
-        config:
-          type: object
-          description: config to use to retrieve the contents
-          $ref: '#/components/schemas/TileDBConfig'
-        enumerations:
-          type: array
-          items:
-            type: string
-    MaxBufferSizes:
-      type: object
-      description: a list of max buffer sizes, one per attribute
-      properties:
-        maxBufferSizes:
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/AttributeBufferSize'
-    ArraySample:
-      type: object
-      description: Sample data from array
-      properties:
-        data:
-          additionalProperties:
-            type: object
-    ActivityEventType:
-      description: Type of activity logged
-      type: string
-      enum:
-      - read_schema
-      - max_buffer_sizes
-      - non_empty_domain
-      - query_read
-      - query_write
-      - query_delete
-      - create
-      - delete
-      - register
-      - deregister
-      - udf
-      - array_metadata_get
-      - array_metadata_update
-      - estimated_result_sizes
-      - read_fragment_info
-      - read_enumerations
-    FilterPipeline:
-      description: One or more filters to apply
-      type: object
-      properties:
-        filters:
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/Filter'
-    ArraySharing:
-      description: details for sharing a given array
-      type: object
-      properties:
-        actions:
-          description: List of permitted actions
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/ArrayActions'
-          example:
-          - read
-          - write
-        namespace:
-          description: namespace being granted array access can be a user or organization
-          type: string
-          example: MyOrganization
-        namespace_type:
-          description: details on if the namespace is a organization or user
-          type: string
-          example: organization
-    ArrayInfoUpdate:
-      description: metadata of an array
-      type: object
-      properties:
-        description:
-          description: description of array
-          type:
-          - string
-          - 'null'
-        name:
-          description: description of array
-          type: string
-          example: myarray1
-        uri:
-          description: uri of array
-          type: string
-          example: s3://bucket/array
-        file_type:
-          description: File type stored /wrapped by this array
-          x-omitempty: true
-          $ref: '#/components/schemas/FileType'
-        file_properties:
-          type: object
-          description: map of file properties created for this array
-          x-omitempty: true
-          additionalProperties:
-            type: string
-        access_credentials_name:
-          description: the name of the access credentials to use. if unset, the default credentials will be used
-          type: string
-        logo:
-          description: logo (base64 encoded) for the array. Optional
-          type: string
-        tags:
-          description: optional tags for array
-          x-omitempty: false
-          type: array
-          items:
-            type: string
-            description: tag must be lowercase characters or hypen [a-z-]
-        license_id:
-          type: string
-          x-omitempty: true
-          description: License identifier from SPDX License List or Custom
-        license_text:
-          type: string
-          x-omitempty: true
-          description: License text
-        read_only:
-          description: Suggests if the array is in read_only mode
-          type: boolean
-          x-omitempty: true
-          example: true
-    ArrayActivityLog:
-      description: Actvity of an Array
-      type: object
-      properties:
-        event_at:
-          description: time event took place (RFC3339)
-          type: string
-          format: date-time
-        action:
-          description: Type of the event
-          $ref: '#/components/schemas/ActivityEventType'
-        username:
-          description: User who performed action
-          type: string
-          example: user1
-        bytes_sent:
-          description: Bytes sent to client
-          type: integer
-          format: uint64
-          example: 1073741824
-        bytes_received:
-          description: Bytes recieved from client
-          type: integer
-          format: uint64
-          example: 1073741824
-        array_task_id:
-          description: UUID of associated array task
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        id:
-          description: ID of the activity
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        query_ranges:
-          description: ranges for query
-          x-omitempty: true
-          type: string
-          example: '{"rows":[{"start": 1, "end": 1},{"start": 3, "end": 4}],"cols":[{"start": 1, "end": 4}]}'
-        query_stats:
-          description: stats for query
-          x-omitempty: true
-          type: string
-          example: '{"timers": {"Context.StorageManager.read_load_array_schema_from_uri.sum": 0.0255293, "...": "..."}, "counters": {"Context.StorageManager.read_unfiltered_byte_num": 191, "...": "..."}}'
-    MetadataStringifiedEntry:
-      type: object
-      description: key/value pair representing an asset metadata map entry
-      properties:
-        key:
-          description: The metadata key
-          type: string
-          x-omitempty: false
-        value:
-          description: The metadata value
-          type: string
-          x-omitempty: false
-        type:
-          description: The metadata type
-          type: string
-          x-omitempty: false
-          example: array_metadata
     FragmentInfo:
       description: Fragment info of an array
       type: object
@@ -2293,211 +1859,29 @@ components:
           type: array
           items:
             type: string
-    ArrayInfo:
-      description: metadata of an array
-      type: object
-      properties:
-        id:
-          description: unique ID of registered array
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        file_type:
-          description: File type stored /wrapped by this array
-          x-omitempty: true
-          $ref: '#/components/schemas/FileType'
-        file_properties:
-          type: object
-          description: map of file properties created for this array
-          x-omitempty: true
-          additionalProperties:
-            type: string
-        uri:
-          description: uri of array
-          type: string
-          example: s3://bucket/array
-        namespace:
-          description: namespace array is in
-          type: string
-          example: user1
-        size:
-          description: size in bytes of array
-          type:
-          - number
-          - 'null'
-          format: uint64
-          example: 1024
-        last_accessed:
-          description: Datetime array was last accessed in UTC
-          type: string
-          format: date-time
-        description:
-          description: description of array
-          type:
-          - string
-          - 'null'
-        name:
-          description: name of array
-          type: string
-          example: myarray1
-        allowed_actions:
-          description: list of actions user is allowed to do on this array
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/ArrayActions'
-        pricing:
-          description: list of pricing created for this array
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/Pricing'
-        subscriptions:
-          description: list of subscriptions created for this array
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/Subscription'
-        logo:
-          description: logo (base64 encoded) for the array. Optional
-          type: string
-        access_credentials_name:
-          description: the name of the access credentials to use. if unset, the default credentials will be used
-          type: string
-        type:
-          description: Array type (dense, key-value, sparse). Calculation of array type runs after array has been registered. So, it is not available immediately.
-          example: sparse
-          $ref: '#/components/schemas/ArrayType'
-        share_count:
-          description: number of unique namespaces this array is shared with
-          type: number
-          format: int32
-        public_share:
-          description: Suggests if the array was shared to public by owner
-          type: boolean
-          x-omitempty: false
-          example: true
-        namespace_subscribed:
-          description: Depends on the namespace asking, denotes the existence of subscription of namespace to this array
-          type: boolean
-          readOnly: true
-          example: false
-        tiledb_uri:
-          description: uri for access through TileDB cloud
-          type: string
-          x-omitempty: false
-        tags:
-          description: optional tags for array
-          x-omitempty: false
-          type: array
-          items:
-            type: string
-            description: tag must be lowercase characters or hypen [a-z-]
-        license_id:
-          type: string
-          x-omitempty: true
-          description: License identifier from SPDX License List or Custom
-        license_text:
-          type: string
-          x-omitempty: true
-          description: License text
-        read_only:
-          description: Suggests if the array is in read_only mode
-          type:
-          - boolean
-          - 'null'
-          example: false
-        is_favorite:
-          description: Indicates whether the array is in user favorites
-          type: boolean
-          x-omitempty: true
-          example: true
-        created_at:
-          description: Datetime array was registered with tiledb
-          type: string
-          format: date-time
-        created_by:
-          description: The user who created the array, if known.
-          type: string
-          x-omitempty: true
-        metadata:
-          description: 'Contains the metadata of the array.
-
-            **Note:** This property is included in the response only if the `with_metadata` query parameter is set to `true`.
-
-            '
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/MetadataStringifiedEntry'
-    Subscription:
-      description: Subscription of a user (customer) to another user's arrays
-      type: object
-      properties:
-        id:
-          description: Unique ID of subscription as defined by Stripe
-          type: string
-          example: subscriptionID
-        owner_namespace_uuid:
-          description: Unique ID of the array (product) owner
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        customer_namespace_uuid:
-          description: Unique ID of the array (product) user (customer)
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        pricing:
-          description: list of pricing used by this subscription
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/Pricing'
-    LastAccessedArray:
-      type: object
-      description: Information related to last access of an array
-      properties:
-        array_id:
-          type: string
-          description: unique ID of array
-          example: 00000000-0000-0000-0000-000000000000
-        array_name:
-          type: string
-          description: name of the array
-          example: array1
-        namespace:
-          description: namespace of a user or organization
-          type: string
-          example: mockuser
-        accessed_time:
-          description: timestamp (epoch milliseconds) array is last accessed
-          type: number
-          format: uint64
-          example: 1540471791873
-        access_type:
-          description: Type of the event
-          $ref: '#/components/schemas/ActivityEventType'
-    NonEmptyDomain:
-      type: object
-      description: object representing a non-empty domain
-      required:
-      - nonEmptyDomain
-      - isEmpty
-      properties:
-        nonEmptyDomain:
-          description: Non Empty Domain of array
-          $ref: '#/components/schemas/DomainArray'
-        isEmpty:
-          description: Is non-empty domain really empty?
-          type: boolean
-          example: false
-    FileType:
-      description: File types represented as TileDB arrays
+    PricingUnitLabel:
+      description: Unit label
       type: string
       enum:
-      - notebook
-      - user_defined_function
-      - ml_model
-      - file
-      - registered_task_graph
+      - byte
+      - second
+    ArrayVacuumRequest:
+      description: Request to consolidate an array
+      type: object
+      properties:
+        config:
+          type: object
+          description: config to use to retrieve the contents
+          $ref: '#/components/schemas/TileDBConfig'
+    ArrayMetadataJson:
+      type: object
+      description: Metadata from array in Json format
+      additionalProperties: true
+    PricingCurrency:
+      description: Currency of pricing
+      type: string
+      enum:
+      - USD
     ArraySchema:
       description: ArraySchema during creation or retrieval
       type: object
@@ -2567,28 +1951,285 @@ components:
           alias: tiledb
         type: ArraySchema
         embedded: true
-    ArrayBrowserData:
-      description: Object including array info and pagination metadata
+    Enumeration:
+      description: The enumerations of a single attribute
       type: object
       properties:
-        arrays:
-          description: Array Info
+        name:
+          type: string
+        path_name:
+          type: string
+        type:
+          type: string
+        cell_val_num:
+          type: integer
+          format: uint32
+        ordered:
+          type: boolean
+        data:
+          type: array
+          items:
+            type: integer
+            format: uint8
+        offsets:
+          type: array
+          items:
+            type: integer
+            format: uint8
+    Filter:
+      description: Filter
+      type: object
+      required:
+      - type
+      properties:
+        type:
+          description: Filter type
+          $ref: '#/components/schemas/FilterType'
+        data:
+          description: Filter data
+          type: object
+          properties:
+            int8:
+              type: integer
+              format: int8
+            uint8:
+              type: integer
+              format: uint8
+            int16:
+              type: integer
+              format: int16
+            uint16:
+              type: integer
+              format: uint16
+            int32:
+              type: integer
+              format: int32
+            uint32:
+              type: integer
+              format: uint32
+            int64:
+              type: integer
+              format: int64
+            uint64:
+              type: integer
+              format: uint64
+            float32:
+              type: integer
+              format: float
+            float64:
+              type: integer
+              format: double
+    Domain:
+      description: Domain of array
+      type: object
+      required:
+      - type
+      - tileOrder
+      - cellOrder
+      - dimensions
+      properties:
+        type:
+          $ref: '#/components/schemas/Datatype'
+          description: Domain Type
+        tileOrder:
+          $ref: '#/components/schemas/Layout'
+          description: Tile Order
+        cellOrder:
+          $ref: '#/components/schemas/Layout'
+          description: Cell Order
+        dimensions:
+          type: array
+          description: Array of dimensions
+          items:
+            $ref: '#/components/schemas/Dimension'
+    LastAccessedArray:
+      type: object
+      description: Information related to last access of an array
+      properties:
+        array_id:
+          type: string
+          description: unique ID of array
+          example: 00000000-0000-0000-0000-000000000000
+        array_name:
+          type: string
+          description: name of the array
+          example: array1
+        namespace:
+          description: namespace of a user or organization
+          type: string
+          example: mockuser
+        accessed_time:
+          description: timestamp (epoch milliseconds) array is last accessed
+          type: number
+          format: uint64
+          example: 1540471791873
+        access_type:
+          description: Type of the event
+          $ref: '#/components/schemas/ActivityEventType'
+    MetadataStringifiedEntry:
+      type: object
+      description: key/value pair representing an asset metadata map entry
+      properties:
+        key:
+          description: The metadata key
+          type: string
+          x-omitempty: false
+        value:
+          description: The metadata value
+          type: string
+          x-omitempty: false
+        type:
+          description: The metadata type
+          type: string
+          x-omitempty: false
+          example: array_metadata
+    MaxBufferSizes:
+      type: object
+      description: a list of max buffer sizes, one per attribute
+      properties:
+        maxBufferSizes:
           type: array
           x-omitempty: true
           items:
-            $ref: '#/components/schemas/ArrayInfo'
-        pagination_metadata:
-          $ref: '#/components/schemas/PaginationMetadata'
-    SingleFragmentInfo:
-      description: Single Fragment info of an array
+            $ref: '#/components/schemas/AttributeBufferSize'
+    Pricing:
+      description: Pricing created by converting an array to product
       type: object
       properties:
-        ArraySchemaName:
-          description: array schema name
+        id:
+          description: Unique ID of plan as defined by Stripe
           type: string
-        meta:
-          description: fragment metadata
-          $ref: '#/components/schemas/FragmentMetadata'
+          example: planID
+        array_uuid:
+          description: Unique ID of registered array
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        pricing_name:
+          description: Name of pricing
+          type: string
+        pricing_type:
+          description: Type of pricing
+          $ref: '#/components/schemas/PricingType'
+        product_name:
+          description: Name of product
+          type: string
+        product_statement_descriptor:
+          description: Extra information about a product which will appear on the credit card statement of the customer
+          type: string
+        product_unit_label:
+          description: A label that represents units of this product in Stripe and receipts and invoices of the customer
+          $ref: '#/components/schemas/PricingUnitLabel'
+        currency:
+          description: Currency of pricing
+          $ref: '#/components/schemas/PricingCurrency'
+        aggregate_usage:
+          description: Specifies a usage aggregation strategy for pricings of usage_type=metered
+          $ref: '#/components/schemas/PricingAggregateUsage'
+        interval:
+          description: The frequency with which a subscription should be billed
+          $ref: '#/components/schemas/PricingInterval'
+        divided_by:
+          description: Group of n product unit labels
+          type: integer
+          format: int64
+          example: 1048576
+        charge:
+          description: Price in cents (decimal) per unitlabel
+          type: number
+          format: double
+        activated:
+          description: If pricing is activated
+          type: boolean
+          example: false
+    LoadArraySchemaResponse:
+      description: Contains the latest schema and all schemas for the opened array
+      type: object
+      properties:
+        latest_array_schema:
+          $ref: '#/components/schemas/ArraySchema'
+        all_array_schemas:
+          description: map of all array schemas
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ArraySchema'
+    FilterType:
+      description: TileDB filter types
+      type: string
+      enum:
+      - FILTER_NONE
+      - FILTER_GZIP
+      - FILTER_ZSTD
+      - FILTER_LZ4
+      - FILTER_RLE
+      - FILTER_BZIP2
+      - FILTER_DOUBLE_DELTA
+      - FILTER_BIT_WIDTH_REDUCTION
+      - FILTER_BITSHUFFLE
+      - FILTER_BYTESHUFFLE
+      - FILTER_POSITIVE_DELTA
+    PricingInterval:
+      description: Interval for pricing
+      type: string
+      enum:
+      - month
+    PricingType:
+      description: Pricing types
+      type: string
+      enum:
+      - egress
+      - access
+    ArrayActivityLog:
+      description: Actvity of an Array
+      type: object
+      properties:
+        event_at:
+          description: time event took place (RFC3339)
+          type: string
+          format: date-time
+        action:
+          description: Type of the event
+          $ref: '#/components/schemas/ActivityEventType'
+        username:
+          description: User who performed action
+          type: string
+          example: user1
+        bytes_sent:
+          description: Bytes sent to client
+          type: integer
+          format: uint64
+          example: 1073741824
+        bytes_received:
+          description: Bytes recieved from client
+          type: integer
+          format: uint64
+          example: 1073741824
+        array_task_id:
+          description: UUID of associated array task
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        id:
+          description: ID of the activity
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        query_ranges:
+          description: ranges for query
+          x-omitempty: true
+          type: string
+          example: '{"rows":[{"start": 1, "end": 1},{"start": 3, "end": 4}],"cols":[{"start": 1, "end": 4}]}'
+        query_stats:
+          description: stats for query
+          x-omitempty: true
+          type: string
+          example: '{"timers": {"Context.StorageManager.read_load_array_schema_from_uri.sum": 0.0255293, "...": "..."}, "counters": {"Context.StorageManager.read_unfiltered_byte_num": 191, "...": "..."}}'
+    FilterPipeline:
+      description: One or more filters to apply
+      type: object
+      properties:
+        filters:
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/Filter'
     Datatype:
       description: TileDB data type
       type: string
@@ -2635,111 +2276,6 @@ components:
       - TIME_AS
       - BLOB
       - BOOL
-    PricingAggregateUsage:
-      description: Specifies a usage aggregation strategy for pricings of usage_type=metered
-      type: string
-      enum:
-      - sum
-    ArrayType:
-      description: TileDB array type
-      type: string
-      enum:
-      - dense
-      - sparse
-    PricingType:
-      description: Pricing types
-      type: string
-      enum:
-      - egress
-      - access
-    Attribute:
-      description: Attribute of array
-      type: object
-      required:
-      - name
-      - type
-      - filterPipeline
-      - cellValNum
-      properties:
-        name:
-          description: Attribute name
-          type: string
-          example: attribute1
-        type:
-          $ref: '#/components/schemas/Datatype'
-        filterPipeline:
-          $ref: '#/components/schemas/FilterPipeline'
-        cellValNum:
-          description: Attribute number of values per cell
-          type: integer
-          example: 1
-        nullable:
-          description: Is attribute nullable
-          type: boolean
-          example: true
-        fillValue:
-          description: The default fill value
-          type: array
-          items:
-            type: integer
-            format: uint8
-    Domain:
-      description: Domain of array
-      type: object
-      required:
-      - type
-      - tileOrder
-      - cellOrder
-      - dimensions
-      properties:
-        type:
-          $ref: '#/components/schemas/Datatype'
-          description: Domain Type
-        tileOrder:
-          $ref: '#/components/schemas/Layout'
-          description: Tile Order
-        cellOrder:
-          $ref: '#/components/schemas/Layout'
-          description: Cell Order
-        dimensions:
-          type: array
-          description: Array of dimensions
-          items:
-            $ref: '#/components/schemas/Dimension'
-    LoadArraySchemaResponse:
-      description: Contains the latest schema and all schemas for the opened array
-      type: object
-      properties:
-        latest_array_schema:
-          $ref: '#/components/schemas/ArraySchema'
-        all_array_schemas:
-          description: map of all array schemas
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/ArraySchema'
-    Layout:
-      description: Layout of array
-      type: string
-      enum:
-      - row-major
-      - col-major
-      - global-order
-      - unordered
-    PricingCurrency:
-      description: Currency of pricing
-      type: string
-      enum:
-      - USD
-    ArrayActions:
-      description: actions a user can take on an array
-      type: string
-      enum:
-      - read
-      - write
-      - edit
-      - read_array_logs
-      - read_array_info
-      - read_array_schema
     ArrayBrowserSidebar:
       description: Object for ui array tasks browser page
       type: object
@@ -2759,17 +2295,150 @@ components:
           x-omitempty: false
           additionalProperties:
             type: integer
-    Filter:
-      description: Filter
+    ArrayInfoUpdate:
+      description: metadata of an array
+      type: object
+      properties:
+        description:
+          description: description of array
+          type:
+          - string
+          - 'null'
+        name:
+          description: description of array
+          type: string
+          example: myarray1
+        uri:
+          description: uri of array
+          type: string
+          example: s3://bucket/array
+        file_type:
+          description: File type stored /wrapped by this array
+          x-omitempty: true
+          $ref: '#/components/schemas/FileType'
+        file_properties:
+          type: object
+          description: map of file properties created for this array
+          x-omitempty: true
+          additionalProperties:
+            type: string
+        access_credentials_name:
+          description: the name of the access credentials to use. if unset, the default credentials will be used
+          type: string
+        logo:
+          description: logo (base64 encoded) for the array. Optional
+          type: string
+        tags:
+          description: optional tags for array
+          x-omitempty: false
+          type: array
+          items:
+            type: string
+            description: tag must be lowercase characters or hypen [a-z-]
+        license_id:
+          type: string
+          x-omitempty: true
+          description: License identifier from SPDX License List or Custom
+        license_text:
+          type: string
+          x-omitempty: true
+          description: License text
+        read_only:
+          description: Suggests if the array is in read_only mode
+          type: boolean
+          x-omitempty: true
+          example: true
+    ArrayType:
+      description: TileDB array type
+      type: string
+      enum:
+      - dense
+      - sparse
+    FragmentInfoRequest:
+      description: Fragment info request
+      type: object
+      properties:
+        config:
+          description: config to use for opening
+          $ref: '#/components/schemas/TileDBConfig'
+    TileDBConfig:
+      description: TileDB config used for interaction with the embedded library
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+    AttributeBufferSize:
+      type: object
+      description: object representing buffer size of an attribute
+      required:
+      - attribute
+      - offsetBytes
+      - dataBytes
+      properties:
+        attribute:
+          description: name of attribute
+          type: string
+        offsetBytes:
+          description: buffer size (in bytes) of offset buffer
+          type: integer
+          format: uint64
+        dataBytes:
+          description: buffer size (in bytes) of data buffer
+          type: integer
+          format: uint64
+    PricingAggregateUsage:
+      description: Specifies a usage aggregation strategy for pricings of usage_type=metered
+      type: string
+      enum:
+      - sum
+    ArrayMetadata:
+      type: object
+      description: user's TileDB array metadata
+      properties:
+        entries:
+          description: List of metadata entries
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/ArrayMetadataEntry'
+    LoadArraySchemaRequest:
+      description: Request to load an array schema
+      type: object
+      properties:
+        config:
+          type: object
+          description: config to use to retrieve the contents
+          $ref: '#/components/schemas/TileDBConfig'
+    Dimension:
+      description: Dimension of array
       type: object
       required:
       - type
+      - domain
+      - nullTileExtent
       properties:
+        name:
+          description: Dimension name
+          type: string
+          example: row
         type:
-          description: Filter type
-          $ref: '#/components/schemas/FilterType'
-        data:
-          description: Filter data
+          $ref: '#/components/schemas/Datatype'
+        domain:
+          description: extent of domain
+          $ref: '#/components/schemas/DomainArray'
+        nullTileExtent:
+          description: Is tile extent null
+          type: boolean
+          example: true
+        tileExtent:
+          description: Extent of tile
           type: object
           properties:
             int8:
@@ -2802,19 +2471,40 @@ components:
             float64:
               type: integer
               format: double
-    TileDBConfig:
-      description: TileDB config used for interaction with the embedded library
+        filterPipeline:
+          x-omit-empty: true
+          $ref: '#/components/schemas/FilterPipeline'
+    FileType:
+      description: File types represented as TileDB arrays
+      type: string
+      enum:
+      - notebook
+      - user_defined_function
+      - ml_model
+      - file
+      - registered_task_graph
+    Subscription:
+      description: Subscription of a user (customer) to another user's arrays
       type: object
       properties:
-        entries:
+        id:
+          description: Unique ID of subscription as defined by Stripe
+          type: string
+          example: subscriptionID
+        owner_namespace_uuid:
+          description: Unique ID of the array (product) owner
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        customer_namespace_uuid:
+          description: Unique ID of the array (product) user (customer)
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        pricing:
+          description: list of pricing used by this subscription
           type: array
+          x-omitempty: true
           items:
-            type: object
-            properties:
-              key:
-                type: string
-              value:
-                type: string
+            $ref: '#/components/schemas/Pricing'
     FragmentMetadata:
       description: Fragment Metadata
       type: object
@@ -2964,49 +2654,119 @@ components:
           type: string
         request_id:
           type: string
-    ArrayMetadata:
+    ArrayActions:
+      description: actions a user can take on an array
+      type: string
+      enum:
+      - read
+      - write
+      - edit
+      - read_array_logs
+      - read_array_info
+      - read_array_schema
+    Layout:
+      description: Layout of array
+      type: string
+      enum:
+      - row-major
+      - col-major
+      - global-order
+      - unordered
+    Attribute:
+      description: Attribute of array
       type: object
-      description: user's TileDB array metadata
+      required:
+      - name
+      - type
+      - filterPipeline
+      - cellValNum
       properties:
-        entries:
-          description: List of metadata entries
+        name:
+          description: Attribute name
+          type: string
+          example: attribute1
+        type:
+          $ref: '#/components/schemas/Datatype'
+        filterPipeline:
+          $ref: '#/components/schemas/FilterPipeline'
+        cellValNum:
+          description: Attribute number of values per cell
+          type: integer
+          example: 1
+        nullable:
+          description: Is attribute nullable
+          type: boolean
+          example: true
+        fillValue:
+          description: The default fill value
+          type: array
+          items:
+            type: integer
+            format: uint8
+    DomainArray:
+      description: Domain object for an array of each type
+      type: object
+      properties:
+        int8:
           type: array
           x-omitempty: true
           items:
-            $ref: '#/components/schemas/ArrayMetadataEntry'
-    Enumeration:
-      description: The enumerations of a single attribute
-      type: object
-      properties:
-        name:
-          type: string
-        path_name:
-          type: string
-        type:
-          type: string
-        cell_val_num:
-          type: integer
-          format: uint32
-        ordered:
-          type: boolean
-        data:
+            type: integer
+            format: int8
+        uint8:
           type: array
+          x-omitempty: true
           items:
             type: integer
             format: uint8
-        offsets:
+        int16:
           type: array
+          x-omitempty: true
           items:
             type: integer
-            format: uint8
-    ArrayVacuumRequest:
-      description: Request to consolidate an array
-      type: object
-      properties:
-        config:
-          type: object
-          description: config to use to retrieve the contents
-          $ref: '#/components/schemas/TileDBConfig'
+            format: int16
+        uint16:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint16
+        int32:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: int32
+        uint32:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint32
+        int64:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: int64
+        uint64:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint64
+        float32:
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: float
+        float64:
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: double
     LoadEnumerationsResponse:
       description: Contains the enumerations of the array's attributes
       type: object
@@ -3015,217 +2775,208 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Enumeration'
-    LoadArraySchemaRequest:
-      description: Request to load an array schema
+    ArrayConsolidationRequest:
+      description: Request to consolidate an array
       type: object
       properties:
         config:
           type: object
           description: config to use to retrieve the contents
           $ref: '#/components/schemas/TileDBConfig'
-    NonEmptyDomainJson:
+        fragments:
+          description: list of fragments in the array to consolidate
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+    ArrayMetadataEntry:
       type: object
-      description: Non-empty domain from array in Json format
-      additionalProperties: true
-    ArrayFetch:
-      description: Model for opening an array v2
-      type: object
+      description: key/value pair representing an array metadata map entry
       properties:
-        config:
-          $ref: '#/components/schemas/TileDBConfig'
-        queryType:
-          description: Array opened for query type
-          $ref: '#/components/schemas/Querytype'
-    FilterType_2:
-      description: TileDB filter types
-      type: string
-      enum:
-      - FILTER_NONE
-      - FILTER_GZIP
-      - FILTER_ZSTD
-      - FILTER_LZ4
-      - FILTER_RLE
-      - FILTER_BZIP2
-      - FILTER_DOUBLE_DELTA
-      - FILTER_BIT_WIDTH_REDUCTION
-      - FILTER_BITSHUFFLE
-      - FILTER_BYTESHUFFLE
-      - FILTER_POSITIVE_DELTA
-      - FILTER_SCALE_FLOAT
-      - FILTER_WEBP
-      - FILTER_CHECKSUM_MD5
-      - FILTER_CHECKSUM_SHA256
-      - FILTER_DICTIONARY
-    FloatScaleConfig:
-      description: FloatScaleConfig
-      type: object
-      properties:
-        scale:
-          type: integer
-          format: double
-        offset:
-          type: integer
-          format: double
-        byteWidth:
-          type: integer
-          format: uint64
-    ActivityEventType_2:
-      description: Type of activity logged
-      type: string
-      enum:
-      - read_schema
-      - max_buffer_sizes
-      - non_empty_domain
-      - query_read
-      - query_write
-      - create
-      - delete
-      - register
-      - deregister
-      - udf
-      - array_metadata_get
-      - array_metadata_update
-      - estimated_result_sizes
-      - update
-      - info
-      - run
-    ArrayActivityLog_2:
-      description: Activity of an Array
-      type: object
-      properties:
-        event_at:
-          description: time event took place (RFC3339)
+        key:
           type: string
-          format: date-time
-        action:
-          description: Type of the event
-          $ref: '#/components/schemas/ActivityEventType_2'
-        username:
-          description: User who performed action
+        type:
+          type: string
+        valueNum:
+          type: integer
+          format: uint32
+        value:
+          type: array
+          items:
+            type: integer
+            format: uint8
+        del:
+          type: boolean
+    ArraySharing:
+      description: details for sharing a given array
+      type: object
+      properties:
+        actions:
+          description: List of permitted actions
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/ArrayActions'
+          example:
+          - read
+          - write
+        namespace:
+          description: namespace being granted array access can be a user or organization
+          type: string
+          example: MyOrganization
+        namespace_type:
+          description: details on if the namespace is a organization or user
+          type: string
+          example: organization
+    ArrayInfo:
+      description: metadata of an array
+      type: object
+      properties:
+        id:
+          description: unique ID of registered array
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        file_type:
+          description: File type stored /wrapped by this array
+          x-omitempty: true
+          $ref: '#/components/schemas/FileType'
+        file_properties:
+          type: object
+          description: map of file properties created for this array
+          x-omitempty: true
+          additionalProperties:
+            type: string
+        uri:
+          description: uri of array
+          type: string
+          example: s3://bucket/array
+        namespace:
+          description: namespace array is in
           type: string
           example: user1
-        bytes_sent:
-          description: Bytes sent to client
-          type: integer
+        size:
+          description: size in bytes of array
+          type:
+          - number
+          - 'null'
           format: uint64
-          example: 1073741824
-        bytes_received:
-          description: Bytes recieved from client
-          type: integer
-          format: uint64
-          example: 1073741824
-        array_task_id:
-          description: uuid of associated array task
+          example: 1024
+        last_accessed:
+          description: Datetime array was last accessed in UTC
           type: string
-          example: 00000000-0000-0000-0000-000000000000
-        id:
-          description: id of the activity
+          format: date-time
+        description:
+          description: description of array
+          type:
+          - string
+          - 'null'
+        name:
+          description: name of array
           type: string
-          example: 00000000-0000-0000-0000-000000000000
-        query_ranges:
-          description: ranges for query
+          example: myarray1
+        allowed_actions:
+          description: list of actions user is allowed to do on this array
+          type: array
           x-omitempty: true
+          items:
+            $ref: '#/components/schemas/ArrayActions'
+        pricing:
+          description: list of pricing created for this array
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/Pricing'
+        subscriptions:
+          description: list of subscriptions created for this array
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/Subscription'
+        logo:
+          description: logo (base64 encoded) for the array. Optional
           type: string
-          example: '{"rows":[{"start": 1, "end": 1},{"start": 3, "end": 4}],"cols":[{"start": 1, "end": 4}]}'
-        query_stats:
-          description: stats for query
-          x-omitempty: true
+        access_credentials_name:
+          description: the name of the access credentials to use. if unset, the default credentials will be used
           type: string
-          example: '{"timers": {"Context.StorageManager.read_load_array_schema_from_uri.sum": 0.0255293, "...": "..."}, "counters": {"Context.StorageManager.read_unfiltered_byte_num": 191, "...": "..."}}'
-    ArrayDirectory:
-      type: object
-      description: Array directory (for reads)
-      properties:
-        unfilteredFragmentUris:
-          description: fragment URIs
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-        consolidatedCommitUris:
-          description: consolidated commit URI set
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-        arraySchemaUris:
-          description: URIs of all the array schema files
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-        latestArraySchemaUri:
-          description: latest array schema URI.
-          type: string
-        arrayMetaUrisToVacuum:
-          description: the array metadata files to vacuum
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-        arrayMetaVacUrisToVacuum:
-          description: the array metadata vac files to vacuum
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-        commitUrisToConsolidate:
-          description: the commit files to consolidate
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-        commitUrisToVacuum:
-          description: the commit files to vacuum
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-        consolidatedCommitUrisToVacuum:
-          description: the consolidated commit files to vacuum
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-        fragmentMetaUris:
-          description: the URIs of the consolidated fragment metadata files
-          type: array
-          x-omitempty: true
-          items:
-            type: string
-        timestampStart:
-          description: Only the files created after timestamp_start are listed
+        type:
+          description: Array type (dense, key-value, sparse). Calculation of array type runs after array has been registered. So, it is not available immediately.
+          example: sparse
+          $ref: '#/components/schemas/ArrayType'
+        share_count:
+          description: number of unique namespaces this array is shared with
           type: number
-          format: uint64
-        timestampEnd:
-          description: Only the files created before timestamp_end are listed
-          type: number
-          format: uint64
-        arrayMetaUris:
-          description: the timestamped filtered array metadata URIs, after removing the ones that need to be vacuumed and those that do not fall within
+          format: int32
+        public_share:
+          description: Suggests if the array was shared to public by owner
+          type: boolean
+          x-omitempty: false
+          example: true
+        namespace_subscribed:
+          description: Depends on the namespace asking, denotes the existence of subscription of namespace to this array
+          type: boolean
+          readOnly: true
+          example: false
+        tiledb_uri:
+          description: uri for access through TileDB cloud
+          type: string
+          x-omitempty: false
+        tags:
+          description: optional tags for array
+          x-omitempty: false
+          type: array
+          items:
+            type: string
+            description: tag must be lowercase characters or hypen [a-z-]
+        license_id:
+          type: string
+          x-omitempty: true
+          description: License identifier from SPDX License List or Custom
+        license_text:
+          type: string
+          x-omitempty: true
+          description: License text
+        read_only:
+          description: Suggests if the array is in read_only mode
+          type:
+          - boolean
+          - 'null'
+          example: false
+        is_favorite:
+          description: Indicates whether the array is in user favorites
+          type: boolean
+          x-omitempty: true
+          example: true
+        created_at:
+          description: Datetime array was registered with tiledb
+          type: string
+          format: date-time
+        created_by:
+          description: The user who created the array, if known.
+          type: string
+          x-omitempty: true
+        metadata:
+          description: 'Contains the metadata of the array.
+
+            **Note:** This property is included in the response only if the `with_metadata` query parameter is set to `true`.
+
+            '
           type: array
           x-omitempty: true
           items:
-            $ref: '#/components/schemas/TimestampedURI'
-        deleteAndUpdateTileLocation:
-          description: the location of delete tiles
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/DeleteAndUpdateTileLocation'
-    ArrayActivityLogData:
-      description: Object including array tasks and metadata
+            $ref: '#/components/schemas/MetadataStringifiedEntry'
+    ArrayBrowserData:
+      description: Object including array info and pagination metadata
       type: object
       properties:
-        activitylogs:
-          description: Array ArrayActivityLog
+        arrays:
+          description: Array Info
           type: array
           x-omitempty: true
           items:
-            $ref: '#/components/schemas/ArrayActivityLog_2'
+            $ref: '#/components/schemas/ArrayInfo'
         pagination_metadata:
           $ref: '#/components/schemas/PaginationMetadata'
-    NonEmptyDomain_2:
+    NonEmptyDomain:
       type: object
       description: object representing a non-empty domain
       required:
@@ -3239,83 +2990,64 @@ components:
           description: Is non-empty domain really empty?
           type: boolean
           example: false
-        sizes:
-          description: Number of elements in DomainArray for var length
-          type: array
-          items:
-            type: integer
-            format: uint64
-    GenericTileOffsets:
+    ArraySample:
       type: object
-      description: Array directory (for reads)
+      description: Sample data from array
       properties:
-        rtree:
-          description: RTree serialized as a blob
-          type: number
-          format: uint64
-        tileOffsets:
-          description: tile offsets
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: uint64
-        tileVarOffsets:
-          description: variable tile offsets
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: uint64
-        tileVarSizes:
-          description: sizes of the uncompressed variable tiles offsets
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: uint64
-        tileValidityOffsets:
-          description: tile validity offsets
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: uint64
-        tileMinOffsets:
-          description: min tile offsets
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: uint64
-        tileMaxOffsets:
-          description: max tile offsets
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: uint64
-        tileSumOffsets:
-          description: tile sum offsets
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: uint64
-        tileNullCountOffsets:
-          description: null count offsets
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: uint64
-        fragmentMinMaxSumNullCountOffset:
-          description: fragment min/max/sum/nullcount offsets
-          type: number
-          format: uint64
-        processedConditionsOffsets:
-          description: processed conditions offsets
-          type: number
+        data:
+          additionalProperties:
+            type: object
+    SingleFragmentInfo:
+      description: Single Fragment info of an array
+      type: object
+      properties:
+        ArraySchemaName:
+          description: array schema name
+          type: string
+        meta:
+          description: fragment metadata
+          $ref: '#/components/schemas/FragmentMetadata'
+    ActivityEventType:
+      description: Type of activity logged
+      type: string
+      enum:
+      - read_schema
+      - max_buffer_sizes
+      - non_empty_domain
+      - query_read
+      - query_write
+      - query_delete
+      - create
+      - delete
+      - register
+      - deregister
+      - udf
+      - array_metadata_get
+      - array_metadata_update
+      - estimated_result_sizes
+      - read_fragment_info
+      - read_enumerations
+    ArrayFetch:
+      description: Model for opening an array v2
+      type: object
+      properties:
+        config:
+          $ref: '#/components/schemas/TileDBConfig'
+        queryType:
+          description: Array opened for query type
+          $ref: '#/components/schemas/Querytype'
+    FloatScaleConfig:
+      description: FloatScaleConfig
+      type: object
+      properties:
+        scale:
+          type: integer
+          format: double
+        offset:
+          type: integer
+          format: double
+        byteWidth:
+          type: integer
           format: uint64
     ArraySchema_2:
       description: ArraySchema during creation or retrieval
@@ -3392,14 +3124,241 @@ components:
           items:
             type: integer
             format: uint64
-    ArraySchemaEntry:
+    Filter_2:
+      description: Filter
       type: object
-      description: key/value pair representing an array schema map entry
+      required:
+      - type
       properties:
-        key:
+        type:
+          description: Filter type
+          $ref: '#/components/schemas/FilterType_2'
+        floatScaleConfig:
+          description: Filter type
+          $ref: '#/components/schemas/FloatScaleConfig'
+        data:
+          description: Filter data
+          type: object
+          properties:
+            text:
+              type: string
+            bytes:
+              type: array
+              items:
+                type: integer
+                format: uint8
+            int8:
+              type: integer
+              format: int8
+            uint8:
+              type: integer
+              format: uint8
+            int16:
+              type: integer
+              format: int16
+            uint16:
+              type: integer
+              format: uint16
+            int32:
+              type: integer
+              format: int32
+            uint32:
+              type: integer
+              format: uint32
+            int64:
+              type: integer
+              format: int64
+            uint64:
+              type: integer
+              format: uint64
+            float32:
+              type: integer
+              format: float
+            float64:
+              type: integer
+              format: double
+    ArraySchemaMap:
+      type: object
+      description: array's schemas
+      properties:
+        entries:
+          description: List of array schemas entries
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/ArraySchemaEntry'
+    NonEmptyDomainList:
+      type: object
+      description: object containing non empty domains
+      properties:
+        nonEmptyDomains:
+          description: Array's non empty domain
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/NonEmptyDomain_2'
+    FilterType_2:
+      description: TileDB filter types
+      type: string
+      enum:
+      - FILTER_NONE
+      - FILTER_GZIP
+      - FILTER_ZSTD
+      - FILTER_LZ4
+      - FILTER_RLE
+      - FILTER_BZIP2
+      - FILTER_DOUBLE_DELTA
+      - FILTER_BIT_WIDTH_REDUCTION
+      - FILTER_BITSHUFFLE
+      - FILTER_BYTESHUFFLE
+      - FILTER_POSITIVE_DELTA
+      - FILTER_SCALE_FLOAT
+      - FILTER_WEBP
+      - FILTER_CHECKSUM_MD5
+      - FILTER_CHECKSUM_SHA256
+      - FILTER_DICTIONARY
+    ArrayActivityLog_2:
+      description: Activity of an Array
+      type: object
+      properties:
+        event_at:
+          description: time event took place (RFC3339)
           type: string
-        value:
-          $ref: '#/components/schemas/ArraySchema_2'
+          format: date-time
+        action:
+          description: Type of the event
+          $ref: '#/components/schemas/ActivityEventType_2'
+        username:
+          description: User who performed action
+          type: string
+          example: user1
+        bytes_sent:
+          description: Bytes sent to client
+          type: integer
+          format: uint64
+          example: 1073741824
+        bytes_received:
+          description: Bytes recieved from client
+          type: integer
+          format: uint64
+          example: 1073741824
+        array_task_id:
+          description: uuid of associated array task
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        id:
+          description: id of the activity
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        query_ranges:
+          description: ranges for query
+          x-omitempty: true
+          type: string
+          example: '{"rows":[{"start": 1, "end": 1},{"start": 3, "end": 4}],"cols":[{"start": 1, "end": 4}]}'
+        query_stats:
+          description: stats for query
+          x-omitempty: true
+          type: string
+          example: '{"timers": {"Context.StorageManager.read_load_array_schema_from_uri.sum": 0.0255293, "...": "..."}, "counters": {"Context.StorageManager.read_unfiltered_byte_num": 191, "...": "..."}}'
+    GenericTileOffsets:
+      type: object
+      description: Array directory (for reads)
+      properties:
+        rtree:
+          description: RTree serialized as a blob
+          type: number
+          format: uint64
+        tileOffsets:
+          description: tile offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileVarOffsets:
+          description: variable tile offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileVarSizes:
+          description: sizes of the uncompressed variable tiles offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileValidityOffsets:
+          description: tile validity offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileMinOffsets:
+          description: min tile offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileMaxOffsets:
+          description: max tile offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileSumOffsets:
+          description: tile sum offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        tileNullCountOffsets:
+          description: null count offsets
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: uint64
+        fragmentMinMaxSumNullCountOffset:
+          description: fragment min/max/sum/nullcount offsets
+          type: number
+          format: uint64
+        processedConditionsOffsets:
+          description: processed conditions offsets
+          type: number
+          format: uint64
+    DeleteAndUpdateTileLocation:
+      type: object
+      description: the location of delete tiles
+      properties:
+        uri:
+          description: the uri
+          type: string
+        conditionMarker:
+          type: string
+        offset:
+          type: number
+          format: uint64
+    TimestampedURI:
+      type: object
+      description: the timestamped filtered array metadata URIs, after removing the ones that need to be vacuumed and those that do not fall within
+      properties:
+        uri:
+          description: the uri
+          type: string
+        timestampStart:
+          description: start of timestamp
+          type: number
+          format: uint64
+        timestampEnd:
+          description: end of timestamp
+          type: number
+          format: uint64
     Array:
       description: Represents an open array
       type: object
@@ -3483,74 +3442,125 @@ components:
           items:
             type: integer
             format: uint8
-    Filter_2:
-      description: Filter
+    ArrayDirectory:
       type: object
-      required:
-      - type
+      description: Array directory (for reads)
       properties:
-        type:
-          description: Filter type
-          $ref: '#/components/schemas/FilterType_2'
-        floatScaleConfig:
-          description: Filter type
-          $ref: '#/components/schemas/FloatScaleConfig'
-        data:
-          description: Filter data
-          type: object
-          properties:
-            text:
-              type: string
-            bytes:
-              type: array
-              items:
-                type: integer
-                format: uint8
-            int8:
-              type: integer
-              format: int8
-            uint8:
-              type: integer
-              format: uint8
-            int16:
-              type: integer
-              format: int16
-            uint16:
-              type: integer
-              format: uint16
-            int32:
-              type: integer
-              format: int32
-            uint32:
-              type: integer
-              format: uint32
-            int64:
-              type: integer
-              format: int64
-            uint64:
-              type: integer
-              format: uint64
-            float32:
-              type: integer
-              format: float
-            float64:
-              type: integer
-              format: double
-    TimestampedURI:
-      type: object
-      description: the timestamped filtered array metadata URIs, after removing the ones that need to be vacuumed and those that do not fall within
-      properties:
-        uri:
-          description: the uri
+        unfilteredFragmentUris:
+          description: fragment URIs
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        consolidatedCommitUris:
+          description: consolidated commit URI set
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        arraySchemaUris:
+          description: URIs of all the array schema files
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        latestArraySchemaUri:
+          description: latest array schema URI.
           type: string
+        arrayMetaUrisToVacuum:
+          description: the array metadata files to vacuum
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        arrayMetaVacUrisToVacuum:
+          description: the array metadata vac files to vacuum
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        commitUrisToConsolidate:
+          description: the commit files to consolidate
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        commitUrisToVacuum:
+          description: the commit files to vacuum
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        consolidatedCommitUrisToVacuum:
+          description: the consolidated commit files to vacuum
+          type: array
+          x-omitempty: true
+          items:
+            type: string
+        fragmentMetaUris:
+          description: the URIs of the consolidated fragment metadata files
+          type: array
+          x-omitempty: true
+          items:
+            type: string
         timestampStart:
-          description: start of timestamp
+          description: Only the files created after timestamp_start are listed
           type: number
           format: uint64
         timestampEnd:
-          description: end of timestamp
+          description: Only the files created before timestamp_end are listed
           type: number
           format: uint64
+        arrayMetaUris:
+          description: the timestamped filtered array metadata URIs, after removing the ones that need to be vacuumed and those that do not fall within
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/TimestampedURI'
+        deleteAndUpdateTileLocation:
+          description: the location of delete tiles
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/DeleteAndUpdateTileLocation'
+    NonEmptyDomain_2:
+      type: object
+      description: object representing a non-empty domain
+      required:
+      - nonEmptyDomain
+      - isEmpty
+      properties:
+        nonEmptyDomain:
+          description: Non Empty Domain of array
+          $ref: '#/components/schemas/DomainArray'
+        isEmpty:
+          description: Is non-empty domain really empty?
+          type: boolean
+          example: false
+        sizes:
+          description: Number of elements in DomainArray for var length
+          type: array
+          items:
+            type: integer
+            format: uint64
+    Querytype:
+      description: Type of query
+      type: string
+      enum:
+      - READ
+      - WRITE
+    ArrayActivityLogData:
+      description: Object including array tasks and metadata
+      type: object
+      properties:
+        activitylogs:
+          description: Array ArrayActivityLog
+          type: array
+          x-omitempty: true
+          items:
+            $ref: '#/components/schemas/ArrayActivityLog_2'
+        pagination_metadata:
+          $ref: '#/components/schemas/PaginationMetadata'
     FragmentMetadata_2:
       type: object
       description: Metadata of a fragment
@@ -3743,44 +3753,34 @@ components:
         gtOffsets:
           description: The start offsets of the generic tiles stored in the metadata file
           $ref: '#/components/schemas/GenericTileOffsets'
-    DeleteAndUpdateTileLocation:
-      type: object
-      description: the location of delete tiles
-      properties:
-        uri:
-          description: the uri
-          type: string
-        conditionMarker:
-          type: string
-        offset:
-          type: number
-          format: uint64
-    NonEmptyDomainList:
-      type: object
-      description: object containing non empty domains
-      properties:
-        nonEmptyDomains:
-          description: Array's non empty domain
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/NonEmptyDomain_2'
-    ArraySchemaMap:
-      type: object
-      description: array's schemas
-      properties:
-        entries:
-          description: List of array schemas entries
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/ArraySchemaEntry'
-    Querytype:
-      description: Type of query
+    ActivityEventType_2:
+      description: Type of activity logged
       type: string
       enum:
-      - READ
-      - WRITE
+      - read_schema
+      - max_buffer_sizes
+      - non_empty_domain
+      - query_read
+      - query_write
+      - create
+      - delete
+      - register
+      - deregister
+      - udf
+      - array_metadata_get
+      - array_metadata_update
+      - estimated_result_sizes
+      - update
+      - info
+      - run
+    ArraySchemaEntry:
+      type: object
+      description: key/value pair representing an array schema map entry
+      properties:
+        key:
+          type: string
+        value:
+          $ref: '#/components/schemas/ArraySchema_2'
   securitySchemes:
     BasicAuth:
       type: http

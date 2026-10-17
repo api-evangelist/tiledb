@@ -368,6 +368,15 @@ paths:
       x-summary-source: derived
 components:
   schemas:
+    TaskGraphLogRunLocation:
+      description: 'The location where an individual node of a task graph is executed.
+
+        '
+      type: string
+      enum:
+      - server
+      - client
+      - virtual
     PaginationMetadata:
       properties:
         page:
@@ -396,106 +405,134 @@ components:
       enum:
       - byte
       - second
-    PricingInterval:
-      description: Interval for pricing
+    PricingCurrency:
+      description: Currency of pricing
       type: string
       enum:
-      - month
-    TaskGraphLogStatus:
-      description: The status of a given task graph execution.
-      type: string
-      enum:
-      - submitted
-      - running
-      - idle
-      - abandoned
-      - succeeded
-      - failed
-      - cancelled
-    DomainArray:
-      description: Domain object for an array of each type
+      - USD
+    MetadataStringifiedEntry:
+      type: object
+      description: key/value pair representing an asset metadata map entry
+      properties:
+        key:
+          description: The metadata key
+          type: string
+          x-omitempty: false
+        value:
+          description: The metadata value
+          type: string
+          x-omitempty: false
+        type:
+          description: The metadata type
+          type: string
+          x-omitempty: false
+          example: array_metadata
+    Pricing:
+      description: Pricing created by converting an array to product
       type: object
       properties:
-        int8:
-          type: array
+        id:
+          description: Unique ID of plan as defined by Stripe
+          type: string
+          example: planID
+        array_uuid:
+          description: Unique ID of registered array
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        pricing_name:
+          description: Name of pricing
+          type: string
+        pricing_type:
+          description: Type of pricing
+          $ref: '#/components/schemas/PricingType'
+        product_name:
+          description: Name of product
+          type: string
+        product_statement_descriptor:
+          description: Extra information about a product which will appear on the credit card statement of the customer
+          type: string
+        product_unit_label:
+          description: A label that represents units of this product in Stripe and receipts and invoices of the customer
+          $ref: '#/components/schemas/PricingUnitLabel'
+        currency:
+          description: Currency of pricing
+          $ref: '#/components/schemas/PricingCurrency'
+        aggregate_usage:
+          description: Specifies a usage aggregation strategy for pricings of usage_type=metered
+          $ref: '#/components/schemas/PricingAggregateUsage'
+        interval:
+          description: The frequency with which a subscription should be billed
+          $ref: '#/components/schemas/PricingInterval'
+        divided_by:
+          description: Group of n product unit labels
+          type: integer
+          format: int64
+          example: 1048576
+        charge:
+          description: Price in cents (decimal) per unitlabel
+          type: number
+          format: double
+        activated:
+          description: If pricing is activated
+          type: boolean
+          example: false
+    ArrayActivityLog:
+      description: Actvity of an Array
+      type: object
+      properties:
+        event_at:
+          description: time event took place (RFC3339)
+          type: string
+          format: date-time
+        action:
+          description: Type of the event
+          $ref: '#/components/schemas/ActivityEventType'
+        username:
+          description: User who performed action
+          type: string
+          example: user1
+        bytes_sent:
+          description: Bytes sent to client
+          type: integer
+          format: uint64
+          example: 1073741824
+        bytes_received:
+          description: Bytes recieved from client
+          type: integer
+          format: uint64
+          example: 1073741824
+        array_task_id:
+          description: UUID of associated array task
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        id:
+          description: ID of the activity
+          type: string
+          example: 00000000-0000-0000-0000-000000000000
+        query_ranges:
+          description: ranges for query
           x-omitempty: true
-          items:
-            type: integer
-            format: int8
-        uint8:
-          type: array
+          type: string
+          example: '{"rows":[{"start": 1, "end": 1},{"start": 3, "end": 4}],"cols":[{"start": 1, "end": 4}]}'
+        query_stats:
+          description: stats for query
           x-omitempty: true
-          items:
-            type: integer
-            format: uint8
-        int16:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: int16
-        uint16:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: uint16
-        int32:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: int32
-        uint32:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: uint32
-        int64:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: int64
-        uint64:
-          type: array
-          x-omitempty: true
-          items:
-            type: integer
-            format: uint64
-        float32:
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: float
-        float64:
-          type: array
-          x-omitempty: true
-          items:
-            type: number
-            format: double
-    ActivityEventType:
-      description: Type of activity logged
+          type: string
+          example: '{"timers": {"Context.StorageManager.read_load_array_schema_from_uri.sum": 0.0255293, "...": "..."}, "counters": {"Context.StorageManager.read_unfiltered_byte_num": 191, "...": "..."}}'
+    PricingType:
+      description: Pricing types
       type: string
       enum:
-      - read_schema
-      - max_buffer_sizes
-      - non_empty_domain
-      - query_read
-      - query_write
-      - query_delete
-      - create
-      - delete
-      - register
-      - deregister
-      - udf
-      - array_metadata_get
-      - array_metadata_update
-      - estimated_result_sizes
-      - read_fragment_info
-      - read_enumerations
+      - egress
+      - access
+    TaskGraphType:
+      description: 'The type of a task graph.
+
+        '
+      type: string
+      enum:
+      - batch
+      - realtime
     TaskGraphLogsData:
       description: Response data for a task graph list, including pagination metadata.
       type: object
@@ -507,6 +544,21 @@ components:
             $ref: '#/components/schemas/TaskGraphLog'
         pagination_metadata:
           $ref: '#/components/schemas/PaginationMetadata'
+    PricingInterval:
+      description: Interval for pricing
+      type: string
+      enum:
+      - month
+    TaskGraphClientNodeStatus:
+      description: 'A report of the execution status of a node that ran on the client side.
+
+        '
+      type: object
+      properties:
+        client_node_uuid:
+          type: string
+        status:
+          $ref: '#/components/schemas/ArrayTaskStatus'
     TaskGraphLog:
       description: Logging information about the execution of a task graph.
       type: object
@@ -613,66 +665,198 @@ components:
           type: string
           x-omitempty: true
           description: The region of the cloud provider where this task graph executed.
-    ArrayActivityLog:
-      description: Actvity of an Array
+    ArrayType:
+      description: TileDB array type
+      type: string
+      enum:
+      - dense
+      - sparse
+    PricingAggregateUsage:
+      description: Specifies a usage aggregation strategy for pricings of usage_type=metered
+      type: string
+      enum:
+      - sum
+    TaskGraphLogStatus:
+      description: The status of a given task graph execution.
+      type: string
+      enum:
+      - submitted
+      - running
+      - idle
+      - abandoned
+      - succeeded
+      - failed
+      - cancelled
+    FileType:
+      description: File types represented as TileDB arrays
+      type: string
+      enum:
+      - notebook
+      - user_defined_function
+      - ml_model
+      - file
+      - registered_task_graph
+    Subscription:
+      description: Subscription of a user (customer) to another user's arrays
       type: object
       properties:
-        event_at:
-          description: time event took place (RFC3339)
-          type: string
-          format: date-time
-        action:
-          description: Type of the event
-          $ref: '#/components/schemas/ActivityEventType'
-        username:
-          description: User who performed action
-          type: string
-          example: user1
-        bytes_sent:
-          description: Bytes sent to client
-          type: integer
-          format: uint64
-          example: 1073741824
-        bytes_received:
-          description: Bytes recieved from client
-          type: integer
-          format: uint64
-          example: 1073741824
-        array_task_id:
-          description: UUID of associated array task
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
         id:
-          description: ID of the activity
+          description: Unique ID of subscription as defined by Stripe
+          type: string
+          example: subscriptionID
+        owner_namespace_uuid:
+          description: Unique ID of the array (product) owner
           type: string
           example: 00000000-0000-0000-0000-000000000000
-        query_ranges:
-          description: ranges for query
-          x-omitempty: true
+        customer_namespace_uuid:
+          description: Unique ID of the array (product) user (customer)
           type: string
-          example: '{"rows":[{"start": 1, "end": 1},{"start": 3, "end": 4}],"cols":[{"start": 1, "end": 4}]}'
-        query_stats:
-          description: stats for query
+          example: 00000000-0000-0000-0000-000000000000
+        pricing:
+          description: list of pricing used by this subscription
+          type: array
           x-omitempty: true
-          type: string
-          example: '{"timers": {"Context.StorageManager.read_load_array_schema_from_uri.sum": 0.0255293, "...": "..."}, "counters": {"Context.StorageManager.read_unfiltered_byte_num": 191, "...": "..."}}'
-    MetadataStringifiedEntry:
+          items:
+            $ref: '#/components/schemas/Pricing'
+    ArrayTaskType:
+      description: Synchronous Task Type
+      type: string
+      enum:
+      - SQL
+      - UDF
+      - QUERY
+      - GENERIC_UDF
+      - BATCH_UDF
+      - CLIENT_COMPUTATION
+    TaskGraphNodeMetadata:
+      description: Metadata about an individual node in a task graph.
       type: object
-      description: key/value pair representing an asset metadata map entry
       properties:
-        key:
-          description: The metadata key
+        client_node_uuid:
           type: string
-          x-omitempty: false
-        value:
-          description: The metadata value
+          description: The client-generated UUID of the given graph node.
+        name:
           type: string
-          x-omitempty: false
-        type:
-          description: The metadata type
+          maxLength: 255
+          description: 'The client-generated name of the node. This is not guaranteed to be unique.
+
+            '
+        depends_on:
+          type: array
+          items:
+            type: string
+          description: 'The client_node_uuid of each node that this node depends upon. Used to define the structure of the graph.
+
+            '
+        run_location:
+          $ref: '#/components/schemas/TaskGraphLogRunLocation'
+        status:
+          description: 'If present, the overall execution status of this node, taking into account the latest execution information.
+
+            For nodes that have not yet been executed, this will be listed as `QUEUED`. For nodes that are set to run locally and have not reported any status information, this will be listed as `UNKNOWN`.
+
+            '
+          $ref: '#/components/schemas/ArrayTaskStatus'
+        status_message:
+          description: The reason the array task status is in the state
+          type:
+          - string
+          - 'null'
+          x-omitempty: true
+        executions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArrayTask'
+          readOnly: true
+          description: 'ArrayTasks representing each execution attempt for this node. For nodes that have never been submitted, this will be empty. For nodes that have been retried, this may have multiple entries. The last one in the list represents the most recent execution.
+
+            This is read-only and generated by the server based on the tasks it has actually executed.
+
+            '
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
           type: string
-          x-omitempty: false
-          example: array_metadata
+        request_id:
+          type: string
+    ArrayActions:
+      description: actions a user can take on an array
+      type: string
+      enum:
+      - read
+      - write
+      - edit
+      - read_array_logs
+      - read_array_info
+      - read_array_schema
+    DomainArray:
+      description: Domain object for an array of each type
+      type: object
+      properties:
+        int8:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: int8
+        uint8:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint8
+        int16:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: int16
+        uint16:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint16
+        int32:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: int32
+        uint32:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint32
+        int64:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: int64
+        uint64:
+          type: array
+          x-omitempty: true
+          items:
+            type: integer
+            format: uint64
+        float32:
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: float
+        float64:
+          type: array
+          x-omitempty: true
+          items:
+            type: number
+            format: double
     ArrayTask:
       description: Synchronous Task to Run
       type: object
@@ -818,6 +1002,18 @@ components:
           type: string
           x-omitempty: true
           description: The region of the cloud provider where this task executed.
+    ArrayTaskStatus:
+      description: Status of array task
+      type: string
+      enum:
+      - QUEUED
+      - FAILED
+      - COMPLETED
+      - RUNNING
+      - RESOURCES_UNAVAILABLE
+      - UNKNOWN
+      - CANCELLED
+      - DENIED
     ArrayInfo:
       description: metadata of an array
       type: object
@@ -954,126 +1150,13 @@ components:
           x-omitempty: true
           items:
             $ref: '#/components/schemas/MetadataStringifiedEntry'
-    Subscription:
-      description: Subscription of a user (customer) to another user's arrays
-      type: object
-      properties:
-        id:
-          description: Unique ID of subscription as defined by Stripe
-          type: string
-          example: subscriptionID
-        owner_namespace_uuid:
-          description: Unique ID of the array (product) owner
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        customer_namespace_uuid:
-          description: Unique ID of the array (product) user (customer)
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        pricing:
-          description: list of pricing used by this subscription
-          type: array
-          x-omitempty: true
-          items:
-            $ref: '#/components/schemas/Pricing'
-    TaskGraphLogRunLocation:
-      description: 'The location where an individual node of a task graph is executed.
-
-        '
+    Querytype:
+      description: Type of query
       type: string
       enum:
-      - server
-      - client
-      - virtual
-    FileType:
-      description: File types represented as TileDB arrays
-      type: string
-      enum:
-      - notebook
-      - user_defined_function
-      - ml_model
-      - file
-      - registered_task_graph
-    ArrayTaskType:
-      description: Synchronous Task Type
-      type: string
-      enum:
-      - SQL
-      - UDF
-      - QUERY
-      - GENERIC_UDF
-      - BATCH_UDF
-      - CLIENT_COMPUTATION
-    TaskGraphType:
-      description: 'The type of a task graph.
-
-        '
-      type: string
-      enum:
-      - batch
-      - realtime
-    PricingAggregateUsage:
-      description: Specifies a usage aggregation strategy for pricings of usage_type=metered
-      type: string
-      enum:
-      - sum
-    PricingType:
-      description: Pricing types
-      type: string
-      enum:
-      - egress
-      - access
-    ArrayType:
-      description: TileDB array type
-      type: string
-      enum:
-      - dense
-      - sparse
-    TaskGraphNodeMetadata:
-      description: Metadata about an individual node in a task graph.
-      type: object
-      properties:
-        client_node_uuid:
-          type: string
-          description: The client-generated UUID of the given graph node.
-        name:
-          type: string
-          maxLength: 255
-          description: 'The client-generated name of the node. This is not guaranteed to be unique.
-
-            '
-        depends_on:
-          type: array
-          items:
-            type: string
-          description: 'The client_node_uuid of each node that this node depends upon. Used to define the structure of the graph.
-
-            '
-        run_location:
-          $ref: '#/components/schemas/TaskGraphLogRunLocation'
-        status:
-          description: 'If present, the overall execution status of this node, taking into account the latest execution information.
-
-            For nodes that have not yet been executed, this will be listed as `QUEUED`. For nodes that are set to run locally and have not reported any status information, this will be listed as `UNKNOWN`.
-
-            '
-          $ref: '#/components/schemas/ArrayTaskStatus'
-        status_message:
-          description: The reason the array task status is in the state
-          type:
-          - string
-          - 'null'
-          x-omitempty: true
-        executions:
-          type: array
-          items:
-            $ref: '#/components/schemas/ArrayTask'
-          readOnly: true
-          description: 'ArrayTasks representing each execution attempt for this node. For nodes that have never been submitted, this will be empty. For nodes that have been retried, this may have multiple entries. The last one in the list represents the most recent execution.
-
-            This is read-only and generated by the server based on the tasks it has actually executed.
-
-            '
+      - READ
+      - WRITE
+      - DELETE
     ResultFormat:
       description: Data format of a result
       type: string
@@ -1085,109 +1168,26 @@ components:
       - bytes
       - tiledb_json
       - native
-    ArrayTaskStatus:
-      description: Status of array task
+    ActivityEventType:
+      description: Type of activity logged
       type: string
       enum:
-      - QUEUED
-      - FAILED
-      - COMPLETED
-      - RUNNING
-      - RESOURCES_UNAVAILABLE
-      - UNKNOWN
-      - CANCELLED
-      - DENIED
-    PricingCurrency:
-      description: Currency of pricing
-      type: string
-      enum:
-      - USD
-    ArrayActions:
-      description: actions a user can take on an array
-      type: string
-      enum:
-      - read
-      - write
-      - edit
-      - read_array_logs
-      - read_array_info
-      - read_array_schema
-    TaskGraphClientNodeStatus:
-      description: 'A report of the execution status of a node that ran on the client side.
-
-        '
-      type: object
-      properties:
-        client_node_uuid:
-          type: string
-        status:
-          $ref: '#/components/schemas/ArrayTaskStatus'
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int64
-        message:
-          type: string
-        request_id:
-          type: string
-    Querytype:
-      description: Type of query
-      type: string
-      enum:
-      - READ
-      - WRITE
-      - DELETE
-    Pricing:
-      description: Pricing created by converting an array to product
-      type: object
-      properties:
-        id:
-          description: Unique ID of plan as defined by Stripe
-          type: string
-          example: planID
-        array_uuid:
-          description: Unique ID of registered array
-          type: string
-          example: 00000000-0000-0000-0000-000000000000
-        pricing_name:
-          description: Name of pricing
-          type: string
-        pricing_type:
-          description: Type of pricing
-          $ref: '#/components/schemas/PricingType'
-        product_name:
-          description: Name of product
-          type: string
-        product_statement_descriptor:
-          description: Extra information about a product which will appear on the credit card statement of the customer
-          type: string
-        product_unit_label:
-          description: A label that represents units of this product in Stripe and receipts and invoices of the customer
-          $ref: '#/components/schemas/PricingUnitLabel'
-        currency:
-          description: Currency of pricing
-          $ref: '#/components/schemas/PricingCurrency'
-        aggregate_usage:
-          description: Specifies a usage aggregation strategy for pricings of usage_type=metered
-          $ref: '#/components/schemas/PricingAggregateUsage'
-        interval:
-          description: The frequency with which a subscription should be billed
-          $ref: '#/components/schemas/PricingInterval'
-        divided_by:
-          description: Group of n product unit labels
-          type: integer
-          format: int64
-          example: 1048576
-        charge:
-          description: Price in cents (decimal) per unitlabel
-          type: number
-          format: double
-        activated:
-          description: If pricing is activated
-          type: boolean
-          example: false
+      - read_schema
+      - max_buffer_sizes
+      - non_empty_domain
+      - query_read
+      - query_write
+      - query_delete
+      - create
+      - delete
+      - register
+      - deregister
+      - udf
+      - array_metadata_get
+      - array_metadata_update
+      - estimated_result_sizes
+      - read_fragment_info
+      - read_enumerations
   securitySchemes:
     BasicAuth:
       type: http
