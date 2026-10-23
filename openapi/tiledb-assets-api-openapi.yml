@@ -375,3 +375,9 @@ components:
             admin: Grants read and write access to administrative information
           authorizationUrl: https://oauth2.tiledb.com/oauth2/authorize
           tokenUrl: https://oauth2.tiledb.com/oauth2/token
+x-provenance:
+  method: harvested
+  publisher: TileDB
+  source: https://raw.githubusercontent.com/tiledb-inc/TileDB-Cloud-API-Spec/HEAD/openapi-v1.yaml
+  note: split by refine-openapis from the provider's own published document, verified by fetch (openapi/_original/*.fetch.json);
+    stamped by stamp-openapi-provenance.py (roadmap#793)
