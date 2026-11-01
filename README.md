@@ -64,5 +64,145 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-TileDB is a company surfaced via the API Evangelist harvest backlog (source: secondary-market) and added to the network as a stub for full-pipeline profiling.
-- https://www.nasdaqprivatemarket.com/
+TileDB, Inc. builds a multimodal database around a single universal data model — the multi-dimensional array — that stores tables, genomics (VCF), single-cell (SOMA), biomedical imaging, vector embeddings, point clouds, files and ML models in one cloud-native format on S3, Azure Blob, GCS, Lustre or MinIO. The open-source TileDB Embedded storage engine is paired with TileDB Cloud (and the Carrara product line), a hosted and self-hostable platform for cataloging, sharing, governing and querying those assets, with serverless SQL, user-defined functions, task graphs, Jupyter notebooks and dashboards. The platform is programmable through the TileDB Storage Platform REST API (v1 and v2, whose Swagger 2.0 contracts TileDB publishes openly on GitHub), plus first-party clients for Python, R, Java, Go, C, C++, C#, JavaScript and Rust. The company is focused on life sciences and precision medicine.
+
+**Areas:** Company · Database · Multimodal Data · Life Sciences · Genomics · Single Cell · Biomedical Imaging · Vector Search · Data Management · Cloud Storage · Analytics · Machine Learning
+
+## TileDB on APIs.io
+
+Everything profiled for TileDB is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/tiledb/](https://apis.io/providers/tiledb/)** — or go straight to one of the APIs or properties below.
+
+### APIs (19)
+
+- [TileDB Array API](https://apis.io/apis/tiledb/tiledb-array-api/) — The array API from TileDB — 29 operation(s) for array.
+- [TileDB Array Tasks API](https://apis.io/apis/tiledb/tiledb-array-tasks-api/) — The array_tasks API from TileDB — 1 operation(s) for array_tasks.
+- [TileDB Assets API](https://apis.io/apis/tiledb/tiledb-assets-api/) — The assets API from TileDB — 3 operation(s) for assets.
+- [TileDB Favorites API](https://apis.io/apis/tiledb/tiledb-favorites-api/) — The favorites API from TileDB — 12 operation(s) for favorites.
+- [TileDB Files API](https://apis.io/apis/tiledb/tiledb-files-api/) — The files API from TileDB — 4 operation(s) for files.
+- [TileDB Groups API](https://apis.io/apis/tiledb/tiledb-groups-api/) — The groups API from TileDB — 17 operation(s) for groups.
+- [TileDB Invitation API](https://apis.io/apis/tiledb/tiledb-invitation-api/) — The invitation API from TileDB — 10 operation(s) for invitation.
+- [TileDB Notebook API](https://apis.io/apis/tiledb/tiledb-notebook-api/) — The notebook API from TileDB — 5 operation(s) for notebook.
+- [TileDB Notebooks API](https://apis.io/apis/tiledb/tiledb-notebooks-api/) — The notebooks API from TileDB — 3 operation(s) for notebooks.
+- [TileDB Organization API](https://apis.io/apis/tiledb/tiledb-organization-api/) — The organization API from TileDB — 13 operation(s) for organization.
+- [TileDB Query API](https://apis.io/apis/tiledb/tiledb-query-api/) — The query API from TileDB — 5 operation(s) for query.
+- [TileDB Registered Task Graphs API](https://apis.io/apis/tiledb/tiledb-registered-task-graphs-api/) — The registered_task_graphs API from TileDB — 2 operation(s) for registered_task_graphs.
+- [TileDB Sql API](https://apis.io/apis/tiledb/tiledb-sql-api/) — The sql API from TileDB — 1 operation(s) for sql.
+- [TileDB Stats API](https://apis.io/apis/tiledb/tiledb-stats-api/) — The stats API from TileDB — 1 operation(s) for stats.
+- [TileDB Task Graph Logs API](https://apis.io/apis/tiledb/tiledb-task-graph-logs-api/) — The task_graph_logs API from TileDB — 8 operation(s) for task_graph_logs.
+- [TileDB Task Graphs API](https://apis.io/apis/tiledb/tiledb-task-graphs-api/) — The task_graphs API from TileDB — 3 operation(s) for task_graphs.
+- [TileDB Tasks API](https://apis.io/apis/tiledb/tiledb-tasks-api/) — The tasks API from TileDB — 4 operation(s) for tasks.
+- [TileDB Udf API](https://apis.io/apis/tiledb/tiledb-udf-api/) — The udf API from TileDB — 7 operation(s) for udf.
+- [TileDB User API](https://apis.io/apis/tiledb/tiledb-user-api/) — The user API from TileDB — 16 operation(s) for user.
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [tiledb-mcp.yml](https://apis.io/servers/tiledb/tiledb-mcp-yml/)
+
+#### Overlays (2)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Tiledb Cloud V1 Overlay](https://apis.io/overlays/tiledb/tiledb-cloud-v1-overlay/)
+- [Tiledb Cloud V2 Overlay](https://apis.io/overlays/tiledb/tiledb-cloud-v2-overlay/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Tiledb Authentication](https://apis.io/security/tiledb/tiledb-authentication/)
+- [Tiledb Domain Security](https://apis.io/security/tiledb/tiledb-domain-security/)
+
+#### OAuth scopes (1)
+
+The permissions the API asks for.
+
+- [Tiledb Scopes](https://apis.io/scopes/tiledb/tiledb-scopes/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Tiledb Plans Pricing](https://apis.io/plans/tiledb/tiledb-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Tiledb Rate Limits](https://apis.io/rate-limits/tiledb/tiledb-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://www.tiledb.com/)
+- [Documentation](https://documentation.cloud.tiledb.com/academy/home/)
+- [Getting started](https://documentation.cloud.tiledb.com/academy/get-started/)
+- [API reference](https://documentation.cloud.tiledb.com/academy/api-reference/)
+- [Pricing](https://www.tiledb.com/pricing)
+- [Sign up](https://cloud.tiledb.com/auth/signup)
+- [Support](https://forum.tiledb.com/)
+- [Blog](https://www.tiledb.com/blog)
+- [Terms of service](https://www.tiledb.com/terms-of-use)
+- [Privacy policy](https://www.tiledb.com/privacy-policy)
+- [GitHub](https://github.com/TileDB-Inc)
+
+## API Evangelist rating
+
+**Kin Score 55.1** — strong · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 71.4 |
+| Contract quality | 44.8 |
+| Contract governance | 18.2 |
+| Operational transparency | 18.4 |
+| Developer ergonomics | 73.2 |
+| Access clarity | 63.2 |
+
+**Agent readiness 35.5** — agent-ready
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | — |
+| Reversibility Documented | verified |
+| MCP Server | — |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | — |
+| Error Semantics | verified |
+| OpenAPI Examples | partial |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | — |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | yes |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | documented (partial credit) |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | — |
+| Operation Distinctiveness | mostly (partial credit) |
+
+**Regulatory alignment 30.9** — Health
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/tiledb/](https://apis.io/providers/tiledb/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for TileDB: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/tiledb/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
